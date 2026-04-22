@@ -24,6 +24,7 @@ import subprocess
 from pathlib import Path
 from docx import Document
 from lxml import etree
+from datetime import datetime, timedelta
 
 def replace_in_run(run, replacements):
     """Ersetzt Platzhalter in einem Run (case-insensitive)."""
@@ -44,6 +45,22 @@ def replace_in_cell(cell, replacements):
     """Ersetzt Platzhalter in allen Runs einer Tabellenzelle."""
     for para in cell.paragraphs:
         replace_in_paragraph(para, replacements)
+
+def get_kw_dates(kw, year):
+    """Berechnet Montag und Sonntag einer Kalenderwoche."""
+    jan4 = datetime(year, 1, 4)
+    iso = jan4.isocalendar()
+    days_since_monday = iso[2] - 1
+    monday_kw1 = jan4 - timedelta(days=days_since_monday)
+    monday = monday_kw1 + timedelta(weeks=kw - 1)
+    sunday = monday + timedelta(days=6)
+    saturday = monday + timedelta(days=5)
+    return monday, sunday, saturday
+
+def get_saturday_of_kw(kw, year):
+    """Berechnet das Datum des Samstags einer Kalenderwoche."""
+    _, _, saturday = get_kw_dates(kw, year)
+    return saturday
 
 def has_placeholders(docx_path):
     """Prüft ob noch Platzhalter im Dokument vorhanden sind."""
@@ -103,17 +120,21 @@ def update_checkboxes(docx_path, abteilung):
         if t.text in ['☐', '☒', '[X]', '[ ]']:
             t.text = '☐'
     
-    # Richtige Checkbox aktivieren
-    checkbox_index = 0
+    # Finde Checkboxen und deren Position im Dokument
+    checkboxes = []
     for t in root.iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t'):
         if t.text == '☐':
-            if abt_lower == 'betrieb' and checkbox_index == 0:
-                t.text = '☒'
-                break
-            elif abt_lower == 'berufsschule' and checkbox_index == 1:
-                t.text = '☒'
-                break
-            checkbox_index += 1
+            checkboxes.append(t)
+    
+    # Richtige Checkbox aktivieren basierend auf Abteilung
+    if abt_lower == 'betrieb' and len(checkboxes) > 0:
+        checkboxes[0].text = '☒'
+    elif abt_lower == 'berufsschule' and len(checkboxes) > 1:
+        checkboxes[1].text = '☒'
+    elif abt_lower == 'presales':
+        # PreSales: Erste Checkbox aktivieren wenn vorhanden
+        if len(checkboxes) > 0:
+            checkboxes[0].text = '☒'
     
     new_xml = etree.tostring(root, xml_declaration=True, encoding='UTF-8', standalone='yes')
     
@@ -171,7 +192,7 @@ def main():
     parser.add_argument('--kw', type=int, required=True)
     parser.add_argument('--jahr', type=int, required=True)
     parser.add_argument('--nr', type=int, required=True)
-    parser.add_argument('--abteilung', type=str, required=True, choices=['Betrieb', 'Berufsschule'])
+    parser.add_argument('--abteilung', type=str, required=True, choices=['Betrieb', 'Berufsschule', 'PreSales'])
     parser.add_argument('--montag', type=str, default='')
     parser.add_argument('--dienstag', type=str, default='')
     parser.add_argument('--mittwoch', type=str, default='')
@@ -199,16 +220,24 @@ def main():
     if placeholders_exist:
         print(f"Öffne: {docx_path}")
         
-        # Signaturdatum
+        # KW-Datumsbereich und Signaturdatum (Samstag der KW oder aus --datum)
         if args.datum:
             parts = args.datum.split(' - ')
             if len(parts) == 2:
+                # Eigenes Datum verwendet
                 date_str = parts[1].strip()
                 day_month = date_str.split('.')[0] + '.' + date_str.split('.')[1]
+                kw_date_range = args.datum
             else:
-                day_month = "08.03"
+                # KW automatisch berechnen
+                monday, sunday, saturday = get_kw_dates(args.kw, args.jahr)
+                kw_date_range = f"{monday.day:02d}.{monday.month:02d}.{args.jahr} - {sunday.day:02d}.{sunday.month:02d}.{args.jahr}"
+                day_month = f"{saturday.day:02d}.{saturday.month:02d}"
         else:
-            day_month = "08.03"
+            # Automatisch KW berechnen
+            monday, sunday, saturday = get_kw_dates(args.kw, args.jahr)
+            kw_date_range = f"{monday.day:02d}.{monday.month:02d}.{args.jahr} - {sunday.day:02d}.{sunday.month:02d}.{args.jahr}"
+            day_month = f"{saturday.day:02d}.{saturday.month:02d}"
         
         signature_date = f"{day_month}.{args.jahr}"
         
@@ -223,8 +252,8 @@ def main():
             '{Donnerstag}': args.donnerstag,
             '{Freitag}': args.freitag,
             '{week_topic}': args.thema,
-            '{DATUMSZAHLUNG}': args.datum,
-            '{WOCHENNUMMER}': f"KW {args.kw:02d}",
+            '{DATUMSZAHLUNG}': kw_date_range,
+            '{WOCHENNUMMER}': f"{args.kw:02d}",
             '{AUSBILDUNGSJAHR}': str(args.ausbildungsjahr),
             '{Ausbildungsjahr}': str(args.ausbildungsjahr),
             '{AUSBILDUNGSNACHWEIS_NR}': str(args.nr),
