@@ -50,7 +50,7 @@ libreoffice --headless --convert-to pdf --outdir . "Berichtsheft Täglich KW 10.
 
 1. **DOCX-Vorlage** in KW-Ordner kopieren:
    ```
-   Nextcloud/Dokumente/Ausbildung-Cancom/Berichtsheft/[JAHR]/KW[XX]/Berichtsheft Täglich KW [XX].docx
+   [Cloud]/[Dokumente]/Berichtsheft/[JAHR]/KW[XX]/Berichtsheft Täglich KW [XX].docx
    ```
 
 2. **Füllen:** `python3 fill_docx.py --kw 10 ...`
