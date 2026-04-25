@@ -117,6 +117,38 @@
     .template-item-name { font-size: 0.55rem; font-weight: 500; }
     .template-item-desc { font-size: 0.45rem; color: var(--text-muted); margin-top: 2px; }
     
+    /* MAC Address Table */
+    .mac-panel { position: absolute; top: 60px; right: 380px; width: 320px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; }
+    .mac-panel.show { display: block; }
+    .mac-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; }
+    .mac-content { max-height: 300px; overflow-y: auto; padding: 8px; }
+    .mac-row { display: grid; grid-template-columns: 130px 100px 90px; gap: 8px; padding: 5px 6px; font-size: 0.55rem; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; }
+    .mac-row.header { background: var(--bg-elevated); color: var(--text-muted); font-family: inherit; }
+    .mac-row .vlan { color: var(--accent); }
+    .mac-row .interface { color: var(--ok); }
+    
+    /* Routing Table */
+    .route-panel { position: absolute; top: 60px; right: 380px; width: 350px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; }
+    .route-panel.show { display: block; }
+    .route-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; }
+    .route-content { max-height: 350px; overflow-y: auto; padding: 8px; }
+    .route-row { display: grid; grid-template-columns: 110px 90px 80px 70px; gap: 6px; padding: 5px 6px; font-size: 0.55rem; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; align-items: center; }
+    .route-row.header { background: var(--bg-elevated); color: var(--text-muted); font-family: inherit; }
+    .route-row .network { color: var(--layer3); }
+    .route-row .gateway { color: var(--device); }
+    .route-row .metric { color: var(--accent); }
+    .route-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.45rem; }
+    .route-badge.s { background: var(--layer3); color: var(--bg-deep); }
+    .route-badge.c { background: var(--ok); color: var(--bg-deep); }
+    .route-badge.o { background: var(--device); color: var(--bg-deep); }
+    .route-badge.r { background: var(--warn); color: var(--bg-deep); }
+    
+    /* Latency Indicator */
+    .latency-badge { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 4px; font-size: 0.4rem; color: var(--text-muted); white-space: nowrap; pointer-events: none; }
+    .latency-badge.excellent { border-color: var(--ok); color: var(--ok); }
+    .latency-badge.good { border-color: var(--layer3); color: var(--layer3); }
+    .latency-badge.poor { border-color: var(--warn); color: var(--warn); }
+    
     /* Mini Map */
     .mini-map { position: absolute; bottom: 60px; right: 12px; width: 150px; height: 100px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 100; }
     .mini-map-header { padding: 4px 8px; background: var(--bg-elevated); font-size: 0.5rem; color: var(--text-muted); display: flex; justify-content: space-between; }
@@ -622,6 +654,8 @@
       <button class="tool-btn" onclick="openQuickTemplates()"><i class="ph ph-layout"></i> Templates</button>
       <button class="tool-btn" onclick="toggleTrafficAnim()"><i class="ph ph-activity"></i> Traffic</button>
       <button class="tool-btn" onclick="selectAll()"><i class="ph ph-check-square"></i> All</button>
+      <button class="tool-btn" onclick="toggleMacTable()" id="btnMac"><i class="ph ph-ethernet"></i> MAC</button>
+      <button class="tool-btn" onclick="toggleRouteTable()" id="btnRoute"><i class="ph ph-path"></i> Routes</button>
       <button class="tool-btn" onclick="openVTP()"><i class="ph ph-swap"></i> VTP</button>
       <button class="tool-btn" onclick="openHSRP()"><i class="ph ph-arrows-clockwise"></i> HSRP</button>
       <button class="tool-btn" onclick="openSyslog()"><i class="ph ph-list-bullets"></i> Syslog</button>
@@ -791,6 +825,42 @@
         <div class="arp-content">
           <div class="arp-row header"><span>IP</span><span>MAC</span><span>Interface</span></div>
           <div id="arpTableBody"></div>
+        </div>
+      </div>
+      
+      <!-- MAC Address Table -->
+      <div class="mac-panel" id="macPanel">
+        <div class="mac-header">
+          <span><i class="ph ph-ethernet"></i> MAC Address Table</span>
+          <div style="display:flex;gap:8px;">
+            <select id="macVlanFilter" onchange="renderMacTable()" style="background:var(--bg-deep);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text-primary);font-size:0.55rem;">
+              <option value="all">All VLANs</option>
+              <option value="1">VLAN 1</option>
+              <option value="10">VLAN 10</option>
+              <option value="20">VLAN 20</option>
+            </select>
+            <button onclick="toggleMacTable()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+          </div>
+        </div>
+        <div class="mac-content">
+          <div class="mac-row header"><span>MAC Address</span><span>VLAN</span><span>Interface</span></div>
+          <div id="macTableBody"></div>
+        </div>
+      </div>
+      
+      <!-- Routing Table -->
+      <div class="route-panel" id="routePanel">
+        <div class="route-header">
+          <span><i class="ph ph-path"></i> Routing Table</span>
+          <div style="display:flex;gap:8px;">
+            <select id="routeDeviceSelect" onchange="renderRouteTable()" style="background:var(--bg-deep);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text-primary);font-size:0.55rem;">
+            </select>
+            <button onclick="toggleRouteTable()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+          </div>
+        </div>
+        <div class="route-content">
+          <div class="route-row header"><span>Network</span><span>Mask</span><span>Gateway</span><span>Metric</span></div>
+          <div id="routeTableBody"></div>
         </div>
       </div>
       
@@ -3746,6 +3816,183 @@ exit                - exit current mode
           addArpEntry(n1.ip, n1.mac, n2.name);
         }
       });
+    }
+    
+    // ==================== MAC ADDRESS TABLE ====================
+    let showMacPanel = false;
+    const macTable = [];
+    
+    function toggleMacTable() {
+      showMacPanel = !showMacPanel;
+      document.getElementById('macPanel').classList.toggle('show', showMacPanel);
+      document.getElementById('btnMac').classList.toggle('active', showMacPanel);
+      if (showMacPanel) {
+        buildMacTable();
+        renderMacTable();
+      }
+    }
+    
+    function buildMacTable() {
+      macTable.length = 0;
+      S.nodes.forEach(n => {
+        if (n.sw || n.r) {
+          // Switches and routers learn MACs from connected devices
+          S.conns.forEach(c => {
+            if (c.n1 === n.id || c.n2 === n.id) {
+              const peerId = c.n1 === n.id ? c.n2 : c.n1;
+              const peer = S.nodes.find(x => x.id === peerId);
+              if (peer) {
+                const port = c.n1 === n.id ? c.p1 : c.p2;
+                const portName = port >= n.ports ? `Gi0/${port - n.ports}` : `Fa0/${port}`;
+                macTable.push({
+                  mac: peer.mac,
+                  vlan: peer.vlan || 1,
+                  interface: n.name + '/' + portName,
+                  type: 'dynamic'
+                });
+              }
+            }
+          });
+        }
+        // Every device knows its own MAC
+        macTable.push({
+          mac: n.mac,
+          vlan: n.vlan || 1,
+          interface: n.name,
+          type: 'static'
+        });
+      });
+    }
+    
+    function renderMacTable() {
+      const body = document.getElementById('macTableBody');
+      const vlanFilter = document.getElementById('macVlanFilter').value;
+      
+      let filtered = macTable;
+      if (vlanFilter !== 'all') {
+        filtered = macTable.filter(m => m.vlan === parseInt(vlanFilter));
+      }
+      
+      if (filtered.length === 0) {
+        body.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No MAC entries</div>';
+        return;
+      }
+      
+      body.innerHTML = filtered.map(m => `
+        <div class="mac-row">
+          <span style="color:var(--device);">${m.mac}</span>
+          <span class="vlan">${m.vlan}</span>
+          <span class="interface">${m.interface}</span>
+        </div>
+      `).join('');
+    }
+    
+    // ==================== ROUTING TABLE ====================
+    let showRoutePanel = false;
+    
+    function toggleRouteTable() {
+      showRoutePanel = !showRoutePanel;
+      document.getElementById('routePanel').classList.toggle('show', showRoutePanel);
+      document.getElementById('btnRoute').classList.toggle('active', showRoutePanel);
+      if (showRoutePanel) {
+        populateRouteDeviceSelect();
+        renderRouteTable();
+      }
+    }
+    
+    function populateRouteDeviceSelect() {
+      const select = document.getElementById('routeDeviceSelect');
+      const routers = S.nodes.filter(n => n.r);
+      select.innerHTML = routers.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+    
+    function renderRouteTable() {
+      const body = document.getElementById('routeTableBody');
+      const deviceId = document.getElementById('routeDeviceSelect').value;
+      const router = S.nodes.find(n => n.id === deviceId);
+      
+      if (!router) {
+        body.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-muted);font-size:0.55rem;">Select a router</div>';
+        return;
+      }
+      
+      // Build routing table
+      const routes = [];
+      
+      // Direct connections
+      S.conns.forEach(c => {
+        if (c.n1 === router.id || c.n2 === router.id) {
+          const peer = S.nodes.find(x => x.id === (c.n1 === router.id ? c.n2 : c.n1));
+          if (peer && peer.ip) {
+            const parts = peer.ip.split('.');
+            parts[3] = '0';
+            routes.push({
+              network: parts.join('.'),
+              mask: '255.255.255.0',
+              gateway: peer.ip,
+              protocol: 'C',
+              metric: '0',
+              interface: peer.name
+            });
+          }
+        }
+      });
+      
+      // Own subnet
+      if (router.ip) {
+        const parts = router.ip.split('.');
+        parts[3] = '0';
+        routes.unshift({
+          network: parts.join('.'),
+          mask: '255.255.255.0',
+          gateway: router.ip,
+          protocol: 'L',
+          metric: '0',
+          interface: router.name
+        });
+      }
+      
+      // Default route if gateway is set
+      if (router.gateway) {
+        routes.push({
+          network: '0.0.0.0',
+          mask: '0.0.0.0',
+          gateway: router.gateway,
+          protocol: 'S',
+          metric: '1',
+          interface: 'via default'
+        });
+      }
+      
+      // Connected routes from other routers (simulated)
+      S.nodes.filter(n => n.r && n.id !== router.id).forEach(r => {
+        if (r.ip) {
+          const parts = r.ip.split('.');
+          parts[3] = '0';
+          routes.push({
+            network: parts.join('.'),
+            mask: '255.255.255.0',
+            gateway: '*',
+            protocol: 'O',
+            metric: Math.floor(Math.random() * 5) + 1,
+            interface: 'via ' + r.name
+          });
+        }
+      });
+      
+      if (routes.length === 0) {
+        body.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No routes</div>';
+        return;
+      }
+      
+      body.innerHTML = routes.map(r => `
+        <div class="route-row">
+          <span class="network">${r.network}</span>
+          <span>${r.mask}</span>
+          <span class="gateway">${r.gateway}</span>
+          <span><span class="route-badge ${r.protocol.toLowerCase()}">${r.protocol}</span> ${r.metric}</span>
+        </div>
+      `).join('');
     }
     
     // ==================== DEVICE SEARCH ====================
