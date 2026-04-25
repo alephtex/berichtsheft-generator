@@ -80,6 +80,51 @@
     .canvas-tool { width: 32px; height: 32px; background: var(--glass); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
     .canvas-tool:hover { background: var(--glass-light); border-color: var(--accent); }
     .canvas-tool.active { background: var(--accent); color: var(--bg-deep); }
+    .canvas-tool.disabled { opacity: 0.4; pointer-events: none; }
+    
+    /* Mini Map */
+    .mini-map { position: absolute; bottom: 60px; right: 12px; width: 150px; height: 100px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 100; }
+    .mini-map-header { padding: 4px 8px; background: var(--bg-elevated); font-size: 0.5rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .mini-map-canvas { width: 100%; height: calc(100% - 20px); background: var(--bg-deep); position: relative; }
+    .mini-map-viewport { position: absolute; border: 1px solid var(--accent); background: rgba(201, 162, 39, 0.2); pointer-events: none; }
+    .mini-map-node { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+    
+    /* Context Menu */
+    .context-menu { position: fixed; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px 0; min-width: 160px; z-index: 10000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: none; }
+    .context-menu.show { display: block; }
+    .context-item { padding: 8px 12px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.1s; }
+    .context-item:hover { background: var(--glass-light); }
+    .context-item i { width: 16px; }
+    .context-sep { height: 1px; background: var(--border); margin: 4px 0; }
+    
+    /* Lasso Selection */
+    .lasso { position: fixed; border: 2px dashed var(--accent); background: rgba(201, 162, 39, 0.1); pointer-events: none; z-index: 5000; display: none; }
+    
+    /* Link Status Indicator */
+    .link-status { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: blink 1s infinite; }
+    .link-status.up { background: var(--ok); }
+    .link-status.down { background: var(--error); }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    
+    /* Snap Grid Toggle */
+    .snap-toggle { position: absolute; bottom: 60px; left: 160px; z-index: 100; display: flex; align-items: center; gap: 6px; background: var(--glass); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 0.6rem; cursor: pointer; }
+    .snap-toggle:hover { border-color: var(--accent); }
+    .snap-toggle.active { background: var(--accent); color: var(--bg-deep); }
+    
+    /* Undo/Redo Buttons */
+    .undo-redo { display: flex; gap: 4px; }
+    .undo-redo .canvas-tool { width: 28px; height: 28px; font-size: 12px; }
+    .undo-redo .canvas-tool.disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    /* Connection Bezier Curves */
+    .conn-line { fill: none; stroke-width: 3; stroke-linecap: round; pointer-events: stroke; transition: stroke-width 0.15s, filter 0.15s; }
+    .conn-line:hover { stroke-width: 6; filter: drop-shadow(0 0 8px currentColor); }
+    .conn-glow { fill: none; stroke-width: 8; stroke-linecap: round; opacity: 0.3; pointer-events: none; }
+    
+    /* Packet Animation Improved */
+    .packet { position: absolute; width: 14px; height: 14px; border-radius: 50%; pointer-events: none; z-index: 2000; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; }
+    .packet::after { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; animation: packetPulse 0.5s infinite; }
+    @keyframes packetPulse { 0%, 100% { box-shadow: 0 0 10px currentColor; } 50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; } }
     
     /* Workspace Tabs */
     .ws-tabs { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; z-index: 100; background: var(--bg-surface); border-radius: 8px; padding: 3px; }
@@ -442,15 +487,49 @@
       </div>
       
       <div class="canvas-tools">
+        <div class="undo-redo">
+          <button class="canvas-tool disabled" onclick="undo()" id="btnUndo" title="Undo (Ctrl+Z)"><i class="ph ph-arrow-u-up-left"></i></button>
+          <button class="canvas-tool disabled" onclick="redo()" id="btnRedo" title="Redo (Ctrl+Y)"><i class="ph ph-arrow-u-up-right"></i></button>
+        </div>
         <button class="canvas-tool" onclick="zoomIn()" title="Zoom In"><i class="ph ph-plus"></i></button>
         <button class="canvas-tool" onclick="zoomOut()" title="Zoom Out"><i class="ph ph-minus"></i></button>
         <button class="canvas-tool" onclick="resetView()" title="Reset View"><i class="ph ph-arrows-out"></i></button>
         <button class="canvas-tool" onclick="fitAll()" title="Fit All"><i class="ph ph-frame-corners"></i></button>
+        <button class="canvas-tool" onclick="deleteSelected()" title="Delete (Del)"><i class="ph ph-trash"></i></button>
+      </div>
+      
+      <!-- Snap to Grid Toggle -->
+      <div class="snap-toggle active" id="snapToggle" onclick="toggleSnap()">
+        <i class="ph ph-grid-four"></i> <span id="snapLabel">Snap: ON</span>
+      </div>
+      
+      <!-- Mini Map -->
+      <div class="mini-map" id="miniMap">
+        <div class="mini-map-header">
+          <span>Overview</span>
+          <span id="miniNodeCount">0</span>
+        </div>
+        <div class="mini-map-canvas" id="miniMapCanvas">
+          <div class="mini-map-viewport" id="miniViewport"></div>
+        </div>
       </div>
       
       <div class="delete-zone" id="deleteZone">
         <i class="ph ph-trash"></i> Hier ablegen zum Löschen
       </div>
+      
+      <!-- Context Menu -->
+      <div class="context-menu" id="contextMenu">
+        <div class="context-item" onclick="ctxDelete()"><i class="ph ph-trash" style="color:var(--error)"></i> Löschen</div>
+        <div class="context-item" onclick="ctxConfig()"><i class="ph ph-sliders"></i> Konfigurieren</div>
+        <div class="context-item" onclick="ctxCLI()"><i class="ph ph-terminal"></i> CLI öffnen</div>
+        <div class="context-sep"></div>
+        <div class="context-item" onclick="ctxCopy()"><i class="ph ph-copy"></i> Duplizieren</div>
+        <div class="context-item" onclick="ctxInspect()"><i class="ph ph-magnifying-glass"></i> Inspizieren</div>
+      </div>
+      
+      <!-- Lasso Selection -->
+      <div class="lasso" id="lasso"></div>
       
       <!-- Simulation Panel -->
       <div class="sim-panel" id="simPanel">
@@ -1481,6 +1560,14 @@
       pz: null, mode: 'realtime', ws: 'logical',
       pduCnt: 0, events: [], stpRoot: null, stpState: {},
       cableType: 'copper-str',
+      // Undo/Redo
+      undoStack: [], redoStack: [], maxUndo: 50,
+      // Snap to Grid
+      snapToGrid: true, gridSize: 20,
+      // Selection
+      selectedNodes: new Set(),
+      // Context Menu
+      ctxNode: null
       capturedPackets: [],
       captureIndex: 0,
       cliHistory: [],
@@ -1497,6 +1584,7 @@
       renderDevs();
       initPZ();
       initCanvas();
+      initLasso();
       setMode('realtime');
       log('System', 'info', 'NetSim Pro geladen - Cisco Packet Tracer Style');
       document.getElementById('cliTerm').innerHTML = `
@@ -1550,7 +1638,194 @@
       updZoom();
     }
     
-    function updZoom() { document.getElementById('sZoom').textContent = Math.round(S.pz.getScale() * 100) + '%'; }
+    function updZoom() { document.getElementById('sZoom').textContent = Math.round(S.pz.getScale() * 100) + '%'; updateMiniMap(); }
+    
+    // ==================== UNDO/REDO ====================
+    function saveState() {
+      const state = JSON.stringify({ nodes: S.nodes.map(n => ({...n, x: n.x, y: n.y})), conns: S.conns });
+      S.undoStack.push(state);
+      if (S.undoStack.length > S.maxUndo) S.undoStack.shift();
+      S.redoStack = [];
+      updUndoRedo();
+    }
+    
+    function undo() {
+      if (S.undoStack.length === 0) return;
+      const current = JSON.stringify({ nodes: S.nodes.map(n => ({...n, x: n.x, y: n.y})), conns: S.conns });
+      S.redoStack.push(current);
+      const prev = JSON.parse(S.undoStack.pop());
+      restoreState(prev);
+      updUndoRedo();
+      log('System', 'info', 'Undo');
+    }
+    
+    function redo() {
+      if (S.redoStack.length === 0) return;
+      const current = JSON.stringify({ nodes: S.nodes.map(n => ({...n, x: n.x, y: n.y})), conns: S.conns });
+      S.undoStack.push(current);
+      const next = JSON.parse(S.redoStack.pop());
+      restoreState(next);
+      updUndoRedo();
+      log('System', 'info', 'Redo');
+    }
+    
+    function restoreState(state) {
+      clearAll(false);
+      state.nodes.forEach(n => {
+        const dev = { id: n.type, name: n.name, icon: n.icon, ports: n.ports, uplink: n.uplink };
+        createNode(dev, n.x, n.y, false);
+      });
+      state.conns.forEach(c => {
+        const n1 = S.nodes.find(x => x.id === c.n1);
+        const n2 = S.nodes.find(x => x.id === c.n2);
+        if (n1 && n2) {
+          const conn = { id: c.id, n1: c.n1, p1: c.p1, n2: c.n2, p2: c.p2, type: c.type };
+          S.conns.push(conn);
+          n1.usedPorts++;
+          n2.usedPorts++;
+        }
+      });
+      drawConns();
+      updPortVisuals();
+      updStats();
+    }
+    
+    function updUndoRedo() {
+      document.getElementById('btnUndo').classList.toggle('disabled', S.undoStack.length === 0);
+      document.getElementById('btnRedo').classList.toggle('disabled', S.redoStack.length === 0);
+    }
+    
+    // ==================== SNAP TO GRID ====================
+    function toggleSnap() {
+      S.snapToGrid = !S.snapToGrid;
+      document.getElementById('snapToggle').classList.toggle('active', S.snapToGrid);
+      document.getElementById('snapLabel').textContent = `Snap: ${S.snapToGrid ? 'ON' : 'OFF'}`;
+      log('System', 'info', `Snap to grid ${S.snapToGrid ? 'enabled' : 'disabled'}`);
+    }
+    
+    function snapPos(x, y) {
+      if (!S.snapToGrid) return { x, y };
+      return { x: Math.round(x / S.gridSize) * S.gridSize, y: Math.round(y / S.gridSize) * S.gridSize };
+    }
+    
+    // ==================== MINI MAP ====================
+    function updateMiniMap() {
+      if (S.nodes.length === 0) {
+        document.getElementById('miniNodeCount').textContent = '0';
+        return;
+      }
+      
+      const canvas = document.getElementById('miniMapCanvas');
+      const viewport = document.getElementById('miniViewport');
+      const mapW = canvas.clientWidth;
+      const mapH = canvas.clientHeight;
+      
+      // Calculate bounds
+      const minX = Math.min(...S.nodes.map(n => n.x));
+      const maxX = Math.max(...S.nodes.map(n => n.x + 100));
+      const minY = Math.min(...S.nodes.map(n => n.y));
+      const maxY = Math.max(...S.nodes.map(n => n.y + 80));
+      
+      const worldW = maxX - minX + 200;
+      const worldH = maxY - minY + 200;
+      const scale = Math.min(mapW / worldW, mapH / worldH, 0.1);
+      
+      // Clear old nodes
+      canvas.querySelectorAll('.mini-map-node').forEach(n => n.remove());
+      
+      // Add node dots
+      S.nodes.forEach(n => {
+        const dot = document.createElement('div');
+        dot.className = 'mini-map-node';
+        dot.style.left = ((n.x - minX + 100) * scale) + 'px';
+        dot.style.top = ((n.y - minY + 40) * scale) + 'px';
+        canvas.appendChild(dot);
+      });
+      
+      // Update viewport indicator
+      const mainCanvas = document.getElementById('canvas');
+      const rect = mainCanvas.getBoundingClientRect();
+      const sc = S.pz.getScale();
+      viewport.style.left = (-S.pz.pan.x / sc * scale + 2) + 'px';
+      viewport.style.top = (-S.pz.pan.y / sc * scale + 2) + 'px';
+      viewport.style.width = (rect.width / sc * scale) + 'px';
+      viewport.style.height = (rect.height / sc * scale) + 'px';
+      
+      document.getElementById('miniNodeCount').textContent = S.nodes.length;
+    }
+    
+    // ==================== CONTEXT MENU ====================
+    function showContextMenu(e, node) {
+      e.preventDefault();
+      S.ctxNode = node;
+      const menu = document.getElementById('contextMenu');
+      menu.style.left = e.clientX + 'px';
+      menu.style.top = e.clientY + 'px';
+      menu.classList.add('show');
+    }
+    
+    function hideContextMenu() {
+      document.getElementById('contextMenu').classList.remove('show');
+      S.ctxNode = null;
+    }
+    
+    function ctxDelete() { if (S.ctxNode) { S.sel = S.ctxNode; deleteSelected(); } hideContextMenu(); }
+    function ctxConfig() { if (S.ctxNode) { sel(S.ctxNode, document.getElementById(S.ctxNode.id)); } hideContextMenu(); }
+    function ctxCLI() { if (S.ctxNode) { S.sel = S.ctxNode; openCLI(); } hideContextMenu(); }
+    function ctxCopy() { if (S.ctxNode) { const el = document.getElementById(S.ctxNode.id); const rect = el.getBoundingClientRect(); const dev = DEVS.end.find(d => d.name === S.ctxNode.name) || DEVS.sw.find(d => d.name === S.ctxNode.name) || DEVS.r.find(d => d.name === S.ctxNode.name); if (dev) createNode(dev, S.ctxNode.x + 50, S.ctxNode.y + 50); } hideContextMenu(); }
+    function ctxInspect() { alert(`Device: ${S.ctxNode?.name}\nType: ${S.ctxNode?.type}\nIP: ${S.ctxNode?.ip || 'None'}\nMAC: ${S.ctxNode?.mac}`); hideContextMenu(); }
+    
+    // ==================== LASSO SELECTION ====================
+    let lassoStart = null;
+    
+    function initLasso() {
+      const canvas = document.getElementById('canvas');
+      const lasso = document.getElementById('lasso');
+      
+      canvas.addEventListener('mousedown', e => {
+        if (e.button === 0 && e.shiftKey && !e.target.closest('.sim-node')) {
+          lassoStart = { x: e.clientX, y: e.clientY };
+          lasso.style.left = e.clientX + 'px';
+          lasso.style.top = e.clientY + 'px';
+          lasso.style.width = '0';
+          lasso.style.height = '0';
+          lasso.style.display = 'block';
+        }
+      });
+      
+      document.addEventListener('mousemove', e => {
+        if (lassoStart) {
+          const dx = e.clientX - lassoStart.x;
+          const dy = e.clientY - lassoStart.y;
+          lasso.style.width = Math.abs(dx) + 'px';
+          lasso.style.height = Math.abs(dy) + 'px';
+          lasso.style.left = (dx < 0 ? e.clientX : lassoStart.x) + 'px';
+          lasso.style.top = (dy < 0 ? e.clientY : lassoStart.y) + 'px';
+        }
+      });
+      
+      document.addEventListener('mouseup', e => {
+        if (lassoStart) {
+          const rect = {
+            left: Math.min(lassoStart.x, e.clientX),
+            top: Math.min(lassoStart.y, e.clientY),
+            right: Math.max(lassoStart.x, e.clientX),
+            bottom: Math.max(lassoStart.y, e.clientY)
+          };
+          
+          S.nodes.forEach(n => {
+            const el = document.getElementById(n.id);
+            if (!el) return;
+            const nRect = el.getBoundingClientRect();
+            const inLasso = nRect.left < rect.right && nRect.right > rect.left && nRect.top < rect.bottom && nRect.bottom > rect.top;
+            el.classList.toggle('selected', inLasso);
+          });
+          
+          lassoStart = null;
+          lasso.style.display = 'none';
+        }
+      });
+    }
 
     function initCanvas() {
       const cv = document.getElementById('canvas');
@@ -1594,7 +1869,9 @@
     }
 
     // ==================== NODES ====================
-    function createNode(d, x, y) {
+    function createNode(d, x, y, doSave = true) {
+      const pos = snapPos(x, y);
+      x = pos.x; y = pos.y;
       const id = 'n' + S.nid++;
       const totalPorts = (d.ports || 0) + (d.uplink || 0);
       const n = {
@@ -1630,6 +1907,9 @@
       
       document.getElementById('nodesContainer').appendChild(el);
       
+      // Right-click context menu
+      el.addEventListener('contextmenu', e => showContextMenu(e, n));
+      
       // NODE DRAG - Always works!
       let dragSt = null;
       el.addEventListener('mousedown', e => {
@@ -1654,7 +1934,14 @@
         const onUp = () => {
           el.classList.remove('dragging');
           if (dragSt.moved) {
+            const pos = snapPos(dragSt.node.x, dragSt.node.y);
+            dragSt.node.x = pos.x;
+            dragSt.node.y = pos.y;
+            el.style.left = dragSt.node.x + 'px';
+            el.style.top = dragSt.node.y + 'px';
             updConnParams();
+            saveState();
+            updateMiniMap();
           } else {
             sel(dragSt.node, el);
           }
@@ -1687,6 +1974,8 @@
       
       log('Gerät', 'success', `${n.name} hinzugefügt`);
       updStats();
+      updateMiniMap();
+      if (doSave) saveState();
       return n;
     }
 
@@ -2031,6 +2320,7 @@
 
     function deleteSelected() {
       if (!S.sel) return;
+      saveState();
       const n = S.sel;
       
       S.conns = S.conns.filter(c => {
@@ -3130,14 +3420,21 @@ ${target.name}# `;
       }
     }
 
-    function clearAll() {
+    function clearAll(doSave = true) {
       S.nodes = []; S.conns = []; S.sel = null; S.pduCnt = 0; S.stpRoot = null; S.stpState = {};
       document.getElementById('nodesContainer').innerHTML = '';
       document.getElementById('connSvg').innerHTML = '';
       document.querySelectorAll('.packet').forEach(p => p.remove());
       document.getElementById('sSTP').textContent = '-';
-      desel(); updStats();
+      desel(); updStats(); updateMiniMap();
+      if (doSave) saveState();
       log('System', 'info', 'Canvas geleert');
+    }
+    
+    function duplicateSelected() {
+      if (!S.sel) return;
+      const dev = DEVS.end.find(d => d.name === S.sel.name) || DEVS.sw.find(d => d.name === S.sel.name) || DEVS.r.find(d => d.name === S.sel.name);
+      if (dev) createNode(dev, S.sel.x + 80, S.sel.y + 80);
     }
 
     // Keyboard shortcuts
@@ -3161,6 +3458,8 @@ ${target.name}# `;
       if (e.ctrlKey && e.key === 'v') { e.preventDefault(); openVTP(); }
       if (e.ctrlKey && e.key === 'h') { e.preventDefault(); openHSRP(); }
       if (e.ctrlKey && e.key === 'l') { e.preventDefault(); openSyslog(); }
+      if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+      if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
       if (e.ctrlKey && e.key === 'a') {
         e.preventDefault();
         S.nodes.forEach(n => document.getElementById(n.id)?.classList.add('selected'));

@@ -33,6 +33,7 @@
 - [x] Port Security (max MAC, violation actions)
 - [x] EtherChannel (LACP, PAgP modes)
 - [x] Native VLAN for trunks
+- [x] **VTP (VLAN Trunking Protocol)** - Server/Client/Transparent
 
 ### Network Services
 - [x] DHCP Pool configuration
@@ -40,6 +41,9 @@
 - [x] NAT configuration
 - [x] ACL (Standard and Extended)
 - [x] QoS settings
+- [x] **HSRP (Hot Standby Router Protocol)** - Gateway redundancy
+- [x] **Syslog Viewer** - Facility/Severity filtering
+- [x] **SSH/Telnet** - Remote access simulation
 
 ### Simulation
 - [x] PDU types: ICMP, ARP, DHCP, DNS, HTTP, TCP, UDP
@@ -74,7 +78,7 @@
 - [x] Device info on hover
 - [x] Connection labels
 - [x] Delete zone visual
-- [x] **Keyboard shortcuts**: Ctrl+S (Save), Ctrl+O (Open), Ctrl+P (PDU), Ctrl+T (Traffic)
+- [x] **Keyboard shortcuts**: Ctrl+S (Save), Ctrl+O (Open), Ctrl+P (PDU), Ctrl+T (Traffic), Ctrl+V (VTP), Ctrl+H (HSRP), Ctrl+L (Syslog)
 - [x] **Interface configuration** (bandwidth, delay, description)
 
 ### Templates
