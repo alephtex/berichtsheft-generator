@@ -122,9 +122,45 @@
     .conn-glow { fill: none; stroke-width: 8; stroke-linecap: round; opacity: 0.3; pointer-events: none; }
     
     /* Packet Animation Improved */
-    .packet { position: absolute; width: 14px; height: 14px; border-radius: 50%; pointer-events: none; z-index: 2000; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; }
+    .packet { position: absolute; width: 16px; height: 16px; border-radius: 50%; pointer-events: none; z-index: 2000; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
     .packet::after { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; animation: packetPulse 0.5s infinite; }
     @keyframes packetPulse { 0%, 100% { box-shadow: 0 0 10px currentColor; } 50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; } }
+    
+    /* OSI Layer Visualization */
+    .osi-layers { position: absolute; top: 40px; right: 12px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; min-width: 120px; z-index: 100; }
+    .osi-layer { display: flex; align-items: center; gap: 6px; padding: 3px 6px; font-size: 0.55rem; border-radius: 4px; margin: 2px 0; }
+    .osi-layer.active { background: var(--glass-light); }
+    .osi-layer-icon { width: 14px; height: 14px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; }
+    .osi-L7 { background: #4080c0; }
+    .osi-L4 { background: #5a8a6a; }
+    .osi-L3 { background: #c9a227; }
+    .osi-L2 { background: #8060c0; }
+    .osi-L1 { background: #606060; }
+    
+    /* Interface Status LED */
+    .port-led { position: absolute; width: 6px; height: 6px; border-radius: 50%; top: 4px; right: 4px; }
+    .port-led.up { background: #5a8a6a; box-shadow: 0 0 6px #5a8a6a; }
+    .port-led.down { background: #c04040; }
+    .port-led.poe { background: #e07020; box-shadow: 0 0 6px #e07020; }
+    
+    /* Bandwidth Display */
+    .conn-bw { font-size: 0.45rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
+    
+    /* Device Power Button */
+    .device-power { position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-deep); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 8px; }
+    .device-power.on { background: var(--ok); border-color: var(--ok); color: white; }
+    .device-power:hover { transform: scale(1.2); }
+    
+    /* VLAN Tag on Connection */
+    .conn-vlan { position: absolute; background: var(--device); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.45rem; font-weight: bold; }
+    
+    /* Topology Tree */
+    .topology-panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin: 4px 0; }
+    .topology-device { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 0.6rem; cursor: pointer; border-radius: 4px; }
+    .topology-device:hover { background: var(--glass-light); }
+    .topology-device.selected { background: var(--accent); color: var(--bg-deep); }
+    .topology-child { padding-left: 20px; }
+    .topology-line { width: 1px; height: 100%; position: absolute; left: 10px; background: var(--border); }
     
     /* Workspace Tabs */
     .ws-tabs { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; z-index: 100; background: var(--bg-surface); border-radius: 8px; padding: 3px; }
@@ -393,6 +429,9 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="toolbar-title"><i class="ph ph-network"></i> NetSim Pro</div>
+      <div style="display:flex;align-items:center;gap:4px;margin-right:8px;">
+        <button class="tool-btn" onclick="toggleTopology()" id="btnTopology" title="Topology"><i class="ph ph-tree-structure"></i></button>
+      </div>
       
       <button class="tool-btn" onclick="setMode('realtime')" id="btnRT"><i class="ph ph-clock"></i> Realtime</button>
       <button class="tool-btn" onclick="setMode('simulation')" id="btnSim"><i class="ph ph-play"></i> Simulation</button>
@@ -453,6 +492,15 @@
         <div class="panel-title"><i class="ph ph-cloud"></i> WAN</div>
         <div class="device-grid" id="wanDev"></div>
       </div>
+    </div>
+    
+    <!-- Topology Panel (Collapsible) -->
+    <div id="topologyPanel" style="position:absolute;top:60px;left:260px;width:200px;max-height:400px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:8px;z-index:200;display:none;overflow-y:auto;">
+      <div style="font-size:0.65rem;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span><i class="ph ph-tree-structure"></i> Topology</span>
+        <button onclick="toggleTopology()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+      </div>
+      <div id="topologyTree"></div>
     </div>
     
     <!-- Canvas -->
@@ -1089,6 +1137,27 @@
             <option value="255.255.255.192">255.255.255.192 (/26)</option>
             <option value="255.255.0.0">255.255.0.0 (/16)</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Speed</label>
+          <select class="form-select" id="intSpeed">
+            <option value="auto">auto</option>
+            <option value="10">10 Mbps</option>
+            <option value="100">100 Mbps</option>
+            <option value="1000">1 Gbps</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duplex</label>
+          <select class="form-select" id="intDuplex">
+            <option value="auto">auto</option>
+            <option value="half">half</option>
+            <option value="full">full</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">MTU</label>
+          <input type="number" class="form-input" id="intMTU" value="1500" min="64" max="9006">
         </div>
         <div class="form-group">
           <label class="form-label">Bandwidth (Kbps)</label>
@@ -1775,6 +1844,22 @@
     function ctxCopy() { if (S.ctxNode) { const el = document.getElementById(S.ctxNode.id); const rect = el.getBoundingClientRect(); const dev = DEVS.end.find(d => d.name === S.ctxNode.name) || DEVS.sw.find(d => d.name === S.ctxNode.name) || DEVS.r.find(d => d.name === S.ctxNode.name); if (dev) createNode(dev, S.ctxNode.x + 50, S.ctxNode.y + 50); } hideContextMenu(); }
     function ctxInspect() { alert(`Device: ${S.ctxNode?.name}\nType: ${S.ctxNode?.type}\nIP: ${S.ctxNode?.ip || 'None'}\nMAC: ${S.ctxNode?.mac}`); hideContextMenu(); }
     
+    function togglePower(id, event) {
+      event.stopPropagation();
+      const n = S.nodes.find(x => x.id === id);
+      if (!n) return;
+      n.on = !n.on;
+      const el = document.getElementById(id);
+      if (el) {
+        const led = el.querySelector('.port-led');
+        const power = el.querySelector('.device-power');
+        if (led) led.className = `port-led ${n.on ? 'up' : 'down'}`;
+        if (power) power.className = `device-power ${n.on ? 'on' : ''}`;
+        el.style.opacity = n.on ? '1' : '0.5';
+      }
+      log('System', 'info', `${n.name} ${n.on ? 'eingeschaltet' : 'ausgeschaltet'}`);
+    }
+    
     // ==================== LASSO SELECTION ====================
     let lassoStart = null;
     
@@ -1899,10 +1984,12 @@
       el.style.top = y + 'px';
       
       el.innerHTML = `
+        <div class="port-led ${n.on ? 'up' : 'down'}"></div>
         <div class="node-icon"><i class="ph ${d.icon}"></i></div>
         <div class="node-name">${d.name}</div>
         ${renderPorts(n)}
         <div class="node-info">${renderInfo(n)}</div>
+        <div class="device-power ${n.on ? 'on' : ''}" onclick="togglePower('${n.id}', event)">⏻</div>
       `;
       
       document.getElementById('nodesContainer').appendChild(el);
@@ -2184,6 +2271,28 @@
         const typeLabel = c.type === 'copper-str' ? 'CU' : c.type === 'copper-cross' ? 'X' : c.type === 'fiber' ? 'FO' : 'SER';
         label.textContent = typeLabel;
         svg.appendChild(label);
+        
+        // Bandwidth label
+        const bw = c.type === 'fiber' ? '1G' : c.type === 'serial' ? '2M' : '100M';
+        const bwLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        bwLabel.setAttribute('x', mx);
+        bwLabel.setAttribute('y', my + 8);
+        bwLabel.setAttribute('class', 'conn-bw');
+        bwLabel.setAttribute('text-anchor', 'middle');
+        bwLabel.textContent = bw;
+        svg.appendChild(bwLabel);
+        
+        // VLAN tag if applicable
+        if (c.vlan && c.vlan !== '1') {
+          const vlanTag = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          vlanTag.setAttribute('x', mx + 30);
+          vlanTag.setAttribute('y', my);
+          vlanTag.setAttribute('class', 'conn-label');
+          vlanTag.setAttribute('fill', 'white');
+          vlanTag.setAttribute('font-size', '8');
+          vlanTag.textContent = `V${c.vlan}`;
+          svg.appendChild(vlanTag);
+        }
       });
     }
 
@@ -2253,6 +2362,7 @@
       S.sel = n;
       document.querySelectorAll('.sim-node').forEach(e => e.classList.remove('selected'));
       el.classList.add('selected');
+      updateTopologyTree();
       
       document.getElementById('noSel').style.display = 'none';
       document.getElementById('nodeCfg').style.display = 'block';
@@ -2702,6 +2812,113 @@ exit                - exit current mode
       return binary.split('1').length - 1;
     }
 
+    // ==================== TOPOLOGY TREE ====================
+    function toggleTopology() {
+      const panel = document.getElementById('topologyPanel');
+      const btn = document.getElementById('btnTopology');
+      const isVisible = panel.style.display !== 'none';
+      panel.style.display = isVisible ? 'none' : 'block';
+      btn.classList.toggle('active', !isVisible);
+      if (!isVisible) updateTopologyTree();
+    }
+    
+    function updateTopologyTree() {
+      const tree = document.getElementById('topologyTree');
+      if (S.nodes.length === 0) {
+        tree.innerHTML = '<div style="color:var(--text-muted);font-size:0.6rem;">Keine Geräte</div>';
+        return;
+      }
+      
+      // Group by connection
+      const rootNodes = S.nodes.filter(n => {
+        return !S.conns.some(c => c.n2 === n.id);
+      });
+      
+      let html = '';
+      const visited = new Set();
+      
+      function renderNode(n, level = 0) {
+        if (visited.has(n.id)) return;
+        visited.add(n.id);
+        
+        const isSelected = S.sel?.id === n.id;
+        const icon = n.r ? 'ph-globe' : n.sw ? 'ph-git-branch' : n.srv ? 'ph-hard-drives' : 'ph-desktop';
+        const color = n.r ? 'var(--device)' : n.sw ? 'var(--copper)' : 'var(--ok)';
+        
+        html += `<div class="topology-device ${isSelected ? 'selected' : ''}" style="padding-left:${level * 16 + 8}px;" onclick="selectNodeById('${n.id}')">
+          <i class="ph ${icon}" style="color:${color}"></i>
+          <span>${n.name}</span>
+          ${n.ip ? `<span style="color:var(--text-muted);font-size:0.5rem;">${n.ip}</span>` : ''}
+        </div>`;
+        
+        // Find connected nodes
+        S.conns.forEach(c => {
+          if (c.n1 === n.id) {
+            const child = S.nodes.find(x => x.id === c.n2);
+            if (child) renderNode(child, level + 1);
+          }
+        });
+      }
+      
+      if (rootNodes.length === 0 && S.nodes.length > 0) {
+        // No clear root, render all
+        S.nodes.forEach(n => renderNode(n, 0));
+      } else {
+        rootNodes.forEach(n => renderNode(n, 0));
+      }
+      
+      tree.innerHTML = html;
+    }
+    
+    function selectNodeById(id) {
+      const n = S.nodes.find(x => x.id === id);
+      const el = document.getElementById(id);
+      if (n && el) {
+        sel(n, el);
+        updateTopologyTree();
+      }
+    }
+    
+    // ==================== OSI LAYER VISUALIZATION ====================
+    function showOSILayers(activeLayer) {
+      let html = '<div style="font-size:0.55rem;font-weight:600;margin-bottom:6px;color:var(--text-muted);">OSI Layers</div>';
+      const layers = [
+        { num: 7, name: 'Application', cls: 'osi-L7', icon: 'A' },
+        { num: 6, name: 'Presentation', cls: 'osi-L7', icon: 'P' },
+        { num: 5, name: 'Session', cls: 'osi-L7', icon: 'S' },
+        { num: 4, name: 'Transport', cls: 'osi-L4', icon: 'T' },
+        { num: 3, name: 'Network', cls: 'osi-L3', icon: 'N' },
+        { num: 2, name: 'Data Link', cls: 'osi-L2', icon: 'D' },
+        { num: 1, name: 'Physical', cls: 'osi-L1', icon: 'Ph' }
+      ];
+      
+      layers.forEach(l => {
+        const isActive = activeLayer && (
+          (activeLayer === 'L7' && l.num >= 5) ||
+          (activeLayer === 'L4' && l.num === 4) ||
+          (activeLayer === 'L3' && l.num === 3) ||
+          (activeLayer === 'L2' && l.num === 2)
+        );
+        html += `<div class="osi-layer ${isActive ? 'active' : ''}">
+          <div class="osi-layer-icon ${l.cls}">${l.icon}</div>
+          <span>L${l.num} ${l.name}</span>
+        </div>`;
+      });
+      
+      return html;
+    }
+    
+    function updateOSIPanel(layer) {
+      let panel = document.getElementById('osiPanel');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'osiPanel';
+        panel.className = 'osi-layers';
+        document.querySelector('.canvas-area').appendChild(panel);
+      }
+      panel.innerHTML = showOSILayers(layer);
+    }
+    
     // ==================== PDU / SIMULATION ====================
     function openPDU() {
       const opts = S.nodes.filter(n => n.end || n.srv || n.r).map(n => 
@@ -2898,6 +3115,7 @@ exit                - exit current mode
     function simPDU(src, dst, type, layer) {
       S.pduCnt++;
       log(layer, 'info', `${src.name} → ${dst.name}: ${type.toUpperCase()}`);
+      updateOSIPanel(layer);
       
       // Store packet for capture
       const packet = {
@@ -2920,6 +3138,7 @@ exit                - exit current mode
       
       animatePath(path, type, layer, () => {
         log(layer, 'success', `${dst.name} erreicht!`);
+        updateOSIPanel(null);
         
         // Show packet detail on click
         showPacketDetail(packet);
@@ -3382,6 +3601,9 @@ ${target.name}# `;
       const desc = document.getElementById('intDesc').value;
       const ip = document.getElementById('intIP').value;
       const mask = document.getElementById('intMask').value;
+      const speed = document.getElementById('intSpeed').value;
+      const duplex = document.getElementById('intDuplex').value;
+      const mtu = document.getElementById('intMTU').value;
       const bw = document.getElementById('intBandwidth').value;
       const delay = document.getElementById('intDelay').value;
       const status = document.getElementById('intStatus').value;
@@ -3392,6 +3614,9 @@ ${target.name}# `;
         log('Interface', 'info', `ip address ${ip} ${mask}`);
         if (S.sel) { S.sel.ip = ip; S.sel.subnet = mask; }
       }
+      if (speed !== 'auto') log('Interface', 'info', `speed ${speed}`);
+      if (duplex !== 'auto') log('Interface', 'info', `duplex ${duplex}`);
+      log('Interface', 'info', `mtu ${mtu}`);
       log('Interface', 'info', `bandwidth ${bw}`);
       log('Interface', 'info', `delay ${delay}`);
       log('Interface', 'info', `${status === 'up' ? 'no shutdown' : 'shutdown'}`);
