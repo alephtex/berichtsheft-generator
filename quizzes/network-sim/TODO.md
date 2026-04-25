@@ -106,6 +106,10 @@
 - [x] **Device status badges** (online/offline)
 - [x] **MAC Address Table** - dynamic learning, VLAN filter
 - [x] **Routing Table** - protocol badges (C/S/O/L), metrics
+- [x] **NAT Translations** panel - Inside/Outside IP, protocols
+- [x] **Enhanced packet animation** - type colors, trail effects, burst arrival
+- [x] **Packet labels** - shows type during animation
+- [x] **Device labels** - shows hop names during animation
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
