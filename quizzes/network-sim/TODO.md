@@ -48,6 +48,9 @@
 - [x] Packet detail view with hex dump
 - [x] Path animation
 - [x] Realtime vs Simulation mode
+- [x] **Traffic Generator** (continuous packet generation)
+- [x] **Ping Results** with detailed statistics
+- [x] **Repeat packets** with configurable interval
 
 ### Workspace
 - [x] Logical view
@@ -61,6 +64,7 @@
 - [x] Show commands: ip, mac, arp, route, vlan, interfaces
 - [x] Configuration: ip address, no shutdown
 - [x] Routing protocol commands
+- [x] **CDP (Cisco Discovery Protocol)** neighbor discovery
 
 ### UI/UX
 - [x] Glassmorphism design
@@ -70,7 +74,8 @@
 - [x] Device info on hover
 - [x] Connection labels
 - [x] Delete zone visual
-- [x] Keyboard shortcuts
+- [x] **Keyboard shortcuts**: Ctrl+S (Save), Ctrl+O (Open), Ctrl+P (PDU), Ctrl+T (Traffic)
+- [x] **Interface configuration** (bandwidth, delay, description)
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

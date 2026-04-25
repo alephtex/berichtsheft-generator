@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+a805861 feat: Add Traffic Generator, CDP, Ping results, Interface config
 7554f1e docs: Update documentation with all new features
 3969139 feat: Add DHCP relay, EtherChannel, QoS, Port Security
 395dc6e feat: Add routing protocols, physical workspace, DHCP pools
@@ -150,6 +151,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv
