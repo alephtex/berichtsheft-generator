@@ -132,6 +132,51 @@
     .smart-label.ip { border-color: var(--layer3); color: var(--layer3); }
     .smart-label.name { border-color: var(--accent); color: var(--accent); }
     
+    /* Interface Statistics Panel */
+    .if-stats-panel { position: absolute; bottom: 130px; right: 12px; width: 280px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 100; overflow: hidden; }
+    .if-stats-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; cursor: pointer; }
+    .if-stats-header:hover { background: var(--glass-light); }
+    .if-stats-content { max-height: 300px; overflow-y: auto; }
+    .if-stats-row { display: grid; grid-template-columns: 80px 1fr 1fr 60px; gap: 4px; padding: 6px 8px; font-size: 0.55rem; border-bottom: 1px solid var(--border); align-items: center; }
+    .if-stats-row.header { background: var(--bg-elevated); font-weight: 600; color: var(--text-muted); position: sticky; top: 0; }
+    .if-stats-row .name { font-weight: 500; color: var(--accent); }
+    .if-stats-row .stat { text-align: center; font-family: 'Fira Code', monospace; }
+    .if-stats-row .stat.ok { color: var(--ok); }
+    .if-stats-row .stat.warn { color: var(--warn); }
+    .if-stats-row .speed { color: var(--layer3); }
+    
+    /* VLAN Table Panel */
+    .vlan-panel { position: absolute; top: 60px; right: 380px; width: 260px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; }
+    .vlan-panel.show { display: block; }
+    .vlan-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; }
+    .vlan-content { padding: 8px; }
+    .vlan-table { width: 100%; font-size: 0.55rem; border-collapse: collapse; }
+    .vlan-table th { background: var(--bg-elevated); padding: 4px 6px; text-align: left; color: var(--text-muted); }
+    .vlan-table td { padding: 4px 6px; border-bottom: 1px solid var(--border); }
+    .vlan-table tr:hover { background: var(--glass-light); }
+    
+    /* Network Health Dashboard */
+    .health-dashboard { position: absolute; top: 60px; left: 260px; width: 200px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 100; overflow: hidden; display: none; }
+    .health-dashboard.show { display: block; }
+    .health-header { padding: 8px 12px; background: var(--bg-elevated); font-size: 0.65rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .health-content { padding: 10px; }
+    .health-metric { margin-bottom: 10px; }
+    .health-metric-label { font-size: 0.55rem; color: var(--text-muted); margin-bottom: 4px; }
+    .health-bar { height: 6px; background: var(--bg-deep); border-radius: 3px; overflow: hidden; }
+    .health-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .health-value { font-size: 0.6rem; font-weight: 600; margin-top: 2px; }
+    
+    /* ARP Table */
+    .arp-panel { position: absolute; top: 60px; right: 380px; width: 300px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; }
+    .arp-panel.show { display: block; }
+    .arp-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; }
+    .arp-content { max-height: 250px; overflow-y: auto; padding: 8px; }
+    .arp-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 8px; padding: 5px 6px; font-size: 0.55rem; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; }
+    .arp-row.header { background: var(--bg-elevated); color: var(--text-muted); font-family: inherit; }
+    .arp-row .ip { color: var(--layer3); }
+    .arp-row .mac { color: var(--device); }
+    .arp-row .interface { color: var(--accent); }
+    
     /* Link Status Indicator */
     .link-status { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: blink 1s infinite; }
     .link-status.up { background: var(--ok); }
@@ -535,6 +580,10 @@
       <button class="tool-btn" onclick="openTrafficGen()"><i class="ph ph-lightning"></i> Traffic</button>
       <button class="tool-btn" onclick="openCDP()"><i class="ph ph-broadcast"></i> CDP</button>
       <button class="tool-btn" onclick="togglePacketHistory()" id="btnPktHist"><i class="ph ph-list-bullets"></i> History</button>
+      <button class="tool-btn" onclick="toggleIfStats()" id="btnIfStats"><i class="ph ph-chart-line"></i> IF Stats</button>
+      <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
+      <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
+      <button class="tool-btn" onclick="toggleArpPanel()" id="btnArp"><i class="ph ph-table"></i> ARP</button>
       <button class="tool-btn" onclick="openVTP()"><i class="ph ph-swap"></i> VTP</button>
       <button class="tool-btn" onclick="openHSRP()"><i class="ph ph-arrows-clockwise"></i> HSRP</button>
       <button class="tool-btn" onclick="openSyslog()"><i class="ph ph-list-bullets"></i> Syslog</button>
@@ -658,6 +707,50 @@
       
       <!-- Port Tooltip -->
       <div class="port-tooltip" id="portTooltip" style="display:none;"></div>
+      
+      <!-- Interface Statistics Panel -->
+      <div class="if-stats-panel" id="ifStatsPanel">
+        <div class="if-stats-header" onclick="toggleIfStatsContent()">
+          <span><i class="ph ph-chart-line"></i> Interface Statistics</span>
+          <i class="ph ph-caret-down if-stats-toggle" id="ifStatsToggle"></i>
+        </div>
+        <div class="if-stats-content" id="ifStatsContent" style="display:none;"></div>
+      </div>
+      
+      <!-- VLAN Table Panel -->
+      <div class="vlan-panel" id="vlanPanel">
+        <div class="vlan-header">
+          <span><i class="ph ph-squares-four"></i> VLAN Table</span>
+          <button onclick="toggleVlanPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+        </div>
+        <div class="vlan-content">
+          <table class="vlan-table">
+            <thead><tr><th>VLAN</th><th>Name</th><th>Ports</th><th>Status</th></tr></thead>
+            <tbody id="vlanTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Health Dashboard -->
+      <div class="health-dashboard" id="healthDashboard">
+        <div class="health-header">
+          <i class="ph ph-heartbeat"></i> Network Health
+          <span style="margin-left:auto;"><button onclick="toggleHealthDashboard()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button></span>
+        </div>
+        <div class="health-content" id="healthContent"></div>
+      </div>
+      
+      <!-- ARP Table Panel -->
+      <div class="arp-panel" id="arpPanel">
+        <div class="arp-header">
+          <span><i class="ph ph-table"></i> ARP Table</span>
+          <button onclick="toggleArpPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+        </div>
+        <div class="arp-content">
+          <div class="arp-row header"><span>IP</span><span>MAC</span><span>Interface</span></div>
+          <div id="arpTableBody"></div>
+        </div>
+      </div>
       
       <div class="delete-zone" id="deleteZone">
         <i class="ph ph-trash"></i> Hier ablegen zum Löschen
@@ -3333,6 +3426,13 @@ exit                - exit current mode
       updateCaptureList();
       addToPacketHistory(packet);
       
+      // Update interface statistics
+      const packetSize = type === 'icmp' ? 64 : type === 'arp' ? 42 : type === 'dhcp' ? 350 : 512;
+      updateIfStat(src.id, src.usedPorts - 1, 'out', packetSize);
+      updateIfStat(dst.id, dst.usedPorts - 1, 'in', packetSize);
+      if (showIfStats) renderIfStats();
+      if (showHealthDashboard) renderHealthDashboard();
+      
       // Store packet for capture
       const packet = {
         id: S.pduCnt,
@@ -3416,6 +3516,194 @@ exit                - exit current mode
     function showPacketDetailById(id) {
       const p = S.capturedPackets.find(x => x.id === id) || packetHistory.find(x => x.id === id);
       if (p) showPacketDetail(p);
+    }
+    
+    // ==================== INTERFACE STATISTICS ====================
+    let showIfStats = false;
+    let ifStatsExpanded = false;
+    const interfaceStats = {}; // { nodeId_portIdx: { in: 0, out: 0, errors: 0, drop: 0 } }
+    
+    function toggleIfStats() {
+      showIfStats = !showIfStats;
+      document.getElementById('ifStatsPanel').style.display = showIfStats ? 'block' : 'none';
+      document.getElementById('btnIfStats').classList.toggle('active', showIfStats);
+      if (showIfStats) renderIfStats();
+    }
+    
+    function toggleIfStatsContent() {
+      ifStatsExpanded = !ifStatsExpanded;
+      document.getElementById('ifStatsContent').style.display = ifStatsExpanded ? 'block' : 'none';
+      document.getElementById('ifStatsToggle').classList.toggle('open', ifStatsExpanded);
+    }
+    
+    function updateIfStat(nodeId, portIdx, direction, bytes) {
+      const key = `${nodeId}_${portIdx}`;
+      if (!interfaceStats[key]) interfaceStats[key] = { in: 0, out: 0, errors: 0, drop: 0 };
+      if (direction === 'in') interfaceStats[key].in += bytes;
+      else interfaceStats[key].out += bytes;
+    }
+    
+    function renderIfStats() {
+      const content = document.getElementById('ifStatsContent');
+      let html = '<div class="if-stats-row header"><span>Interface</span><span>In</span><span>Out</span><span>Status</span></div>';
+      
+      S.nodes.forEach(n => {
+        for (let i = 0; i < n.totalPorts; i++) {
+          const key = `${n.id}_${i}`;
+          const stats = interfaceStats[key] || { in: 0, out: 0, errors: 0, drop: 0 };
+          const conn = S.conns.find(c => (c.n1 === n.id && c.p1 === i) || (c.n2 === n.id && c.p2 === i));
+          const status = conn ? 'up' : 'down';
+          const statusClass = conn ? 'ok' : 'error';
+          const portName = i >= n.ports ? `U${i - n.ports + 1}` : `F0/${i}`;
+          html += `<div class="if-stats-row">
+            <span class="name">${n.name.substring(0, 8)}/${portName}</span>
+            <span class="stat">${formatBytes(stats.in)}</span>
+            <span class="stat">${formatBytes(stats.out)}</span>
+            <span class="stat ${statusClass}">${status}</span>
+          </div>`;
+        }
+      });
+      
+      content.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No interfaces</div>';
+    }
+    
+    function formatBytes(b) {
+      if (b < 1024) return b + ' B';
+      if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+      return (b / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+    
+    // ==================== VLAN TABLE ====================
+    let showVlanPanel = false;
+    const vlans = [
+      { id: 1, name: 'default', ports: [], status: 'active' },
+      { id: 10, name: 'Management', ports: [], status: 'active' },
+      { id: 20, name: 'Sales', ports: [], status: 'active' },
+      { id: 99, name: 'Native', ports: [], status: 'active' }
+    ];
+    
+    function toggleVlanPanel() {
+      showVlanPanel = !showVlanPanel;
+      document.getElementById('vlanPanel').classList.toggle('show', showVlanPanel);
+      document.getElementById('btnVlan').classList.toggle('active', showVlanPanel);
+      if (showVlanPanel) renderVlanTable();
+    }
+    
+    function renderVlanTable() {
+      const body = document.getElementById('vlanTableBody');
+      // Update port assignments
+      vlans.forEach(v => v.ports = []);
+      S.nodes.forEach(n => {
+        const vlan = vlans.find(v => v.id === (n.vlan || 1));
+        if (vlan && n.sw) vlan.ports.push(n.name.substring(0, 6));
+      });
+      body.innerHTML = vlans.map(v => `
+        <tr>
+          <td>${v.id}</td>
+          <td>${v.name}</td>
+          <td>${v.ports.length || '-'}</td>
+          <td style="color:var(--ok);">${v.status}</td>
+        </tr>
+      `).join('');
+    }
+    
+    // ==================== HEALTH DASHBOARD ====================
+    let showHealthDashboard = false;
+    
+    function toggleHealthDashboard() {
+      showHealthDashboard = !showHealthDashboard;
+      document.getElementById('healthDashboard').classList.toggle('show', showHealthDashboard);
+      document.getElementById('btnHealth').classList.toggle('active', showHealthDashboard);
+      if (showHealthDashboard) renderHealthDashboard();
+    }
+    
+    function renderHealthDashboard() {
+      const content = document.getElementById('healthContent');
+      const totalNodes = S.nodes.length;
+      const onlineNodes = S.nodes.filter(n => n.on !== false).length;
+      const totalLinks = S.conns.length;
+      const activeLinks = S.conns.filter(c => {
+        const n1 = S.nodes.find(x => x.id === c.n1);
+        const n2 = S.nodes.find(x => x.id === c.n2);
+        return n1?.on !== false && n2?.on !== false;
+      }).length;
+      const packets = packetHistory.length;
+      const errors = packetHistory.filter(p => !p.success).length;
+      
+      const uptime = totalNodes > 0 ? Math.round((onlineNodes / totalNodes) * 100) : 100;
+      const linkHealth = totalLinks > 0 ? Math.round((activeLinks / totalLinks) * 100) : 100;
+      const packetHealth = packets > 0 ? Math.max(0, 100 - (errors / packets * 100)) : 100;
+      
+      const getColor = (v) => v > 80 ? 'var(--ok)' : v > 50 ? 'var(--warn)' : 'var(--error)';
+      
+      content.innerHTML = `
+        <div class="health-metric">
+          <div class="health-metric-label">Device Uptime</div>
+          <div class="health-bar"><div class="health-bar-fill" style="width:${uptime}%;background:${getColor(uptime)};"></div></div>
+          <div class="health-value" style="color:${getColor(uptime)};">${uptime}% (${onlineNodes}/${totalNodes})</div>
+        </div>
+        <div class="health-metric">
+          <div class="health-metric-label">Link Status</div>
+          <div class="health-bar"><div class="health-bar-fill" style="width:${linkHealth}%;background:${getColor(linkHealth)};"></div></div>
+          <div class="health-value" style="color:${getColor(linkHealth)};">${linkHealth}% (${activeLinks}/${totalLinks})</div>
+        </div>
+        <div class="health-metric">
+          <div class="health-metric-label">Packet Delivery</div>
+          <div class="health-bar"><div class="health-bar-fill" style="width:${packetHealth}%;background:${getColor(packetHealth)};"></div></div>
+          <div class="health-value" style="color:${getColor(packetHealth)};">${packetHealth}% (${packets} sent)</div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:0.5rem;color:var(--text-muted);">
+          <div>Connections: ${totalLinks}</div>
+          <div>Errors: ${errors}</div>
+          <div>VLANs: ${vlans.length}</div>
+        </div>
+      `;
+    }
+    
+    // ==================== ARP TABLE ====================
+    let showArpPanel = false;
+    const arpTable = [];
+    
+    function toggleArpPanel() {
+      showArpPanel = !showArpPanel;
+      document.getElementById('arpPanel').classList.toggle('show', showArpPanel);
+      document.getElementById('btnArp').classList.toggle('active', showArpPanel);
+      if (showArpPanel) renderArpTable();
+    }
+    
+    function addArpEntry(ip, mac, interfaceName) {
+      const existing = arpTable.findIndex(a => a.ip === ip);
+      if (existing >= 0) arpTable.splice(existing, 1);
+      arpTable.unshift({ ip, mac, interface: interfaceName, age: 'dynamic' });
+      if (arpTable.length > 50) arpTable.pop();
+      if (showArpPanel) renderArpTable();
+    }
+    
+    function renderArpTable() {
+      const body = document.getElementById('arpTableBody');
+      if (arpTable.length === 0) {
+        body.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-muted);font-size:0.55rem;">ARP cache empty</div>';
+        return;
+      }
+      body.innerHTML = arpTable.map(a => `
+        <div class="arp-row">
+          <span class="ip">${a.ip}</span>
+          <span class="mac">${a.mac}</span>
+          <span class="interface">${a.interface}</span>
+        </div>
+      `).join('');
+    }
+    
+    // Auto-populate ARP when devices are connected
+    function updateArpFromConnections() {
+      S.conns.forEach(c => {
+        const n1 = S.nodes.find(x => x.id === c.n1);
+        const n2 = S.nodes.find(x => x.id === c.n2);
+        if (n1?.ip && n2?.ip) {
+          addArpEntry(n2.ip, n2.mac, n1.name);
+          addArpEntry(n1.ip, n1.mac, n2.name);
+        }
+      });
     }
     
     // ==================== PORT TOOLTIP ====================
