@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+e89c122 feat: Realistic device front panels, port LEDs, system LEDs
 be36294 feat: Enhanced packet animation, NAT table, trail effects
 0ee51ee feat: Add MAC address table, routing table, VLAN filter
 a9d9284 feat: Add device search, quick templates, traffic animation, status badges
@@ -159,6 +160,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv

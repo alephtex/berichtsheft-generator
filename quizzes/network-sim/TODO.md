@@ -110,6 +110,10 @@
 - [x] **Enhanced packet animation** - type colors, trail effects, burst arrival
 - [x] **Packet labels** - shows type during animation
 - [x] **Device labels** - shows hop names during animation
+- [x] **Realistic front panels** - hardware-style device views
+- [x] **Port LED indicators** - green=up, dark=down
+- [x] **System LEDs** - power, PoE, activity, speed
+- [x] **Panel labels** - device type identification
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
