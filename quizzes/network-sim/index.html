@@ -364,6 +364,8 @@
       <div class="toolbar-spacer"></div>
       
       <button class="tool-btn" onclick="openCLI()"><i class="ph ph-terminal"></i> CLI</button>
+      <button class="tool-btn" onclick="openTrafficGen()"><i class="ph ph-lightning"></i> Traffic</button>
+      <button class="tool-btn" onclick="openCDP()"><i class="ph ph-broadcast"></i> CDP</button>
       <button class="tool-btn" onclick="selectConnType()" id="btnConnType"><i class="ph ph-plugs-connected"></i> Kabel</button>
       <button class="tool-btn" onclick="openTemplates()" title="Geräte Vorlagen"><i class="ph ph-stack"></i> Vorlagen</button>
       <button class="tool-btn" onclick="autoConnect()" title="Auto-Connect ausgewählter Geräte"><i class="ph ph-magic-wand"></i> Auto</button>
@@ -682,6 +684,14 @@
         <button class="modal-btn secondary" onclick="closeM('pduModal')">Abbrechen</button>
         <button class="modal-btn primary" onclick="sendPDU()"><i class="ph ph-paper-plane-tilt"></i> Senden</button>
       </div>
+      <div class="form-group">
+        <label class="form-label">Anzahl Wiederholungen</label>
+        <input type="number" class="form-input" id="pduRepeat" value="1" min="1" max="100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Intervall (ms)</label>
+        <input type="number" class="form-input" id="pduInterval" value="1000" min="100" max="10000">
+      </div>
     </div>
   </div>
   
@@ -893,6 +903,130 @@
       </div>
       <div class="modal-actions">
         <button class="modal-btn secondary" onclick="closeM('cliModal')">Schließen</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Traffic Generator Modal -->
+  <div class="modal-overlay" id="trafficModal">
+    <div class="modal">
+      <div class="modal-title"><i class="ph ph-lightning"></i> Traffic Generator</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Quelle</label>
+          <select class="form-select" id="trafficSrc"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ziel</label>
+          <select class="form-select" id="trafficDst"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Protokoll</label>
+          <select class="form-select" id="trafficProto">
+            <option value="icmp">ICMP (Ping)</option>
+            <option value="udp">UDP Flood</option>
+            <option value="tcp">TCP Flood</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paketgröße (Bytes)</label>
+          <input type="number" class="form-input" id="trafficSize" value="64" min="64" max="1500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Intervall (ms)</label>
+          <input type="number" class="form-input" id="trafficInterval" value="1000" min="100" max="5000">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeM('trafficModal')">Abbrechen</button>
+        <button class="modal-btn primary" onclick="startTraffic()"><i class="ph ph-play"></i> Start</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CDP Modal -->
+  <div class="modal-overlay" id="cdpModal">
+    <div class="modal" style="max-width: 550px;">
+      <div class="modal-title"><i class="ph ph-broadcast"></i> Cisco Discovery Protocol</div>
+      <div class="modal-body">
+        <div class="props-section">
+          <div class="props-section-title">CDP Nachrichten</div>
+          <div id="cdpMessages" style="max-height:250px;overflow-y:auto;font-family:'Fira Code',monospace;font-size:0.55rem;"></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="modal-btn secondary" style="flex:1;" onclick="runCDP()"><i class="ph ph-broadcast"></i> CDP neighbours</button>
+          <button class="modal-btn secondary" style="flex:1;" onclick="clearCDP()"><i class="ph ph-trash"></i> Clear</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeM('cdpModal')">Schließen</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Ping Results Modal -->
+  <div class="modal-overlay" id="pingModal">
+    <div class="modal">
+      <div class="modal-title"><i class="ph ph-paper-plane-tilt"></i> Ping Ergebnisse</div>
+      <div class="modal-body">
+        <div id="pingResults" style="background:#000;padding:10px;border-radius:6px;font-family:'Fira Code',monospace;font-size:0.6rem;min-height:150px;max-height:300px;overflow-y:auto;"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeM('pingModal')">Schließen</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Interface Config Modal -->
+  <div class="modal-overlay" id="interfaceModal">
+    <div class="modal">
+      <div class="modal-title"><i class="ph ph-plugs-connected"></i> Interface Konfiguration</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Interface</label>
+          <select class="form-select" id="intInterface">
+            <option value="gi0/0">GigabitEthernet0/0</option>
+            <option value="gi0/1">GigabitEthernet0/1</option>
+            <option value="fa0/0">FastEthernet0/0</option>
+            <option value="fa0/1">FastEthernet0/1</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Beschreibung</label>
+          <input type="text" class="form-input" id="intDesc" placeholder="Connected to ...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">IP Adresse</label>
+          <input type="text" class="form-input" id="intIP" placeholder="192.168.1.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subnetzmaske</label>
+          <select class="form-select" id="intMask">
+            <option value="255.255.255.0">255.255.255.0 (/24)</option>
+            <option value="255.255.255.128">255.255.255.128 (/25)</option>
+            <option value="255.255.255.192">255.255.255.192 (/26)</option>
+            <option value="255.255.0.0">255.255.0.0 (/16)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bandwidth (Kbps)</label>
+          <input type="number" class="form-input" id="intBandwidth" value="1000000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delay (us)</label>
+          <input type="number" class="form-input" id="intDelay" value="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="intStatus">
+            <option value="up">up</option>
+            <option value="down">down</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="closeM('interfaceModal')">Abbrechen</button>
+        <button class="modal-btn primary" onclick="applyInterface()"><i class="ph ph-check"></i> Anwenden</button>
       </div>
     </div>
   </div>
@@ -2472,7 +2606,7 @@ exit                - exit current mode
 
     function log(layer, type, msg) {
       const t = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const bg = { L3: 'var(--layer3)', L4: 'var(--layer4)', L7: 'var(--layer7)', Config: 'var(--accent)', STP: 'var(--ok)', VLAN: 'var(--device)', Route: 'var(--device)', System: 'var(--text-muted)', Gerät: 'var(--ok)', Verbindung: 'var(--ok)', Capture: 'var(--layer7)', ACL: 'var(--warn)', fail: 'var(--error)', info: 'var(--accent)', success: 'var(--ok)' };
+      const bg = { L3: 'var(--layer3)', L4: 'var(--layer4)', L7: 'var(--layer7)', Config: 'var(--accent)', STP: 'var(--ok)', VLAN: 'var(--device)', Route: 'var(--device)', System: 'var(--text-muted)', Gerät: 'var(--ok)', Verbindung: 'var(--ok)', Capture: 'var(--layer7)', ACL: 'var(--warn)', Traffic: 'var(--layer3)', CDP: 'var(--layer7)', Interface: 'var(--accent)', fail: 'var(--error)', info: 'var(--accent)', success: 'var(--ok)' };
       S.events.unshift({ t, layer, type, msg });
       if (S.events.length > 100) S.events.pop();
       document.getElementById('eventLog').innerHTML = S.events.slice(0, 20).map(e => 
@@ -2485,6 +2619,171 @@ exit                - exit current mode
     }
 
     function clearLog() { S.events = []; document.getElementById('eventLog').innerHTML = ''; }
+    
+    // ==================== TRAFFIC GENERATOR ====================
+    let trafficInterval = null;
+    
+    function openTrafficGen() {
+      const opts = S.nodes.filter(n => n.end || n.srv || n.r).map(n => 
+        `<option value="${n.id}">${n.name}${n.ip ? ` (${n.ip})` : ''}</option>`
+      ).join('');
+      document.getElementById('trafficSrc').innerHTML = opts;
+      document.getElementById('trafficDst').innerHTML = '<option value="">-- --</option>' + opts;
+      document.getElementById('trafficModal').classList.add('show');
+    }
+    
+    function startTraffic() {
+      const srcId = document.getElementById('trafficSrc').value;
+      const dstId = document.getElementById('trafficDst').value;
+      const proto = document.getElementById('trafficProto').value;
+      const size = parseInt(document.getElementById('trafficSize').value) || 64;
+      const interval = parseInt(document.getElementById('trafficInterval').value) || 1000;
+      
+      if (!srcId || !dstId) { alert('Quelle und Ziel auswählen'); return; }
+      
+      closeM('trafficModal');
+      
+      const src = S.nodes.find(n => n.id === srcId);
+      const dst = S.nodes.find(n => n.id === dstId);
+      
+      log('Traffic', 'info', `Traffic Generator: ${src.name} → ${dst.name} [${proto}]`);
+      
+      let count = 0;
+      trafficInterval = setInterval(() => {
+        count++;
+        simPDU(src, dst, proto, 'L3');
+        log('Traffic', 'info', `Packet #${count} sent (${size}B @ ${interval}ms)`);
+      }, interval);
+    }
+    
+    function stopTraffic() {
+      if (trafficInterval) {
+        clearInterval(trafficInterval);
+        trafficInterval = null;
+        log('Traffic', 'info', 'Traffic Generator gestoppt');
+      }
+    }
+    
+    // ==================== CDP ====================
+    let cdpMessages = [];
+    
+    function openCDP() {
+      document.getElementById('cdpModal').classList.add('show');
+      updateCDPMessages();
+    }
+    
+    function runCDP() {
+      cdpMessages = [];
+      S.nodes.forEach(n => {
+        S.conns.forEach(c => {
+          if (c.n1 === n.id) {
+            const neighbor = S.nodes.find(x => x.id === c.n2);
+            if (neighbor) {
+              cdpMessages.push({ device: n.name, neighbor: neighbor.name, interface: `Gi0/${c.p1}`, ip: neighbor.ip || 'N/A', platform: neighbor.type, capability: neighbor.r ? 'Router' : neighbor.sw ? 'Switch' : 'Host' });
+            }
+          }
+          if (c.n2 === n.id) {
+            const neighbor = S.nodes.find(x => x.id === c.n1);
+            if (neighbor) {
+              cdpMessages.push({ device: n.name, neighbor: neighbor.name, interface: `Gi0/${c.p2}`, ip: neighbor.ip || 'N/A', platform: neighbor.type, capability: neighbor.r ? 'Router' : neighbor.sw ? 'Switch' : 'Host' });
+            }
+          }
+        });
+      });
+      updateCDPMessages();
+      log('CDP', 'success', `${cdpMessages.length} CDP Nachrichten`);
+    }
+    
+    function updateCDPMessages() {
+      const el = document.getElementById('cdpMessages');
+      if (cdpMessages.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-muted);padding:10px;">Klicke "CDP neighbours" um Nachbarn zu finden</div>';
+        return;
+      }
+      el.innerHTML = cdpMessages.map(m => `<div style="padding:6px;border-bottom:1px solid var(--border);"><div style="color:var(--ok);">${m.device}</div><div style="color:var(--text-muted);">Interface: ${m.interface}</div><div>Neighbour: <span style="color:var(--accent)">${m.neighbor}</span> (${m.ip})</div><div style="color:var(--text-muted);font-size:0.5rem;">${m.platform} | ${m.capability}</div></div>`).join('');
+    }
+    
+    function clearCDP() { cdpMessages = []; updateCDPMessages(); }
+    
+    // ==================== PING RESULTS ====================
+    function runPing(src, dst) {
+      const results = [];
+      document.getElementById('pingResults').innerHTML = `<div style="color:var(--ok);">Pinging from ${src.name} to ${dst.name}...</div><br>`;
+      
+      for (let i = 0; i < 4; i++) {
+        const delay = 10 + Math.random() * 50;
+        const ttl = 64;
+        const success = Math.random() > 0.1;
+        results.push({ seq: i + 1, time: delay.toFixed(2), ttl, success });
+        
+        setTimeout(() => {
+          const el = document.getElementById('pingResults');
+          if (success) {
+            el.innerHTML += `<div style="color:var(--ok);">Reply ${src.ip}: seq=${i+1} time=${delay.toFixed(2)}ms TTL=${ttl}</div>`;
+          } else {
+            el.innerHTML += `<div style="color:var(--error);">Request timeout for seq ${i+1}</div>`;
+          }
+          el.scrollTop = el.scrollHeight;
+        }, (i + 1) * 300);
+      }
+      
+      setTimeout(() => {
+        const sent = 4, received = results.filter(r => r.success).length;
+        const loss = ((sent - received) / sent * 100).toFixed(0);
+        const avgTime = results.filter(r => r.success).reduce((a, b) => a + parseFloat(b.time), 0) / received;
+        document.getElementById('pingResults').innerHTML += `<br><div style="color:var(--text-muted);">--- Ping Statistics ---\n4 packets transmitted, ${received} received, ${loss}% loss\nround-trip min/avg/max = ${Math.min(...results.filter(r=>r.success).map(r=>parseFloat(r.time))).toFixed(2)}/${avgTime.toFixed(2)}/${Math.max(...results.filter(r=>r.success).map(r=>parseFloat(r.time))).toFixed(2)} ms</div>`;
+      }, 1500);
+      
+      document.getElementById('pingModal').classList.add('show');
+    }
+    
+    // ==================== INTERFACE CONFIG ====================
+    function openInterface() {
+      document.getElementById('interfaceModal').classList.add('show');
+    }
+    
+    function applyInterface() {
+      const iface = document.getElementById('intInterface').value;
+      const desc = document.getElementById('intDesc').value;
+      const ip = document.getElementById('intIP').value;
+      const mask = document.getElementById('intMask').value;
+      const bw = document.getElementById('intBandwidth').value;
+      const delay = document.getElementById('intDelay').value;
+      const status = document.getElementById('intStatus').value;
+      
+      log('Interface', 'info', `interface ${iface}`);
+      if (desc) log('Interface', 'info', `description ${desc}`);
+      if (ip) {
+        log('Interface', 'info', `ip address ${ip} ${mask}`);
+        if (S.sel) { S.sel.ip = ip; S.sel.subnet = mask; }
+      }
+      log('Interface', 'info', `bandwidth ${bw}`);
+      log('Interface', 'info', `delay ${delay}`);
+      log('Interface', 'info', `${status === 'up' ? 'no shutdown' : 'shutdown'}`);
+      
+      closeM('interfaceModal');
+    }
+    
+    // ==================== ENHANCED PDU ====================
+    function sendPDU() {
+      const src = S.nodes.find(n => n.id === document.getElementById('pduSrc').value);
+      const dst = S.nodes.find(n => n.id === document.getElementById('pduDst').value);
+      const type = document.getElementById('pduType').value;
+      const layer = document.getElementById('pduLayer').value;
+      const repeat = parseInt(document.getElementById('pduRepeat')?.value) || 1;
+      const interval = parseInt(document.getElementById('pduInterval')?.value) || 1000;
+      
+      if (!src || !dst) return;
+      closeM('pduModal');
+      
+      if (type === 'icmp') {
+        runPing(src, dst);
+      }
+      
+      for (let i = 0; i < repeat; i++) {
+        setTimeout(() => simPDU(src, dst, type, layer), i * interval);
+      }
+    }
 
     function clearAll() {
       S.nodes = []; S.conns = []; S.sel = null; S.pduCnt = 0; S.stpRoot = null; S.stpState = {};
@@ -2510,7 +2809,15 @@ exit                - exit current mode
         closeM('natModal');
         closeM('aclModal');
         closeM('cliModal');
+        closeM('trafficModal');
+        closeM('cdpModal');
+        closeM('pingModal');
+        closeM('interfaceModal');
       }
+      if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveTopo(); }
+      if (e.ctrlKey && e.key === 'o') { e.preventDefault(); loadTopo(); }
+      if (e.ctrlKey && e.key === 'p') { e.preventDefault(); openPDU(); }
+      if (e.ctrlKey && e.key === 't') { e.preventDefault(); openTrafficGen(); }
       if (e.ctrlKey && e.key === 'a') {
         e.preventDefault();
         S.nodes.forEach(n => document.getElementById(n.id)?.classList.add('selected'));
