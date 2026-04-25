@@ -100,6 +100,10 @@
 - [x] **VLAN Table** - all VLANs with status
 - [x] **Network Health Dashboard** - uptime, links, delivery
 - [x] **ARP Table** - IP/MAC, auto-populated
+- [x] **Device search/filter** in panel
+- [x] **Quick Templates** - 6 pre-made topologies
+- [x] **Traffic animation** on connections
+- [x] **Device status badges** (online/offline)
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
