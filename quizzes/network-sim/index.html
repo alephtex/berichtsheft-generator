@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Netzwerk-Simulator Pro | Cisco Packet Tracer Style</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
@@ -81,6 +82,40 @@
     .canvas-tool:hover { background: var(--glass-light); border-color: var(--accent); }
     .canvas-tool.active { background: var(--accent); color: var(--bg-deep); }
     .canvas-tool.disabled { opacity: 0.4; pointer-events: none; }
+    
+    /* Real-time Traffic Indicator */
+    .traffic-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: trafficPulse 1s infinite; }
+    .traffic-dot.sending { background: var(--layer3); }
+    .traffic-dot.receiving { background: var(--layer7); }
+    @keyframes trafficPulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
+    /* Device Status Badge */
+    .device-status-badge { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg-deep); z-index: 5; }
+    .device-status-badge.online { background: var(--ok); }
+    .device-status-badge.offline { background: var(--error); }
+    .device-status-badge.busy { background: var(--warn); animation: busyPulse 0.5s infinite; }
+    @keyframes busyPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Packet Animation Trail */
+    .packet-trail-dot { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); opacity: 0; animation: trailFade 0.3s forwards; pointer-events: none; }
+    @keyframes trailFade {
+      0% { opacity: 0.8; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.2); }
+    }
+    
+    /* Quick Templates Modal */
+    .template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
+    .template-item { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; padding: 12px 8px; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .template-item:hover { background: var(--glass-light); border-color: var(--accent); transform: translateY(-2px); }
+    .template-item i { font-size: 28px; color: var(--accent); margin-bottom: 6px; }
+    .template-item-name { font-size: 0.55rem; font-weight: 500; }
+    .template-item-desc { font-size: 0.45rem; color: var(--text-muted); margin-top: 2px; }
     
     /* Mini Map */
     .mini-map { position: absolute; bottom: 60px; right: 12px; width: 150px; height: 100px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 100; }
@@ -584,6 +619,9 @@
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
       <button class="tool-btn" onclick="toggleArpPanel()" id="btnArp"><i class="ph ph-table"></i> ARP</button>
+      <button class="tool-btn" onclick="openQuickTemplates()"><i class="ph ph-layout"></i> Templates</button>
+      <button class="tool-btn" onclick="toggleTrafficAnim()"><i class="ph ph-activity"></i> Traffic</button>
+      <button class="tool-btn" onclick="selectAll()"><i class="ph ph-check-square"></i> All</button>
       <button class="tool-btn" onclick="openVTP()"><i class="ph ph-swap"></i> VTP</button>
       <button class="tool-btn" onclick="openHSRP()"><i class="ph ph-arrows-clockwise"></i> HSRP</button>
       <button class="tool-btn" onclick="openSyslog()"><i class="ph ph-list-bullets"></i> Syslog</button>
@@ -602,6 +640,10 @@
     
     <!-- Device Panel -->
     <div class="device-panel">
+      <div class="search-box">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="text" id="deviceSearch" placeholder="Geräte suchen..." oninput="filterDevices()">
+      </div>
       <div class="panel-section">
         <div class="panel-title"><i class="ph ph-desktop"></i> Endgeräte</div>
         <div class="device-grid" id="endDev"></div>
@@ -3705,6 +3747,168 @@ exit                - exit current mode
         }
       });
     }
+    
+    // ==================== DEVICE SEARCH ====================
+    function filterDevices() {
+      const query = document.getElementById('deviceSearch').value.toLowerCase();
+      document.querySelectorAll('.device-item').forEach(item => {
+        const name = item.querySelector('.device-name').textContent.toLowerCase();
+        item.style.display = name.includes(query) ? '' : 'none';
+      });
+    }
+    
+    // ==================== SELECT ALL ====================
+    function selectAll() {
+      S.sel = S.nodes.map(n => n.id);
+      document.querySelectorAll('.node').forEach(el => el.classList.add('selected'));
+      log('System', 'info', `Alle ${S.nodes.length} Geräte ausgewählt`);
+    }
+    
+    // ==================== QUICK TEMPLATES ====================
+    const QUICK_TEMPLATES = [
+      { name: 'Kleines LAN', icon: 'ph-house', desc: '2 PC + 1 Switch', nodes: [{ type: 'end', name: 'PC0' }, { type: 'end', name: 'PC1' }, { type: 'sw', name: 'Switch0' }] },
+      { name: 'Mittleres LAN', icon: 'ph-buildings', desc: '4 PC + 2 Switch', nodes: [{ type: 'end', name: 'PC0' }, { type: 'end', name: 'PC1' }, { type: 'end', name: 'PC2' }, { type: 'end', name: 'PC3' }, { type: 'sw', name: 'Switch0' }, { type: 'sw', name: 'Switch1' }] },
+      { name: 'Router LAN', icon: 'ph-globe', desc: '2 PC + Router', nodes: [{ type: 'end', name: 'PC0' }, { type: 'end', name: 'PC1' }, { type: 'r', name: 'Router0' }] },
+      { name: 'Server Farm', icon: 'ph-hard-drives', desc: '3 Server + Switch', nodes: [{ type: 'srv', name: 'Server0' }, { type: 'srv', name: 'Server1' }, { type: 'srv', name: 'Server2' }, { type: 'sw', name: 'Switch0' }] },
+      { name: 'WAN Link', icon: 'ph-cloud', desc: '2 Router + WAN', nodes: [{ type: 'r', name: 'Router0' }, { type: 'r', name: 'Router1' }, { type: 'wan', name: 'WAN0' }] },
+      { name: 'PoE Setup', icon: 'ph-lightning', desc: '2 AP + PoE Switch', nodes: [{ type: 'end', name: 'PC0' }, { type: 'poe', name: 'PoE Switch0' }, { type: 'end', name: 'AccessPoint0' }] }
+    ];
+    
+    function openQuickTemplates() {
+      const content = QUICK_TEMPLATES.map((t, i) => `
+        <div class="template-item" onclick="loadTemplate(${i})">
+          <i class="ph ${t.icon}"></i>
+          <div class="template-item-name">${t.name}</div>
+          <div class="template-item-desc">${t.desc}</div>
+        </div>
+      `).join('');
+      
+      document.getElementById('modalContent').innerHTML = `
+        <div style="font-size:0.75rem;font-weight:600;margin-bottom:10px;"><i class="ph ph-layout"></i> Schnellvorlagen</div>
+        <div class="template-grid">${content}</div>
+      `;
+      openM('modal');
+    }
+    
+    function loadTemplate(idx) {
+      closeM('modal');
+      clearAll(true);
+      const t = QUICK_TEMPLATES[idx];
+      const offsetX = 400, offsetY = 300;
+      const spacing = 150;
+      
+      t.nodes.forEach((n, i) => {
+        const dev = findDeviceTemplate(n.type, n.name);
+        if (dev) {
+          createNode(dev, offsetX + (i % 3) * spacing, offsetY + Math.floor(i / 3) * 120, true);
+        }
+      });
+      
+      // Auto-connect
+      if (t.nodes.length > 1) {
+        for (let i = 0; i < t.nodes.length - 1; i++) {
+          const src = S.nodes[i];
+          const dst = S.nodes[i + 1];
+          if (src && dst && src.usedPorts < src.totalPorts && dst.usedPorts < dst.totalPorts) {
+            makeConn(src, src.usedPorts, dst, dst.usedPorts, 'copper-str');
+          }
+        }
+      }
+      
+      log('System', 'info', `Vorlage "${t.name}" geladen`);
+    }
+    
+    function findDeviceTemplate(type, name) {
+      const DEVS_ALL = [...(DEVS.end || []), ...(DEVS.sw || []), ...(DEVS.r || []), ...(DEVS.srv || []), ...(DEVS.poe || []), ...(DEVS.wan || [])];
+      return DEVS_ALL.find(d => {
+        if (type === 'end' && (d.name?.includes('PC') || d.name?.includes('Laptop'))) return true;
+        if (type === 'sw' && d.name?.includes('2960')) return true;
+        if (type === 'r' && d.name?.includes('1941')) return true;
+        if (type === 'srv' && d.name?.includes('Server')) return true;
+        if (type === 'poe' && d.name?.includes('PoE')) return true;
+        if (type === 'wan' && d.name?.includes('Cloud')) return true;
+        return false;
+      });
+    }
+    
+    // ==================== TRAFFIC ANIMATION ====================
+    let showTrafficAnim = false;
+    let trafficInterval = null;
+    
+    function toggleTrafficAnim() {
+      showTrafficAnim = !showTrafficAnim;
+      document.getElementById('btnTrafficAnim').classList.toggle('active', showTrafficAnim);
+      
+      if (showTrafficAnim) {
+        trafficInterval = setInterval(animateTrafficDots, 1000);
+        animateTrafficDots();
+        log('System', 'info', 'Traffic Animation aktiviert');
+      } else {
+        clearInterval(trafficInterval);
+        document.querySelectorAll('.traffic-dot').forEach(d => d.remove());
+        log('System', 'info', 'Traffic Animation deaktiviert');
+      }
+    }
+    
+    function animateTrafficDots() {
+      if (!showTrafficAnim) return;
+      
+      // Remove old dots
+      document.querySelectorAll('.traffic-dot').forEach(d => d.remove());
+      
+      // Add dots on active connections
+      S.conns.forEach(c => {
+        if (Math.random() > 0.5) {
+          const n1 = S.nodes.find(x => x.id === c.n1);
+          const n2 = S.nodes.find(x => x.id === c.n2);
+          if (n1 && n2 && n1.on !== false && n2.on !== false) {
+            const dot = document.createElement('div');
+            dot.className = 'traffic-dot sending';
+            dot.style.left = ((n1.x + n2.x) / 2 + 50) + 'px';
+            dot.style.top = ((n1.y + n2.y) / 2 + 40) + 'px';
+            document.getElementById('canvasInner').appendChild(dot);
+          }
+        }
+      });
+    }
+    
+    // ==================== DEVICE STATUS BADGES ====================
+    function updateDeviceStatusBadges() {
+      S.nodes.forEach(n => {
+        const el = document.getElementById(n.id);
+        if (!el) return;
+        
+        // Remove old badge
+        const oldBadge = el.querySelector('.device-status-badge');
+        if (oldBadge) oldBadge.remove();
+        
+        // Add new badge
+        const badge = document.createElement('div');
+        badge.className = 'device-status-badge ' + (n.on === false ? 'offline' : 'online');
+        el.appendChild(badge);
+      });
+    }
+    
+    // Add to simPDU to show traffic animation during packet send
+    const _origSimPDU = simPDU;
+    simPDU = function(src, dst, type, layer) {
+      _origSimPDU(src, dst, type, layer);
+      
+      if (showTrafficAnim) {
+        // Add a busy dot on sending device
+        const srcEl = document.getElementById(src.id);
+        if (srcEl) {
+          const dot = document.createElement('div');
+          dot.className = 'traffic-dot busy';
+          dot.style.left = '50%';
+          dot.style.top = '50%';
+          dot.style.transform = 'translate(-50%, -50%)';
+          dot.style.position = 'absolute';
+          srcEl.appendChild(dot);
+          setTimeout(() => dot.remove(), 500);
+        }
+      }
+    };
     
     // ==================== PORT TOOLTIP ====================
     let portTooltip = null;
