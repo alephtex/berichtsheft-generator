@@ -144,6 +144,7 @@
 - [x] **Color-coded bandwidth** - gigabit/fast/slow indicators
 - [x] **Spark effect** on successful connections
 - [x] **Tips banner** - quick reference on startup
+- [x] **Interface Statistics with traffic graphs** - detailed in/out monitoring
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
