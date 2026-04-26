@@ -138,6 +138,8 @@
 - [x] **Device hover tooltip** - quick info on mouseover
 - [x] **Network Summary panel** - device/cable breakdown statistics
 - [x] **Selection glow animation** - pulsing glow on selected devices
+- [x] **Smart port highlighting** - available ports glow green
+- [x] **Quick actions bar** - Connect/Config/Delete buttons
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
