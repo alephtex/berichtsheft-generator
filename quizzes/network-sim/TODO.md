@@ -167,6 +167,7 @@
 - [x] **Space = Play/Pause** - toggle auto-forward
 - [x] **Auto-Configure** - automatic IP assignment
 - [x] **Network health check** - periodic diagnostics
+- [x] **Playwright tests** - 6 tests for basic functionality
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
