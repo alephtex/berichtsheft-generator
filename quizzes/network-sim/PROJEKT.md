@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+caf5fe1 feat: Add zoom slider, enhanced status bar, device/connection counts
 a21aae7 feat: Add keyboard shortcuts, favorites section, zoom controls
 5f47028 feat: Add duplicate device, Quick VLAN assignment, improved power button
 9914515 feat: Enhanced interface statistics with traffic graphs
@@ -178,6 +179,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 3.9  
+**Version:** 4.0  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv

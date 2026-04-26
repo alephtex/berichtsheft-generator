@@ -149,6 +149,8 @@
 - [x] **Quick VLAN assignment** - popup with presets
 - [x] **Keyboard shortcuts** - Ctrl+D, +/-, Home, etc.
 - [x] **Favorites bar** - quick access to common devices
+- [x] **Zoom slider** with +/- buttons in toolbar
+- [x] **Enhanced status bar** - devices, connections, online count
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
