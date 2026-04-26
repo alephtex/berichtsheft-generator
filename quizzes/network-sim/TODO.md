@@ -175,6 +175,7 @@
 - [x] **Path Trace Panel** - Route visualization with hops, latency, bandwidth
 - [x] **QoS Queue Visualization** - Priority/High/Normal/Low queue status
 - [x] **Interface Status Grid** - Auto-negotiation, speed, duplex, CRC stats
+- [x] **Running Config View** - CLI show running-config command with full config
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

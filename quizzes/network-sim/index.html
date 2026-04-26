@@ -4827,8 +4827,81 @@ exit                - exit current mode
       if (c === 'show arp') return Object.entries(n.arp).map(([ip, m]) => `${ip} ${m}`).join('\n') || 'Leer';
       if (c === 'show vlan') return `VLAN ${n.vlan} configured`;
       if (c === 'show interfaces') return `GigabitEthernet0/0 is up\n  IP: ${n.ip || 'unassigned'}\n  MTU: 1500 bytes`;
+      if (c === 'show running-config' || c === 'show run') {
+        return generateRunningConfig(n);
+      }
 
       if (c.startsWith('ip address ')) {
+        const parts = cmd.split(' ').filter(Boolean);
+        if (parts.length >= 4) {
+          n.ip = parts[2];
+          n.subnet = parts[3];
+          updIP(n.ip);
+          return `IP address set to ${n.ip} ${n.subnet}`;
+        }
+      }
+
+      return `Unknown command: ${cmd}`;
+    }
+
+    function generateRunningConfig(n) {
+      const lines = [];
+      lines.push('!');
+      lines.push(`version 15.x`);
+      lines.push('!');
+      lines.push(`hostname ${n.name}`);
+      lines.push('!');
+      lines.push('boot-start-marker');
+      lines.push('boot-end-marker');
+      lines.push('!');
+      lines.push('! no authentication');
+      lines.push('!');
+      lines.push('ip cef');
+      lines.push('no ipv6 cef');
+      lines.push('!');
+      if (n.routing.rip) {
+        lines.push('router rip');
+        lines.push(' version 2');
+        lines.push(' network 192.168.0.0');
+      }
+      if (n.routing.ospf) {
+        lines.push('router ospf 1');
+        lines.push(' network 192.168.0.0 0.0.255.255 area 0');
+      }
+      if (n.routing.eigrp) {
+        lines.push('router eigrp 1');
+        lines.push(' network 192.168.0.0');
+      }
+      lines.push('!');
+      lines.push('interface GigabitEthernet0/0');
+      lines.push(` ip address ${n.ip || '192.168.1.1'} ${n.subnet || '255.255.255.0'}`);
+      lines.push(' duplex auto');
+      lines.push(' speed auto');
+      lines.push(' no shutdown');
+      lines.push('!');
+      lines.push('interface GigabitEthernet0/1');
+      lines.push(' no ip address');
+      lines.push(' shutdown');
+      lines.push('!');
+      lines.push('ip forward-protocol nd');
+      lines.push('!');
+      if (n.gateway) {
+        lines.push(`ip default-gateway ${n.gateway}`);
+      }
+      lines.push('no ip http server');
+      lines.push('no ip http secure-server');
+      lines.push('!');
+      lines.push('!');
+      lines.push('line con 0');
+      lines.push('line aux 0');
+      lines.push('line vty 0 4');
+      lines.push(' login');
+      lines.push('!');
+      lines.push('end');
+      lines.push('');
+      lines.push(`${n.name}#`);
+      return lines.join('\n');
+    }
         const parts = cmd.split(' ').filter(Boolean);
         if (parts.length >= 4) {
           n.ip = parts[2];

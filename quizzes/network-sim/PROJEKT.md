@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+c9b4769 feat: v5.5 Interface Status + Auto-Negotiation
 9560dde feat: v5.4 QoS Queue Visualization
 58c6b46 feat: v5.3 Path Trace Panel + Physical Rack View
 1eda4ad feat: v5.2 ACL Panel + Interface Security
@@ -194,6 +195,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 5.5  
+**Version:** 5.6  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv
