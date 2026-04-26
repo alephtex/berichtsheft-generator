@@ -147,6 +147,8 @@
 - [x] **Interface Statistics with traffic graphs** - detailed in/out monitoring
 - [x] **Duplicate device** - right-click to copy
 - [x] **Quick VLAN assignment** - popup with presets
+- [x] **Keyboard shortcuts** - Ctrl+D, +/-, Home, etc.
+- [x] **Favorites bar** - quick access to common devices
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
