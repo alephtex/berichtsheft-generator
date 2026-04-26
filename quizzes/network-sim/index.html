@@ -937,6 +937,12 @@
     .data-table th { text-align: left; padding: 3px 5px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
     .data-table td { padding: 3px 5px; border-bottom: 1px solid var(--border); font-family: 'Fira Code', monospace; }
 
+    /* Annotations */
+    .annotation { position: absolute; background: var(--bg-elevated); border: 1px solid var(--accent); border-radius: 6px; padding: 8px 12px; font-size: 0.6rem; cursor: move; z-index: 100; min-width: 80px; max-width: 200px; }
+    .annotation-input { background: transparent; border: none; color: var(--text-primary); font-size: inherit; width: 100%; resize: none; outline: none; }
+    .annotation-delete { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: var(--error); border: none; border-radius: 50%; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; justify-content: center; }
+    .annotation-label { position: absolute; top: -10px; left: 8px; background: var(--accent); color: var(--bg-deep); padding: 2px 6px; border-radius: 4px; font-size: 0.5rem; font-weight: 600; }
+
     .panel-tabs { display: flex; gap: 3px; margin-bottom: 6px; }
     .panel-tab { flex: 1; padding: 5px; background: var(--glass); border: 1px solid var(--border); border-radius: 5px; font-size: 0.6rem; cursor: pointer; text-align: center; transition: all 0.15s; }
     .panel-tab:hover { background: var(--glass-light); }
@@ -1300,6 +1306,7 @@
       <button class="tool-btn" onclick="toggleClock()" id="btnClock"><i class="ph ph-clock"></i> Clock</button>
       <button class="tool-btn" onclick="toggleActivityPanel()" id="btnActivity"><i class="ph ph-target"></i> Activity</button>
       <button class="tool-btn" onclick="toggleNotes()" id="btnNotes"><i class="ph ph-note"></i> Notes</button>
+      <button class="tool-btn" onclick="addAnnotation(500, 300)" title="Add Annotation"><i class="ph ph-note-pencil"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -4176,6 +4183,86 @@
     function closeInspectPanel() {
       const panel = document.getElementById('inspectPanel');
       if (panel) panel.style.display = 'none';
+    }
+
+    // ==================== ANNOTATIONS ====================
+    let annotations = [];
+    let annotDrag = null;
+    let annotOffset = { x: 0, y: 0 };
+    
+    function addAnnotation(x, y) {
+      const id = 'ann_' + Date.now();
+      const annot = {
+        id,
+        x: x - 100,
+        y: y - 20,
+        text: 'Annotation...',
+        color: 'var(--accent)'
+      };
+      annotations.push(annot);
+      renderAnnotation(annot);
+      log('System', 'info', 'Annotation hinzugefügt');
+    }
+    
+    function renderAnnotation(a) {
+      const canvas = document.getElementById('nodesContainer');
+      if (!canvas) return;
+      
+      const div = document.createElement('div');
+      div.id = a.id;
+      div.className = 'annotation';
+      div.style.cssText = `left:${a.x}px;top:${a.y}px;border-color:${a.color};`;
+      div.innerHTML = `
+        <div class="annotation-label">📝 Note</div>
+        <textarea class="annotation-input" rows="2">${a.text}</textarea>
+        <button class="annotation-delete" onclick="deleteAnnotation('${a.id}')">×</button>
+      `;
+      
+      // Drag functionality
+      div.addEventListener('mousedown', e => {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
+        annotDrag = { id: a.id, el: div };
+        const rect = div.getBoundingClientRect();
+        annotOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      });
+      
+      // Save on text change
+      const textarea = div.querySelector('textarea');
+      textarea.addEventListener('input', e => {
+        const ann = annotations.find(x => x.id === a.id);
+        if (ann) ann.text = e.target.value;
+      });
+      
+      canvas.appendChild(div);
+    }
+    
+    document.addEventListener('mousemove', e => {
+      if (annotDrag) {
+        const canvas = document.getElementById('nodesContainer');
+        const rect = canvas.getBoundingClientRect();
+        const scale = S.pz.getScale();
+        const x = (e.clientX - rect.left) / scale - annotOffset.x;
+        const y = (e.clientY - rect.top) / scale - annotOffset.y;
+        annotDrag.el.style.left = x + 'px';
+        annotDrag.el.style.top = y + 'px';
+        const ann = annotations.find(a => a.id === annotDrag.id);
+        if (ann) { ann.x = x; ann.y = y; }
+      }
+    });
+    
+    document.addEventListener('mouseup', () => { annotDrag = null; });
+    
+    function deleteAnnotation(id) {
+      annotations = annotations.filter(a => a.id !== id);
+      const el = document.getElementById(id);
+      if (el) el.remove();
+      log('System', 'info', 'Annotation gelöscht');
+    }
+    
+    function toggleAnnotations() {
+      const show = document.getElementById('nodesContainer').querySelectorAll('.annotation').length > 0;
+      document.querySelectorAll('.annotation').forEach(el => el.style.display = show ? 'none' : 'block');
+      log('System', 'info', show ? 'Annotationen ausgeblendet' : 'Annotationen eingeblendet');
     }
 
     function togglePower(id, event) {
