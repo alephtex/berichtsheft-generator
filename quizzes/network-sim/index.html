@@ -320,10 +320,15 @@
     .vlan-table tr:hover { background: var(--glass-light); }
 
     /* Network Health Dashboard */
-    .health-dashboard { position: absolute; top: 60px; left: 260px; width: 200px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 100; overflow: hidden; display: none; }
+    .health-dashboard { position: absolute; top: 60px; left: 260px; width: 220px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 100; overflow: hidden; display: none; }
     .health-dashboard.show { display: block; }
     .health-header { padding: 8px 12px; background: var(--bg-elevated); font-size: 0.65rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
     .health-content { padding: 10px; }
+    .health-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .health-stat { background: var(--bg-deep); padding: 8px; border-radius: 6px; text-align: center; }
+    .health-stat-icon { font-size: 14px; color: var(--text-muted); margin-bottom: 2px; }
+    .health-stat-value { font-size: 1rem; font-weight: 700; color: var(--accent); }
+    .health-stat-label { font-size: 0.45rem; color: var(--text-muted); }
     .health-metric { margin-bottom: 10px; }
     .health-metric-label { font-size: 0.55rem; color: var(--text-muted); margin-bottom: 4px; }
     .health-bar { height: 6px; background: var(--bg-deep); border-radius: 3px; overflow: hidden; }
@@ -1428,9 +1433,34 @@
       <div class="health-dashboard" id="healthDashboard">
         <div class="health-header">
           <i class="ph ph-heartbeat"></i> Network Health
-          <span style="margin-left:auto;"><button onclick="toggleHealthDashboard()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button></span>
+          <span id="healthScore" style="margin-left:auto;font-weight:700;color:var(--ok);">100%</span>
+          <button onclick="toggleHealthDashboard()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:8px;">×</button>
         </div>
-        <div class="health-content" id="healthContent"></div>
+        <div class="health-content" id="healthContent">
+          <div class="health-stats">
+            <div class="health-stat">
+              <div class="health-stat-icon"><i class="ph ph-desktop"></i></div>
+              <div class="health-stat-value" id="healthDevs">0</div>
+              <div class="health-stat-label">Devices</div>
+            </div>
+            <div class="health-stat">
+              <div class="health-stat-icon"><i class="ph ph-link"></i></div>
+              <div class="health-stat-value" id="healthConns">0</div>
+              <div class="health-stat-label">Links</div>
+            </div>
+            <div class="health-stat">
+              <div class="health-stat-icon"><i class="ph ph-check-circle"></i></div>
+              <div class="health-stat-value" id="healthOnline">0</div>
+              <div class="health-stat-label">Online</div>
+            </div>
+          </div>
+          <div class="health-issues" id="healthIssues">
+            <div style="font-size:0.55rem;color:var(--text-muted);text-align:center;padding:10px;">
+              <i class="ph ph-check-circle" style="font-size:20px;color:var(--ok);display:block;margin-bottom:4px;"></i>
+              Keine Probleme erkannt
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ARP Table Panel -->

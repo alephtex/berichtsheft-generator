@@ -183,6 +183,7 @@
 - [x] **Device Search & Filters** - Quick filter buttons, search box
 - [x] **Enhanced Context Menu** - VLAN submenu, power toggle, SSH access
 - [x] **Enhanced Mini-map** - Clickable navigation, device type colors, connections
+- [x] **Enhanced Health Dashboard** - Score display, stats grid (devices/links/online)
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
