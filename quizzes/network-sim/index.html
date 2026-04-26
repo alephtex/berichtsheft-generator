@@ -1331,6 +1331,7 @@
       <button class="tool-btn" onclick="openNetworkTest()" title="Network Test"><i class="ph ph-flask"></i></button>
       <button class="tool-btn" onclick="openDeviceStatus()" title="Network Overview"><i class="ph ph-chart-bar"></i></button>
       <button class="tool-btn" onclick="openQoSConfig()" title="QoS Config"><i class="ph ph-traffic-signal"></i></button>
+      <button class="tool-btn" onclick="openSyslog()" title="Syslog"><i class="ph ph-list-bullets"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -8221,6 +8222,108 @@ ${generateVlandDoc()}
     function saveQoS() {
       log('QoS', 'success', 'QoS configuration saved');
       document.getElementById('qosModal')?.remove();
+    }
+
+    // ==================== SYSLOG VIEWER ====================
+    const SYSLOG_LEVELS = { emergency: 0, alert: 1, critical: 2, error: 3, warning: 4, notice: 5, info: 6, debug: 7 };
+    let syslogEntries = [];
+    
+    function openSyslog() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'syslogModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      // Generate sample entries
+      if (syslogEntries.length === 0) generateSyslogEntries();
+      
+      modal.innerHTML = `<div class="modal" style="max-width:800px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="modal-title"><i class="ph ph-list-bullets"></i> Syslog Viewer</div>
+        <div style="padding:0 16px 8px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="modal-btn secondary" onclick="filterSyslog('all')">All</button>
+            <button class="modal-btn secondary" onclick="filterSyslog('error')">Errors</button>
+            <button class="modal-btn secondary" onclick="filterSyslog('warning')">Warnings</button>
+            <button class="modal-btn secondary" onclick="filterSyslog('info')">Info</button>
+            <button class="modal-btn secondary" onclick="clearSyslog()" style="margin-left:auto;"><i class="ph ph-trash"></i> Clear</button>
+          </div>
+        </div>
+        <div id="syslogContent" style="flex:1;overflow:auto;background:#0a0a0a;margin:0 16px;border-radius:8px;padding:8px;font-family:'Fira Code',monospace;font-size:0.55rem;line-height:1.4;">
+          ${renderSyslogEntries('all')}
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="exportSyslog()"><i class="ph ph-download"></i> Export</button>
+          <button class="modal-btn secondary" onclick="document.getElementById('syslogModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function generateSyslogEntries() {
+      const messages = [
+        { level: 'info', msg: 'Interface GigabitEthernet0/0 is up' },
+        { level: 'info', msg: 'Interface FastEthernet0/1 is up' },
+        { level: 'warning', msg: 'Port security violation on Fa0/2' },
+        { level: 'error', msg: 'CDP neighbor lost on Gi0/1' },
+        { level: 'info', msg: 'OSPF adjacency established with 192.168.1.2' },
+        { level: 'warning', msg: 'High CPU utilization detected' },
+        { level: 'info', msg: 'Configuration saved to NVRAM' },
+        { level: 'error', msg: 'DHCP pool exhausted' },
+        { level: 'notice', msg: 'User admin logged in' },
+        { level: 'debug', msg: 'STP port state changed to Forwarding' }
+      ];
+      
+      for (let i = 0; i < 20; i++) {
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+        const device = S.nodes[Math.floor(Math.random() * S.nodes.length)] || { name: 'System' };
+        syslogEntries.push({
+          time: new Date(Date.now() - i * 60000).toLocaleTimeString(),
+          device: device.name,
+          level: msg.level,
+          message: msg.msg
+        });
+      }
+    }
+    
+    function renderSyslogEntries(filter) {
+      const colors = {
+        emergency: 'var(--error)', alert: 'var(--error)', critical: 'var(--error)',
+        error: 'var(--error)', warning: 'var(--warn)', notice: 'var(--device)',
+        info: 'var(--ok)', debug: 'var(--text-muted)'
+      };
+      
+      const filtered = filter === 'all' ? syslogEntries : syslogEntries.filter(e => e.level === filter);
+      
+      return filtered.map(e => `
+        <div style="display:grid;grid-template-columns:70px 80px 60px 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--text-muted);">${e.time}</span>
+          <span style="color:var(--accent);">${e.device}</span>
+          <span style="color:${colors[e.level]};font-weight:600;">${e.level.toUpperCase()}</span>
+          <span style="color:var(--text-primary);">${e.message}</span>
+        </div>
+      `).join('') || '<div style="color:var(--text-muted);text-align:center;padding:40px;">No entries</div>';
+    }
+    
+    function filterSyslog(filter) {
+      document.getElementById('syslogContent').innerHTML = renderSyslogEntries(filter);
+    }
+    
+    function clearSyslog() {
+      syslogEntries = [];
+      document.getElementById('syslogContent').innerHTML = renderSyslogEntries('all');
+      log('Syslog', 'info', 'Syslog cleared');
+    }
+    
+    function exportSyslog() {
+      if (syslogEntries.length === 0) { alert('No entries'); return; }
+      let content = 'Time,Device,Level,Message\n';
+      syslogEntries.forEach(e => content += `${e.time},${e.device},${e.level},${e.message}\n`);
+      const blob = new Blob([content], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'syslog-' + Date.now() + '.csv';
+      a.click();
+      log('Export', 'success', 'Syslog exported');
     }
 
     function processCLI(cmd) {

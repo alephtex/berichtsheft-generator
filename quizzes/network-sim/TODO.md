@@ -238,6 +238,7 @@
 - [x] **Network Testing** - Connectivity, DHCP, DNS, VLAN tests
 - [x] **Device Status Overview** - Network statistics, device types, online/offline status
 - [x] **QoS Configuration** - Priority queuing, bandwidth allocation, queue management
+- [x] **Syslog Viewer** - System logs, level filtering, export, clear
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
