@@ -140,6 +140,8 @@
 - [x] **Selection glow animation** - pulsing glow on selected devices
 - [x] **Smart port highlighting** - available ports glow green
 - [x] **Quick actions bar** - Connect/Config/Delete buttons
+- [x] **Improved port LEDs** - larger, better styling, blink animation
+- [x] **Color-coded bandwidth** - gigabit/fast/slow indicators
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
