@@ -1334,6 +1334,7 @@
       <button class="tool-btn" onclick="openSyslog()" title="Syslog"><i class="ph ph-list-bullets"></i></button>
       <button class="tool-btn" onclick="openFavorites()" title="Favorites"><i class="ph ph-star"></i></button>
       <button class="tool-btn" onclick="openDeviceTemplate()" title="Device Template"><i class="ph ph-cube"></i></button>
+      <button class="tool-btn" onclick="openPortMirror()" title="Port Mirror"><i class="ph ph-copy"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -8588,6 +8589,78 @@ ${generateVlandDoc()}
       const saved = localStorage.getItem('netSimDeviceTemplates');
       if (saved) deviceTemplates = JSON.parse(saved);
     } catch (e) {}
+
+    // ==================== PORT MIRRORING ====================
+    const PORT_MIRRORING = {
+      sessions: [
+        { id: 1, source: 'Fa0/1', destination: 'Fa0/10', type: 'both' }
+      ]
+    };
+    
+    function openPortMirror() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'mirrorModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:600px;">
+        <div class="modal-title"><i class="ph ph-copy"></i> Port Mirroring (SPAN)</div>
+        <div class="modal-body">
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="modal-btn primary" onclick="addMirrorSession()"><i class="ph ph-plus"></i> Add Session</button>
+            <button class="modal-btn secondary" onclick="document.getElementById('mirrorBody').innerHTML=renderMirrorSessions()">Refresh</button>
+          </div>
+          <div id="mirrorBody">
+            ${renderMirrorSessions()}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('mirrorModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function renderMirrorSessions() {
+      if (PORT_MIRRORING.sessions.length === 0) {
+        return '<div style="color:var(--text-muted);text-align:center;padding:20px;">No mirror sessions configured</div>';
+      }
+      
+      return PORT_MIRRORING.sessions.map(s => `
+        <div style="background:var(--bg-deep);border-radius:8px;padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-weight:600;color:var(--accent);">Session ${s.id}</span>
+            <button onclick="deleteMirrorSession(${s.id})" style="background:transparent;border:none;color:var(--error);cursor:pointer;">×</button>
+          </div>
+          <table class="data-table">
+            <tr><td style="color:var(--text-muted);width:100px;">Source:</td><td style="color:var(--ok);">${s.source}</td></tr>
+            <tr><td style="color:var(--text-muted);">Destination:</td><td style="color:var(--accent);">${s.destination}</td></tr>
+            <tr><td style="color:var(--text-muted);">Type:</td><td>${s.type.toUpperCase()}</td></tr>
+          </table>
+        </div>
+      `).join('');
+    }
+    
+    function addMirrorSession() {
+      const source = prompt('Source port (e.g., Fa0/1):');
+      const dest = prompt('Destination port (e.g., Fa0/10):');
+      const type = prompt('Type (rx/tx/both):') || 'both';
+      
+      if (source && dest) {
+        PORT_MIRRORING.sessions.push({
+          id: PORT_MIRRORING.sessions.length + 1,
+          source, destination: dest, type
+        });
+        document.getElementById('mirrorBody').innerHTML = renderMirrorSessions();
+        log('Mirror', 'success', `Session created: ${source} → ${dest}`);
+      }
+    }
+    
+    function deleteMirrorSession(id) {
+      PORT_MIRRORING.sessions = PORT_MIRRORING.sessions.filter(s => s.id !== id);
+      document.getElementById('mirrorBody').innerHTML = renderMirrorSessions();
+      log('Mirror', 'info', 'Session deleted');
+    }
 
     function processCLI(cmd) {
       if (!S.sel) return 'No device selected';

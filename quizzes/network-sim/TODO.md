@@ -241,6 +241,7 @@
 - [x] **Syslog Viewer** - System logs, level filtering, export, clear
 - [x] **Favorite Templates** - Save/load topologies, localStorage persistence
 - [x] **Device Template Editor** - Save/load device configs, apply to devices
+- [x] **Port Mirroring** - SPAN sessions, source/destination ports, traffic monitoring
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
