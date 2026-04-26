@@ -673,6 +673,27 @@
     .port-active { animation: portFlash 0.3s ease-out; }
     @keyframes portFlash { 0% { transform: scale(1.8); background: var(--accent); } 100% { transform: scale(1); } }
 
+    /* Snap Guides */
+    .snap-guide { position: absolute; pointer-events: none; z-index: 999; background: var(--accent); opacity: 0.5; }
+    .snap-guide.h { height: 1px; }
+    .snap-guide.v { width: 1px; }
+    .snap-guide-label { position: absolute; background: var(--accent); color: var(--bg-deep); font-size: 0.5rem; padding: 2px 4px; border-radius: 3px; }
+    
+    /* Alignment Helpers */
+    .align-helper { position: absolute; pointer-events: none; z-index: 998; border: 1px dashed var(--ok); opacity: 0.6; border-radius: 4px; }
+    
+    /* Drag Ghost */
+    .sim-node.drag-ghost { opacity: 0.5; }
+    
+    /* Connection Preview Line */
+    .conn-preview { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+    .conn-preview line { stroke-width: 3; stroke-linecap: round; animation: dashMove 0.3s linear infinite; }
+    .conn-preview.copper-str line, .conn-preview.copper-cross line { stroke: var(--copper); }
+    .conn-preview.fiber line { stroke: var(--fiber); }
+    .conn-preview.serial line { stroke: var(--serial); }
+    @keyframes dashMove { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -20; } }
+    .conn-preview line { stroke-dasharray: 10, 5; }
+    
     .conn-label {
       font-size: 9px;
       fill: var(--text-muted);
@@ -2897,6 +2918,9 @@
 
         dragSt = { node: n, el, startX: e.clientX, startY: e.clientY, origX: n.x, origY: n.y, moved: false };
         el.classList.add('dragging');
+        
+        // Remove old guides
+        document.querySelectorAll('.snap-guide, .align-helper').forEach(g => g.remove());
 
         const onMove = e => {
           const dx = e.clientX - dragSt.startX, dy = e.clientY - dragSt.startY;
@@ -2904,15 +2928,66 @@
           const sc = S.pz.getScale();
           dragSt.node.x = dragSt.origX + dx / sc;
           dragSt.node.y = dragSt.origY + dy / sc;
+          
+          // Snap to grid guides
+          document.querySelectorAll('.snap-guide').forEach(g => g.remove());
+          const snapped = snapPos(dragSt.node.x, dragSt.node.y);
+          const gs = S.gridSize;
+          
+          // Show horizontal guide if close to grid
+          if (Math.abs(dragSt.node.y - snapped.y) < 5) {
+            const hGuide = document.createElement('div');
+            hGuide.className = 'snap-guide h';
+            hGuide.style.left = '0';
+            hGuide.style.top = snapped.y + 40 + 'px';
+            hGuide.style.width = '100%';
+            document.getElementById('canvasInner').appendChild(hGuide);
+          }
+          // Show vertical guide if close to grid
+          if (Math.abs(dragSt.node.x - snapped.x) < 5) {
+            const vGuide = document.createElement('div');
+            vGuide.className = 'snap-guide v';
+            vGuide.style.left = snapped.x + 45 + 'px';
+            vGuide.style.top = '0';
+            vGuide.style.height = '100%';
+            document.getElementById('canvasInner').appendChild(vGuide);
+          }
+          
+          // Alignment helpers - snap to other devices
+          S.nodes.forEach(other => {
+            if (other.id === n.id) return;
+            const dist = 10;
+            if (Math.abs(dragSt.node.x - other.x) < dist) {
+              dragSt.node.x = other.x;
+              const vGuide = document.createElement('div');
+              vGuide.className = 'snap-guide v';
+              vGuide.style.left = other.x + 45 + 'px';
+              vGuide.style.top = '0';
+              vGuide.style.height = '100%';
+              vGuide.style.background = 'var(--ok)';
+              document.getElementById('canvasInner').appendChild(vGuide);
+            }
+            if (Math.abs(dragSt.node.y - other.y) < dist) {
+              dragSt.node.y = other.y;
+              const hGuide = document.createElement('div');
+              hGuide.className = 'snap-guide h';
+              hGuide.style.left = '0';
+              hGuide.style.top = other.y + 40 + 'px';
+              hGuide.style.width = '100%';
+              hGuide.style.background = 'var(--ok)';
+              document.getElementById('canvasInner').appendChild(hGuide);
+            }
+          });
+          
           dragSt.el.style.left = dragSt.node.x + 'px';
           dragSt.el.style.top = dragSt.node.y + 'px';
           drawConns();
         };
 
         const onUp = () => {
+          document.querySelectorAll('.snap-guide, .align-helper').forEach(g => g.remove());
           el.classList.remove('dragging');
           if (dragSt.moved) {
-            const oldX = dragSt.node.x, oldY = dragSt.node.y;
             const pos = snapPos(dragSt.node.x, dragSt.node.y);
             dragSt.node.x = pos.x;
             dragSt.node.y = pos.y;
