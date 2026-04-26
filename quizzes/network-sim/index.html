@@ -1315,6 +1315,7 @@
       <button class="tool-btn" onclick="openDeviceCompare()" title="Device Compare"><i class="ph ph-scales"></i></button>
       <button class="tool-btn" onclick="openBandwidthMonitor()" title="Bandwidth Monitor"><i class="ph ph-gauge"></i></button>
       <button class="tool-btn" onclick="openDocumentation()" title="Documentation"><i class="ph ph-file-text"></i></button>
+      <button class="tool-btn" onclick="openNetworkCalc()" title="Network Calculator"><i class="ph ph-calculator"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -6782,6 +6783,72 @@ ${generateVlandDoc()}
       a.download = 'network-doc-' + Date.now() + ext;
       a.click();
       log('Export', 'success', 'Documentation exported');
+    }
+
+    // ==================== NETWORK CALCULATOR ====================
+    function openNetworkCalc() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'netCalcModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:600px;">
+        <div class="modal-title"><i class="ph ph-calculator"></i> Network Calculator</div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">IP Address</label>
+            <input type="text" class="form-input" id="calcIP" placeholder="192.168.1.0" value="192.168.1.0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">CIDR / Subnet</label>
+            <select class="form-select" id="calcCIDR" onchange="calcNetwork()">
+              ${Array.from({length:33},(_,i)=>`<option value="${i}" ${i===24?'selected':''}>/${i}</option>`).join('')}
+            </select>
+          </div>
+          <button class="modal-btn primary" onclick="calcNetwork()" style="margin:12px 0;"><i class="ph ph-calculator"></i> Calculate</button>
+          <div id="calcResults" style="background:var(--bg-deep);border-radius:8px;padding:16px;font-family:'Fira Code',monospace;font-size:0.6rem;"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('netCalcModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function calcNetwork() {
+      const ip = document.getElementById('calcIP').value;
+      const cidr = parseInt(document.getElementById('calcCIDR').value);
+      
+      const parts = ip.split('.').map(Number);
+      if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) {
+        document.getElementById('calcResults').innerHTML = '<div style="color:var(--error);">Invalid IP address</div>';
+        return;
+      }
+      
+      const mask = Array(4).fill(0).map((_,i) => {
+        const bits = Math.min(8, Math.max(0, cidr - i * 8));
+        return bits > 0 ? (256 - Math.pow(2, 8 - bits)) : 0;
+      });
+      
+      const network = parts.map((p, i) => p & mask[i]);
+      const broadcast = network.map((n, i) => n | (~mask[i] & 255));
+      const firstHost = [...network]; firstHost[3]++;
+      const lastHost = [...broadcast]; lastHost[3]--;
+      const totalHosts = Math.pow(2, 32 - cidr) - 2;
+      
+      document.getElementById('calcResults').innerHTML = `
+        <div style="display:grid;gap:8px;">
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Network:</span><span style="color:var(--ok);">${network.join('.')}/${cidr}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Subnet Mask:</span><span>${mask.join('.')}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Wildcard:</span><span>${mask.map(m=>255-m).join('.')}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Broadcast:</span><span>${broadcast.join('.')}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">First Host:</span><span>${firstHost.join('.')}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Last Host:</span><span>${lastHost.join('.')}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Total Hosts:</span><span>${totalHosts > 0 ? totalHosts : 'N/A'}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Subnet Bits:</span><span>${cidr}</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Host Bits:</span><span>${32 - cidr}</span></div>
+        </div>
+      `;
     }
 
     function processCLI(cmd) {

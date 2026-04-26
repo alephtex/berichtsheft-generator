@@ -222,6 +222,7 @@
 - [x] **Device Comparison Tool** - Side-by-side device comparison, property highlighting
 - [x] **Bandwidth Monitor** - Real-time bandwidth usage, utilization %, chart, link stats
 - [x] **Documentation Generator** - Markdown/HTML export, topology, devices, IP schema, VLANs
+- [x] **Network Calculator** - Subnet mask, CIDR, broadcast, host range calculation
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
