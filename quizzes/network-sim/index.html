@@ -855,6 +855,14 @@
       <div id="topologyTree"></div>
     </div>
 
+    <!-- Quick Actions Bar -->
+    <div id="quickActions" style="display:none;position:absolute;top:52px;left:50%;transform:translateX(-50%);background:var(--bg-surface);border:1px solid var(--border);border-radius:20px;padding:6px 12px;gap:8px;display:flex;align-items:center;gap:8px;z-index:150;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+      <span id="quickActionLabel" style="font-size:0.6rem;color:var(--accent);font-weight:600;">Selected:</span>
+      <button class="modal-btn secondary" style="font-size:0.55rem;padding:4px 10px;" onclick="quickConnectSel()"><i class="ph ph-plugs-connected"></i> Connect</button>
+      <button class="modal-btn secondary" style="font-size:0.55rem;padding:4px 10px;" onclick="quickConfigSel()"><i class="ph ph-sliders"></i> Config</button>
+      <button class="modal-btn secondary" style="font-size:0.55rem;padding:4px 10px;" onclick="quickDeleteSel()"><i class="ph ph-trash"></i> Delete</button>
+    </div>
+
     <!-- Canvas -->
     <div class="canvas-area">
       <div class="mode-badge realtime" id="modeBadge">REALTIME</div>
@@ -2884,6 +2892,26 @@
 
       const port = el.querySelectorAll('.node-port')[portIdx];
       port.classList.add('connecting');
+      
+      // Smart port highlighting - show available ports on all devices
+      S.nodes.forEach(node => {
+        if (node.id !== n.id) {
+          const nodeEl = document.getElementById(node.id);
+          if (nodeEl) {
+            const ports = nodeEl.querySelectorAll('.node-port');
+            ports.forEach((p, i) => {
+              if (i >= node.totalPorts) return;
+              const isUsed = S.conns.some(c => 
+                (c.n1 === node.id && c.p1 === i) || (c.n2 === node.id && c.p2 === i)
+              );
+              if (!isUsed) {
+                p.style.boxShadow = '0 0 15px var(--ok)';
+                p.style.borderColor = 'var(--ok)';
+              }
+            });
+          }
+        }
+      });
 
       previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       previewLine.classList.add('conn-preview', S.cableType);
@@ -3009,6 +3037,25 @@
       updPortVisuals();
       updStats();
       log('Verbindung', 'success', `${n1.name} ↔ ${n2.name} [${c.type}]`);
+      
+      // Connection success animation
+      const n1El = document.getElementById(n1.id);
+      const n2El = document.getElementById(n2.id);
+      if (n1El) {
+        n1El.style.animation = 'none';
+        n1El.offsetHeight;
+        n1El.style.animation = 'connSuccess 0.5s ease-out';
+      }
+      if (n2El) {
+        n2El.style.animation = 'none';
+        n2El.offsetHeight;
+        n2El.style.animation = 'connSuccess 0.5s ease-out';
+      }
+    }
+    
+    @keyframes connSuccess {
+      0% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
 
     function updConnParams() {
@@ -3156,6 +3203,11 @@
       document.querySelectorAll('.sim-node').forEach(e => e.classList.remove('selected'));
       el.classList.add('selected');
       updateTopologyTree();
+      
+      // Show quick actions bar
+      const quickBar = document.getElementById('quickActions');
+      quickBar.style.display = 'flex';
+      document.getElementById('quickActionLabel').textContent = n.name + ':';
 
       document.getElementById('noSel').style.display = 'none';
       document.getElementById('nodeCfg').style.display = 'block';
@@ -3219,6 +3271,30 @@
       document.getElementById('noSel').style.display = 'block';
       document.getElementById('nodeCfg').style.display = 'none';
       document.getElementById('sSel').textContent = '-';
+      document.getElementById('quickActions').style.display = 'none';
+    }
+    
+    function quickConnectSel() {
+      if (!S.sel) return;
+      const el = document.getElementById(S.sel.id);
+      if (el && S.sel.usedPorts < S.sel.totalPorts) {
+        const ports = el.querySelectorAll('.node-port');
+        const port = ports[S.sel.usedPorts];
+        if (port) {
+          const rect = port.getBoundingClientRect();
+          startPortConnect({ clientX: rect.left + 8, clientY: rect.top + 8, preventDefault: () => {}, stopPropagation: () => {} }, S.sel, S.sel.usedPorts, el);
+        }
+      }
+    }
+    
+    function quickConfigSel() {
+      if (!S.sel) return;
+      ctxConfig();
+    }
+    
+    function quickDeleteSel() {
+      if (!S.sel) return;
+      deleteSelected();
     }
 
     function deleteSelected() {
