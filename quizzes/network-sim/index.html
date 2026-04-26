@@ -351,13 +351,18 @@
     .osi-L1 { background: #606060; }
 
     /* Interface Status LED */
-    .port-led { position: absolute; width: 6px; height: 6px; border-radius: 50%; top: 4px; right: 4px; }
-    .port-led.up { background: #5a8a6a; box-shadow: 0 0 6px #5a8a6a; }
-    .port-led.down { background: #c04040; }
-    .port-led.poe { background: #e07020; box-shadow: 0 0 6px #e07020; }
+    .port-led { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: 3px; right: 3px; border: 1px solid rgba(0,0,0,0.3); }
+    .port-led.up { background: #5a8a6a; box-shadow: 0 0 8px #5a8a6a; }
+    .port-led.down { background: #333; }
+    .port-led.poe { background: #e07020; box-shadow: 0 0 8px #e07020; }
+    .port-led.active { animation: ledBlink 0.3s ease-in-out; }
+    @keyframes ledBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
     /* Bandwidth Display */
-    .conn-bw { font-size: 0.45rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
+    .conn-bw { font-size: 0.5rem; fill: var(--layer3); font-family: 'Fira Code', monospace; font-weight: 600; }
+    .conn-bw.gigabit { fill: var(--ok); }
+    .conn-bw.fast { fill: var(--layer3); }
+    .conn-bw.slow { fill: var(--warn); }
 
     /* Device Power Button */
     .device-power { position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-deep); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 8px; }
