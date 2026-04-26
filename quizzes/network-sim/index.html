@@ -940,6 +940,26 @@
     .sim-status-text { color: var(--text-muted); }
     .sim-status-count { color: var(--accent); font-weight: 600; }
 
+    /* Activity Panel */
+    .activity-panel { position: absolute; top: 60px; left: 260px; width: 340px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; max-height: 450px; }
+    .activity-panel.show { display: flex; flex-direction: column; }
+    .activity-header { padding: 10px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .activity-content { padding: 12px; flex: 1; overflow-y: auto; }
+    .activity-question { background: var(--bg-deep); border-radius: 6px; padding: 12px; margin-bottom: 12px; font-size: 0.65rem; line-height: 1.5; }
+    .activity-checklist { margin: 12px 0; }
+    .check-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--bg-deep); border-radius: 6px; margin-bottom: 6px; font-size: 0.6rem; cursor: pointer; transition: all 0.2s; }
+    .check-item:hover { background: var(--glass); }
+    .check-item.completed { background: rgba(90, 138, 106, 0.2); color: var(--ok); }
+    .check-item.completed .check-box { color: var(--ok); }
+    .check-box { font-size: 0.8rem; }
+    .activity-result { padding: 12px; border-radius: 6px; text-align: center; font-size: 0.7rem; font-weight: 600; }
+    .activity-result.success { background: rgba(90, 138, 106, 0.2); color: var(--ok); }
+    .activity-result.fail { background: rgba(192, 64, 64, 0.2); color: var(--error); }
+    .activity-progress { display: flex; gap: 4px; margin-bottom: 12px; }
+    .activity-step { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+    .activity-step.done { background: var(--ok); }
+    .activity-step.current { background: var(--accent); }
+
     /* Packet Detail */
     .packet-detail { margin-top: 10px; padding: 8px; background: var(--bg-deep); border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.5rem; }
     .packet-detail pre { white-space: pre-wrap; word-break: break-all; }
@@ -989,6 +1009,7 @@
       <button class="tool-btn" onclick="toggleSTP()" id="btnSTP"><i class="ph ph-tree-structure"></i> STP</button>
       <button class="tool-btn" onclick="toggleDNS()" id="btnDNS"><i class="ph ph-globe-hemisphere-west"></i> DNS</button>
       <button class="tool-btn" onclick="toggleClock()" id="btnClock"><i class="ph ph-clock"></i> Clock</button>
+      <button class="tool-btn" onclick="toggleActivityPanel()" id="btnActivity"><i class="ph ph-target"></i> Activity</button>
       <button class="tool-btn" onclick="toggleNotes()" id="btnNotes"><i class="ph ph-note"></i> Notes</button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
@@ -1739,6 +1760,8 @@
 
     <!-- Status Bar -->
     <div class="status-bar">
+      <div class="status-item"><span class="status-label">⏱</span><span class="status-value" id="sClock" style="font-family:'Fira Code',monospace;">00:00:00</span></div>
+      <div class="status-sep"></div>
       <div class="status-item"><span class="status-label">Modus:</span><span class="status-value" id="sMode">Echtzeit</span></div>
       <div class="status-item"><span class="status-label">WS:</span><span class="status-value" id="sWS">Logical</span></div>
       <div class="status-item"><span class="status-label">Zoom:</span><span class="status-value" id="sZoom">100%</span></div>
@@ -1751,6 +1774,28 @@
       <div class="status-item"><span class="status-label">Geräte:</span><span class="status-value" id="sNodes">0</span></div>
       <div class="status-item"><span class="status-label">Links:</span><span class="status-value" id="sLinks">0</span></div>
       <div class="status-item"><span class="status-label">PKTs:</span><span class="status-value" id="sPkts">0</span></div>
+    </div>
+
+    <!-- Activity Mode Panel -->
+    <div class="activity-panel" id="activityPanel">
+      <div class="activity-header">
+        <span><i class="ph ph-target"></i> Activity Mode</span>
+        <button onclick="closeActivityPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+      </div>
+      <div class="activity-content">
+        <div class="activity-question" id="activityQuestion">
+          <div style="color:var(--accent);margin-bottom:8px;font-weight:600;">Aufgabe:</div>
+          <div id="questionText">Verbinde PC0 mit dem Server und teste die Verbindung mit einem Ping.</div>
+        </div>
+        <div class="activity-checklist" id="checklist">
+          <div class="check-item" id="checkDevices"><span class="check-box">☐</span> Geräte platziert</div>
+          <div class="check-item" id="checkConnected"><span class="check-box">☐</span> Geräte verbunden</div>
+          <div class="check-item" id="checkConfigured"><span class="check-box">☐</span> IP-Adressen konfiguriert</div>
+          <div class="check-item" id="checkPing" onclick="runActivityPing()"><span class="check-box">☐</span> Ping erfolgreich</div>
+        </div>
+        <div class="activity-result" id="activityResult" style="display:none;"></div>
+        <button class="modal-btn primary" style="width:100%;margin-top:8px;" onclick="nextActivity()">Nächste Aufgabe</button>
+      </div>
     </div>
   </div>
 
@@ -5734,6 +5779,115 @@ exit                - exit current mode
         }
       });
       log('System', 'success', 'Network time synchronized');
+    }
+
+    // ==================== ACTIVITY MODE ====================
+    let activityMode = false;
+    let currentActivity = 0;
+    const activities = [
+      { title: 'Grundlegende Verbindung', desc: 'Platziere einen PC und einen Switch. Verbinde sie mit einem Kabel.', checks: ['devices', 'connected'] },
+      { title: 'IP-Konfiguration', desc: 'Konfiguriere IP-Adressen auf beiden Geräten (PC: 192.168.1.10, Server: 192.168.1.100)', checks: ['configured'] },
+      { title: 'Verbindungstest', desc: 'Sende einen Ping von PC0 zum Server und überprüfe die Verbindung.', checks: ['ping'] },
+      { title: 'Router hinzufügen', desc: 'Füge einen Router hinzu und verbinde ihn mit dem Switch.', checks: ['devices', 'connected'] },
+      { title: 'Routing konfigurieren', desc: 'Konfiguriere Standard-Routen auf allen Geräten.', checks: ['configured'] },
+      { title: 'Erweiterter Test', desc: 'Sende einen Ping über den Router zum Gateway.', checks: ['ping'] }
+    ];
+
+    function toggleActivityPanel() {
+      activityMode = !activityMode;
+      const panel = document.getElementById('activityPanel');
+      panel.classList.toggle('show', activityMode);
+      if (activityMode) {
+        currentActivity = 0;
+        updateActivity();
+        log('Activity', 'info', 'Activity Mode gestartet');
+      }
+    }
+
+    function closeActivityPanel() {
+      activityMode = false;
+      document.getElementById('activityPanel').classList.remove('show');
+    }
+
+    function updateActivity() {
+      const activity = activities[currentActivity];
+      document.getElementById('questionText').textContent = activity.desc;
+      
+      // Update progress
+      const progress = document.querySelector('.activity-progress');
+      if (!progress) {
+        const progressHTML = '<div class="activity-progress">' + activities.map((_, i) => 
+          `<div class="activity-step ${i < currentActivity ? 'done' : i === currentActivity ? 'current' : ''}"></div>`
+        ).join('') + '</div>';
+        document.getElementById('activityQuestion').insertAdjacentHTML('beforebegin', progressHTML);
+      } else {
+        document.querySelectorAll('.activity-step').forEach((el, i) => {
+          el.className = 'activity-step' + (i < currentActivity ? ' done' : i === currentActivity ? ' current' : '');
+        });
+      }
+      
+      // Reset checks
+      document.querySelectorAll('.check-item').forEach(el => el.classList.remove('completed'));
+      document.querySelectorAll('.check-box').forEach(el => el.textContent = '☐');
+      document.getElementById('activityResult').style.display = 'none';
+      
+      // Check current state
+      checkActivityState();
+    }
+
+    function checkActivityState() {
+      const activity = activities[currentActivity];
+      const nodes = S.nodes;
+      const conns = S.conns;
+      
+      // Check devices placed
+      if (activity.checks.includes('devices')) {
+        const hasPC = nodes.some(n => n.end);
+        const hasRouter = nodes.some(n => n.r);
+        const hasSwitch = nodes.some(n => n.sw);
+        const hasServer = nodes.some(n => n.srv);
+        if (hasPC || hasRouter || hasSwitch || hasServer) {
+          markCheck('checkDevices');
+        }
+      }
+      
+      // Check connected
+      if (activity.checks.includes('connected') && conns.length > 0) {
+        markCheck('checkConnected');
+      }
+      
+      // Check configured
+      if (activity.checks.includes('configured')) {
+        const configuredNodes = nodes.filter(n => n.ip);
+        if (configuredNodes.length >= 2) {
+          markCheck('checkConfigured');
+        }
+      }
+    }
+
+    function markCheck(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('completed');
+        el.querySelector('.check-box').textContent = '✓';
+      }
+    }
+
+    function runActivityPing() {
+      const pcs = S.nodes.filter(n => n.end && n.ip);
+      const servers = S.nodes.filter(n => n.srv && n.ip);
+      if (pcs.length > 0 && servers.length > 0) {
+        runPing(pcs[0], servers[0]);
+      } else if (pcs.length > 0 && nodes.length > 1) {
+        const other = S.nodes.find(n => n !== pcs[0] && n.ip);
+        if (other) runPing(pcs[0], other);
+      }
+    }
+
+    function nextActivity() {
+      currentActivity = (currentActivity + 1) % activities.length;
+      updateActivity();
+      log('Activity', 'info', `Aufgabe ${currentActivity + 1}/${activities.length}`);
     }
 
     // ==================== DNS PANEL ====================
