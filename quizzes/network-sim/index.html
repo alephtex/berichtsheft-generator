@@ -57,6 +57,9 @@
     .panel-section { margin-bottom: 8px; }
     .panel-title { font-size: 0.55rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; cursor: pointer; }
     .panel-title:hover { color: var(--accent); }
+    .fav-section { background: var(--bg-elevated); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+    .fav-dev { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 0.55rem; cursor: pointer; transition: all 0.2s; }
+    .fav-dev:hover { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); transform: scale(1.05); }
     .device-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
     .device-item { background: var(--glass); border: 1px solid var(--border); border-radius: 6px; padding: 8px 4px; cursor: grab; text-align: center; transition: all 0.2s; user-select: none; }
     .device-item:hover { background: var(--glass-light); border-color: var(--accent); transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
@@ -840,6 +843,16 @@
 
     <!-- Device Panel -->
     <div class="device-panel">
+      <!-- Favorites Section -->
+      <div class="fav-section">
+        <div class="panel-title" style="font-size:0.55rem;margin-bottom:6px;"><i class="ph ph-star"></i> Favoriten</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          <div class="fav-dev" onclick="addDeviceFromFav('pc')" title="PC">💻 PC</div>
+          <div class="fav-dev" onclick="addDeviceFromFav('switch')" title="Switch">🔀 Sw</div>
+          <div class="fav-dev" onclick="addDeviceFromFav('router)" title="Router">🌐 Rtr</div>
+          <div class="fav-dev" onclick="addDeviceFromFav('server')" title="Server">🖥️ Srv</div>
+        </div>
+      </div>
       <div class="search-box">
         <i class="ph ph-magnifying-glass"></i>
         <input type="text" id="deviceSearch" placeholder="Geräte suchen..." oninput="filterDevices()">
@@ -5335,6 +5348,24 @@ exit                - exit current mode
     }
 
     // ==================== DEVICE SEARCH ====================
+    function addDeviceFromFav(type) {
+      const devMap = {
+        'pc': DEVS.end[0],
+        'switch': DEVS.sw[0],
+        'router': DEVS.r[0],
+        'server': DEVS.srv[0]
+      };
+      const dev = devMap[type];
+      if (dev) {
+        const canvas = document.getElementById('canvasInner');
+        const rect = canvas.getBoundingClientRect();
+        const cx = (rect.width / 2) - parseFloat(canvas.dataset.tx || 0);
+        const cy = (rect.height / 2) - parseFloat(canvas.dataset.ty || 0);
+        createNode(dev, cx, cy);
+        log('Gerät', 'info', `Hinzugefügt: ${dev.label}`);
+      }
+    }
+    
     function filterDevices() {
       const query = document.getElementById('deviceSearch').value.toLowerCase();
       document.querySelectorAll('.device-item').forEach(item => {
@@ -6358,6 +6389,42 @@ ${target.name}# `;
         e.preventDefault();
         S.nodes.forEach(n => document.getElementById(n.id)?.classList.add('selected'));
       }
+      // Ctrl+D = Duplicate selected
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        if (S.sel) {
+          const n = S.sel;
+          const type = n.r ? 'r' : n.sw ? 'sw' : n.wireless ? 'wireless' : n.srv ? 'srv' : n.wan ? 'wan' : 'end';
+          const templates = DEVS[type] || [];
+          const dev = templates.find(d => d.name === (n.devName || n.name.split(/\d/)[0]));
+          if (dev) {
+            saveState();
+            const newNode = createNode(dev, n.x + 60, n.y + 60);
+            if (n.ip) { newNode.ip = n.ip; newNode.subnet = n.subnet; newNode.gateway = n.gateway; newNode.mac = genMAC(); }
+            log('Gerät', 'info', `Dupliziert: ${n.name} → ${newNode.name}`);
+          }
+        }
+      }
+      // + or = = Zoom in
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        const canvas = document.getElementById('canvasInner');
+        const currentZoom = parseFloat(canvas.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
+        const newZoom = Math.min(3, currentZoom + 0.1);
+        canvas.style.transform = `translate(${canvas.dataset.tx || 0}px, ${canvas.dataset.ty || 0}px) scale(${newZoom})`;
+        canvas.dataset.scale = newZoom;
+      }
+      // - = Zoom out
+      if (e.key === '-') {
+        e.preventDefault();
+        const canvas = document.getElementById('canvasInner');
+        const currentZoom = parseFloat(canvas.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
+        const newZoom = Math.max(0.3, currentZoom - 0.1);
+        canvas.style.transform = `translate(${canvas.dataset.tx || 0}px, ${canvas.dataset.ty || 0}px) scale(${newZoom})`;
+        canvas.dataset.scale = newZoom;
+      }
+      // Home = Center all
+      if (e.key === 'Home') { e.preventDefault(); fitAll(); }
       // F = Fit all
       if (e.key === 'f' || e.key === 'F') { e.preventDefault(); fitAll(); }
       // C = Center selected
