@@ -1325,6 +1325,7 @@
       <button class="tool-btn" onclick="openCDPNeighbors()" title="CDP Neighbors"><i class="ph ph-users-three"></i></button>
       <button class="tool-btn" onclick="openARPTable()" title="ARP Table"><i class="ph ph-table"></i></button>
       <button class="tool-btn" onclick="openInterfaceConfig()" title="Interface Config"><i class="ph ph-gear"></i></button>
+      <button class="tool-btn" onclick="openACLManager()" title="ACL Manager"><i class="ph ph-shield-warning"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -7691,6 +7692,119 @@ ${generateVlandDoc()}
     function applyInterfaceConfig() {
       log('Interface', 'success', 'Interface configuration applied');
       document.getElementById('ifConfigModal')?.remove();
+    }
+
+    // ==================== ACL MANAGER ====================
+    const ACL_LISTS = [
+      { name: 'ACL-101', type: 'standard', entries: [
+        { id: 10, action: 'permit', source: '192.168.1.0', wildcard: '0.0.0.255' },
+        { id: 20, action: 'deny', source: 'any' }
+      ]},
+      { name: 'ACL-110', type: 'extended', entries: [
+        { id: 10, action: 'permit', protocol: 'tcp', source: 'any', dest: 'any', port: '80' },
+        { id: 20, action: 'permit', protocol: 'tcp', source: 'any', dest: 'any', port: '443' },
+        { id: 30, action: 'deny', protocol: 'ip', source: 'any', dest: 'any' }
+      ]}
+    ];
+    
+    function openACLManager() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'aclModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:800px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-shield-warning"></i> Access Control Lists</div>
+        <div class="modal-body">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button class="modal-btn primary" onclick="addACL()"><i class="ph ph-plus"></i> Add ACL</button>
+            <button class="modal-btn secondary" onclick="applyACL()"><i class="ph ph-check"></i> Apply to Router</button>
+          </div>
+          <div id="aclList">
+            ${renderACLLists()}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('aclModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function renderACLLists() {
+      return ACL_LISTS.map(acl => `
+        <div style="background:var(--bg-deep);border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:600;color:var(--accent);">${acl.name}</span>
+            <span style="font-size:0.55rem;color:var(--text-muted);padding:2px 6px;background:var(--bg-elevated);border-radius:4px;">${acl.type.toUpperCase()}</span>
+          </div>
+          <table class="data-table" style="width:100%;">
+            <thead>
+              <tr style="background:var(--bg-elevated);">
+                <th>#</th>
+                <th>Action</th>
+                <th>Protocol</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${acl.entries.map(e => `
+                <tr>
+                  <td>${e.id}</td>
+                  <td style="color:${e.action === 'permit' ? 'var(--ok)' : 'var(--error)'};">${e.action.toUpperCase()}</td>
+                  <td>${e.protocol || 'ip'}</td>
+                  <td>${e.source}${e.wildcard ? ' ' + e.wildcard : ''}</td>
+                  <td>${e.dest || 'any'}${e.port ? ' ' + e.port : ''}</td>
+                  <td><button onclick="deleteACLEntry('${acl.name}',${e.id})" style="background:transparent;border:none;color:var(--error);cursor:pointer;">×</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <button onclick="addACLEntry('${acl.name}')" style="margin-top:8px;background:transparent;border:1px dashed var(--border);color:var(--text-muted);padding:4px 8px;border-radius:4px;cursor:pointer;font-size:0.55rem;">+ Add Entry</button>
+        </div>
+      `).join('');
+    }
+    
+    function addACL() {
+      const name = prompt('ACL Name/Number:');
+      const type = prompt('Type (standard/extended):');
+      if (name && type) {
+        ACL_LISTS.push({ name, type, entries: [] });
+        document.getElementById('aclList').innerHTML = renderACLLists();
+        log('ACL', 'success', `ACL ${name} created`);
+      }
+    }
+    
+    function addACLEntry(aclName) {
+      const action = prompt('Action (permit/deny):');
+      const source = prompt('Source (e.g., 192.168.1.0):');
+      const dest = prompt('Destination (e.g., any):');
+      const acl = ACL_LISTS.find(a => a.name === aclName);
+      if (acl && action && source) {
+        acl.entries.push({
+          id: (acl.entries.length + 1) * 10,
+          action,
+          protocol: 'ip',
+          source,
+          dest: dest || 'any'
+        });
+        document.getElementById('aclList').innerHTML = renderACLLists();
+      }
+    }
+    
+    function deleteACLEntry(aclName, entryId) {
+      const acl = ACL_LISTS.find(a => a.name === aclName);
+      if (acl) {
+        acl.entries = acl.entries.filter(e => e.id !== entryId);
+        document.getElementById('aclList').innerHTML = renderACLLists();
+        log('ACL', 'info', 'Entry deleted');
+      }
+    }
+    
+    function applyACL() {
+      log('ACL', 'success', `Applied ${ACL_LISTS.length} ACLs to router`);
     }
 
     function processCLI(cmd) {

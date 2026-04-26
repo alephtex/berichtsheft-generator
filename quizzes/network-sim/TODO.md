@@ -232,6 +232,7 @@
 - [x] **CDP/LLDP Neighbors** - View neighbors, CDP/LLDP toggle, capability/platform info
 - [x] **ARP Table** - View/clear ARP cache, IP/MAC/Interface/Type columns
 - [x] **Interface Configuration** - Port settings, speed/duplex, bandwidth, enable/disable
+- [x] **ACL Manager** - Standard/Extended ACLs, add/delete entries, apply to router
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
