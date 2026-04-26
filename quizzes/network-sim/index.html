@@ -1260,6 +1260,8 @@
       <button class="tool-btn" onclick="openDHCPHelper()" title="DHCP Relay"><i class="ph ph-arrows-left-right"></i> Helper</button>
       <button class="tool-btn" onclick="autoSave()" id="btnAutoSave" title="Auto-Save"><i class="ph ph-cloud-check"></i> AutoSave</button>
       <button class="tool-btn" onclick="exportImage()" title="Als Bild"><i class="ph ph-image"></i></button>
+      <button class="tool-btn" onclick="exportTopologyJSON()" title="Export JSON"><i class="ph ph-download"></i></button>
+      <button class="tool-btn" onclick="importTopologyJSON()" title="Import JSON"><i class="ph ph-upload"></i></button>
       <button class="tool-btn" onclick="openM('helpModal')" title="Help (?)"><i class="ph ph-question"></i></button>
       <button class="tool-btn" onclick="openM('shortcutsModal')" title="Shortcuts (K)"><i class="ph ph-keyboard"></i></button>
       <button class="tool-btn" onclick="openNetSummary()" title="Summary"><i class="ph ph-chart-pie"></i></button>
@@ -8167,6 +8169,138 @@ ${S.conns.map(c => {
       link.href = canvas.toDataURL('image/png');
       link.click();
       log('System', 'success', 'Bild exportiert');
+    }
+    
+    // ==================== JSON EXPORT/IMPORT ====================
+    function exportTopologyJSON() {
+      if (S.nodes.length === 0) {
+        alert('Keine Geräte zum Exportieren');
+        return;
+      }
+      
+      const topology = {
+        version: '1.0',
+        timestamp: new Date().toISOString(),
+        nodes: S.nodes.map(n => ({
+          id: n.id,
+          type: n.type,
+          name: n.name,
+          icon: n.icon,
+          x: n.x,
+          y: n.y,
+          ports: n.ports,
+          uplink: n.uplink,
+          totalPorts: n.totalPorts,
+          ip: n.ip,
+          subnet: n.subnet,
+          gateway: n.gateway,
+          dns: n.dns,
+          vlan: n.vlan,
+          mac: n.mac,
+          services: n.services,
+          on: n.on,
+          routes: n.routes,
+          nat: n.nat,
+          acl: n.acl,
+          routing: n.routing,
+          arp: n.arp,
+          macTable: n.macTable
+        })),
+        connections: S.conns.map(c => ({
+          id: c.id,
+          n1: c.n1,
+          p1: c.p1,
+          n2: c.n2,
+          p2: c.p2,
+          type: c.type,
+          bandwidth: c.bandwidth,
+          latency: c.latency,
+          quality: c.quality
+        })),
+        settings: {
+          gridSize: S.gridSize,
+          snapToGrid: S.snapToGrid
+        }
+      };
+      
+      const blob = new Blob([JSON.stringify(topology, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'network-topology-' + Date.now() + '.json';
+      a.click();
+      log('System', 'success', 'Topologie exportiert (JSON)');
+    }
+    
+    function importTopologyJSON() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = event => {
+          try {
+            const topology = JSON.parse(event.target.result);
+            
+            if (!topology.nodes || !topology.connections) {
+              throw new Error('Invalid topology format');
+            }
+            
+            clearAll(true);
+            
+            // Restore nodes
+            topology.nodes.forEach(n => {
+              const dev = {
+                id: n.type,
+                name: n.name,
+                icon: n.icon,
+                ports: n.ports,
+                uplink: n.uplink,
+                services: n.services
+              };
+              createNode(dev, n.x, n.y, false);
+              
+              // Update with saved data
+              const node = S.nodes[S.nodes.length - 1];
+              if (node) {
+                node.ip = n.ip;
+                node.subnet = n.subnet;
+                node.gateway = n.gateway;
+                node.dns = n.dns;
+                node.vlan = n.vlan;
+                node.mac = n.mac;
+                node.on = n.on;
+                node.routes = n.routes;
+                node.nat = n.nat;
+                node.acl = n.acl;
+                node.routing = n.routing;
+              }
+            });
+            
+            // Restore connections (after a small delay to ensure nodes are rendered)
+            setTimeout(() => {
+              topology.connections.forEach(c => {
+                const n1 = S.nodes.find(x => x.id === c.n1);
+                const n2 = S.nodes.find(x => x.id === c.n2);
+                if (n1 && n2) {
+                  makeConn(n1, c.p1, n2, c.p2, c.type);
+                }
+              });
+              
+              updateAll();
+              log('System', 'success', `Topologie importiert (${topology.nodes.length} Geräte)`);
+            }, 100);
+            
+          } catch (err) {
+            log('System', 'error', 'Fehler beim Importieren: ' + err.message);
+            alert('Fehler beim Importieren der Topologie: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
     }
 
     // ==================== CENTER SELECTED ====================

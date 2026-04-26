@@ -196,6 +196,7 @@
 - [x] **Enhanced Network Summary** - Health score, device breakdown, IP/services, export report
 - [x] **Quick Config Wizard** - Step-by-step IP configuration, subnet selection, router config
 - [x] **Enhanced Device Tooltip** - Detailed info (IP, MAC, Gateway, Subnet, Status)
+- [x] **JSON Export/Import** - Full topology save/load, settings preservation
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
