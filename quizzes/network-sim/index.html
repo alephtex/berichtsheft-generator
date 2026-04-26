@@ -4046,26 +4046,65 @@
       const icon = n.r ? 'ph-globe' : n.sw ? 'ph-git-branch' : n.srv ? 'ph-hard-drives' : 'ph-desktop';
       const type = n.r ? 'Router' : n.sw ? 'Switch' : n.srv ? 'Server' : 'End Device';
       const status = n.on ? '<span style="color:var(--ok)">● Online</span>' : '<span style="color:var(--error)">● Offline</span>';
+      
+      // Get connected devices
+      const connectedNodes = [];
+      S.conns.forEach(c => {
+        if (c.n1 === n.id) {
+          const peer = S.nodes.find(x => x.id === c.n2);
+          if (peer) connectedNodes.push({ node: peer, port: c.p2, cable: c.type });
+        } else if (c.n2 === n.id) {
+          const peer = S.nodes.find(x => x.id === c.n1);
+          if (peer) connectedNodes.push({ node: peer, port: c.p1, cable: c.type });
+        }
+      });
+      
       content.innerHTML = `
-        <div style="text-align:center;margin-bottom:12px;">
-          <div style="font-size:28px;color:var(--accent);"><i class="ph ${icon}"></i></div>
-          <div style="font-weight:600;">${n.name}</div>
+        <div style="text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+          <div style="font-size:32px;color:var(--accent);margin-bottom:4px;"><i class="ph ${icon}"></i></div>
+          <div style="font-weight:600;font-size:0.7rem;">${n.name}</div>
           <div style="font-size:0.55rem;color:var(--text-muted);">${type}</div>
-          ${status}
+          <div style="font-size:0.55rem;margin-top:4px;">${status}</div>
         </div>
-        <div style="font-size:0.55rem;">
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">IP:</span><span>${n.ip || 'N/A'}</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Subnet:</span><span>${n.subnet}</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">MAC:</span><span style="font-size:0.5rem;">${n.mac}</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Gateway:</span><span>${n.gateway || 'N/A'}</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">VLAN:</span><span>${n.vlan || '1'}</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Ports:</span><span>${n.usedPorts}/${n.totalPorts}</span></div>
-          ${n.poeBudget ? `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">PoE:</span><span>${n.poeUsed}/${n.poeBudget}W</span></div>` : ''}
-          ${n.services?.length ? `<div style="padding:3px 0;"><span style="color:var(--text-muted);">Services:</span><div style="margin-top:4px;">${n.services.map(s => `<span style="background:var(--accent);color:var(--bg-deep);padding:1px 5px;border-radius:3px;font-size:0.5rem;margin:1px;">${s}</span>`).join('')}</div></div>` : ''}
+        
+        <div style="font-size:0.55rem;margin-bottom:10px;">
+          <div style="font-weight:600;color:var(--accent);margin-bottom:4px;font-size:0.6rem;">📍 IP Configuration</div>
+          <div class="inspect-row"><span>IP Address</span><span>${n.ip || '<span style="color:var(--warn)">Unassigned</span>'}</span></div>
+          <div class="inspect-row"><span>Subnet Mask</span><span>${n.subnet}</span></div>
+          <div class="inspect-row"><span>Default Gateway</span><span>${n.gateway || 'N/A'}</span></div>
+          <div class="inspect-row"><span>DNS Server</span><span>${n.dns || 'N/A'}</span></div>
         </div>
-        <div style="margin-top:8px;display:flex;gap:4px;">
-          <button class="modal-btn secondary" style="flex:1;font-size:0.5rem;" onclick="sel(S.ctxNode, document.getElementById(S.ctxNode.id)); closeInspectPanel();"><i class="ph ph-sliders"></i> Config</button>
-          <button class="modal-btn secondary" style="flex:1;font-size:0.5rem;" onclick="S.sel=S.ctxNode;openCLI();closeInspectPanel();"><i class="ph ph-terminal"></i> CLI</button>
+        
+        <div style="font-size:0.55rem;margin-bottom:10px;padding-top:8px;border-top:1px solid var(--border);">
+          <div style="font-weight:600;color:var(--accent);margin-bottom:4px;font-size:0.6rem;">🔧 Hardware</div>
+          <div class="inspect-row"><span>MAC Address</span><span style="font-family:'Fira Code',monospace;font-size:0.5rem;">${n.mac}</span></div>
+          <div class="inspect-row"><span>Ports</span><span>${n.usedPorts}/${n.totalPorts}</span></div>
+          <div class="inspect-row"><span>VLAN</span><span>${n.vlan || '1'}</span></div>
+          ${n.poeBudget ? `<div class="inspect-row"><span>PoE Budget</span><span>${n.poeUsed}/${n.poeBudget}W</span></div>` : ''}
+        </div>
+        
+        <div style="font-size:0.55rem;margin-bottom:10px;padding-top:8px;border-top:1px solid var(--border);">
+          <div style="font-weight:600;color:var(--accent);margin-bottom:4px;font-size:0.6rem;">🔌 Connections (${connectedNodes.length})</div>
+          ${connectedNodes.length > 0 ? connectedNodes.map(c => `
+            <div class="inspect-row" style="cursor:pointer;" onclick="zoomToDevice('${c.node.id}')">
+              <span>→ ${c.node.name}</span>
+              <span style="font-size:0.45rem;color:var(--text-muted);">${c.cable}</span>
+            </div>
+          `).join('') : '<div style="color:var(--text-muted);font-size:0.5rem;">No connections</div>'}
+        </div>
+        
+        ${n.services?.length ? `
+        <div style="font-size:0.55rem;margin-bottom:10px;padding-top:8px;border-top:1px solid var(--border);">
+          <div style="font-weight:600;color:var(--accent);margin-bottom:4px;font-size:0.6rem;">⚙️ Services (${n.services.length})</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">${n.services.map(s => `<span style="background:var(--accent);color:var(--bg-deep);padding:2px 6px;border-radius:4px;font-size:0.5rem;">${s}</span>`).join('')}</div>
+        </div>
+        ` : ''}
+        
+        <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+          <button class="modal-btn secondary" style="font-size:0.5rem;" onclick="sel(S.ctxNode, document.getElementById(S.ctxNode.id)); closeInspectPanel();"><i class="ph ph-sliders"></i> Config</button>
+          <button class="modal-btn secondary" style="font-size:0.5rem;" onclick="S.sel=S.ctxNode;openCLI();closeInspectPanel();"><i class="ph ph-terminal"></i> CLI</button>
+          <button class="modal-btn secondary" style="font-size:0.5rem;" onclick="zoomToDevice('${n.id}'); closeInspectPanel();"><i class="ph ph-crosshair"></i> Zoom</button>
+          <button class="modal-btn secondary" style="font-size:0.5rem;" onclick="togglePower('${n.id}'); closeInspectPanel();"><i class="ph ph-power"></i> Power</button>
         </div>
       `;
       panel.style.display = 'block';
@@ -4074,7 +4113,7 @@
     function createInspectPanel() {
       const panel = document.createElement('div');
       panel.id = 'inspectPanel';
-      panel.style.cssText = 'position:absolute;top:60px;right:380px;width:200px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:10px;z-index:200;display:none;';
+      panel.style.cssText = 'position:absolute;top:60px;right:380px;width:240px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:12px;z-index:200;display:none;max-height:80vh;overflow-y:auto;';
       panel.innerHTML = `
         <div style="font-size:0.65rem;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
           <span><i class="ph ph-magnifying-glass-plus"></i> Inspector</span>
@@ -4085,6 +4124,11 @@
       document.querySelector('.canvas-area').appendChild(panel);
       return panel;
     }
+    
+    <style>
+      .inspect-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); }
+      .inspect-row:last-child { border-bottom: none; }
+    </style>
 
     function closeInspectPanel() {
       const panel = document.getElementById('inspectPanel');

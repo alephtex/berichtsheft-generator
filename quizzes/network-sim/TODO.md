@@ -206,6 +206,7 @@
 - [x] **Enhanced Wireless AP** - SSID, Security (WPA2/WPA3/WEP), Channel, Bandwidth settings
 - [x] **Enhanced Cable Panel** - Bandwidth specs, connection recommendations, visual improvements
 - [x] **Real-time Statistics** - Traffic in/out, CPU load, error counter in status bar
+- [x] **Enhanced Device Inspector** - Detailed device info, connections list, quick actions
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
