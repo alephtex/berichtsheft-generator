@@ -930,6 +930,8 @@
     .form-input { width: 100%; padding: 6px 8px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); font-family: inherit; font-size: 0.7rem; }
     .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 8px rgba(201, 162, 39, 0.2); }
     .form-select { width: 100%; padding: 6px 8px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); font-family: inherit; font-size: 0.7rem; cursor: pointer; }
+    .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+    .color-btn:hover { transform: scale(1.2); border-color: white; }
 
     .data-table { width: 100%; border-collapse: collapse; font-size: 0.55rem; }
     .data-table th { text-align: left; padding: 3px 5px; border-bottom: 1px solid var(--border); color: var(--text-muted); }
@@ -2052,6 +2054,33 @@
             <div class="form-group">
               <label class="form-label">MAC</label>
               <input type="text" class="form-input" id="pMAC" disabled style="font-family: 'Fira Code', monospace;">
+            </div>
+          </div>
+          <div class="props-section">
+            <div class="props-section-title">Anpassung</div>
+            <div class="form-group">
+              <label class="form-label">Icon Farbe</label>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button class="color-btn" style="background:var(--accent)" onclick="setDeviceColor('var(--accent)"></button>
+                <button class="color-btn" style="background:var(--ok)" onclick="setDeviceColor('var(--ok)"></button>
+                <button class="color-btn" style="background:var(--layer3)" onclick="setDeviceColor('var(--layer3)"></button>
+                <button class="color-btn" style="background:var(--device)" onclick="setDeviceColor('var(--device)"></button>
+                <button class="color-btn" style="background:var(--warn)" onclick="setDeviceColor('var(--warn)"></button>
+                <button class="color-btn" style="background:var(--error)" onclick="setDeviceColor('var(--error)"></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Beschriftung</label>
+              <select class="form-select" id="pLabelType" onchange="setDeviceLabel(this.value)">
+                <option value="name">Name</option>
+                <option value="ip">IP</option>
+                <option value="both">Name + IP</option>
+                <option value="type">Type</option>
+                <option value="none">Keine</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><input type="checkbox" id="pShowPorts" checked onchange="toggleDevicePorts(this.checked)"> Ports anzeigen</label>
             </div>
           </div>
           <div class="props-section">
@@ -5192,6 +5221,44 @@
     function updDNS(v) { if (S.sel) S.sel.dns = v; }
     function updVLAN(v) { if (S.sel) { S.sel.vlan = v; log('VLAN', 'info', `VLAN ${v}`); } }
     function updPortMode(v) { if (S.sel) S.sel.portMode = v; }
+
+    // Device customization functions
+    function setDeviceColor(color) {
+      if (!S.sel) return;
+      S.sel.color = color;
+      const el = document.getElementById(S.sel.id);
+      if (el) {
+        const icon = el.querySelector('.node-icon');
+        if (icon) icon.style.color = color;
+      }
+      log('Config', 'success', `Farbe geändert`);
+    }
+    
+    function setDeviceLabel(type) {
+      if (!S.sel) return;
+      S.sel.labelType = type;
+      const el = document.getElementById(S.sel.id);
+      if (el) {
+        const nameEl = el.querySelector('.node-name');
+        if (nameEl) {
+          if (type === 'name') nameEl.textContent = S.sel.name;
+          else if (type === 'ip') nameEl.textContent = S.sel.ip || 'N/A';
+          else if (type === 'both') nameEl.textContent = S.sel.name + (S.sel.ip ? `\n${S.sel.ip}` : '');
+          else if (type === 'type') nameEl.textContent = S.sel.r ? 'Router' : S.sel.sw ? 'Switch' : S.sel.srv ? 'Server' : 'PC';
+          else nameEl.textContent = '';
+        }
+      }
+      log('Config', 'info', `Beschriftung: ${type}`);
+    }
+    
+    function toggleDevicePorts(show) {
+      if (!S.sel) return;
+      const el = document.getElementById(S.sel.id);
+      if (el) {
+        const ports = el.querySelector('.panel-ports');
+        if (ports) ports.style.display = show ? 'flex' : 'none';
+      }
+    }
 
     function updNodeInfo(n) {
       const el = document.getElementById(n.id);
