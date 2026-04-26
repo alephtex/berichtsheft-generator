@@ -2327,6 +2327,11 @@
       <div class="status-item"><span class="status-label">Geräte:</span><span class="status-value" id="sNodes">0</span></div>
       <div class="status-item"><span class="status-label">Links:</span><span class="status-value" id="sLinks">0</span></div>
       <div class="status-item"><span class="status-label">PKTs:</span><span class="status-value" id="sPkts">0</span></div>
+      <div class="status-sep"></div>
+      <div class="status-item"><span class="status-label">↓</span><span class="status-value" id="sTrafficIn" style="color:var(--ok);">0</span></div>
+      <div class="status-item"><span class="status-label">↑</span><span class="status-value" id="sTrafficOut" style="color:var(--accent);">0</span></div>
+      <div class="status-item"><span class="status-label">⚡</span><span class="status-value" id="sCpuLoad" style="color:var(--warn);">0%</span></div>
+      <div class="status-item"><span class="status-label">🔊</span><span class="status-value" id="sErrors" style="color:var(--error);">0</span></div>
     </div>
     <style>
       .breadcrumb { display: flex; align-items: center; gap: 4px; }
@@ -9197,6 +9202,41 @@ ${target.name}# `;
       const online = S.nodes.filter(n => n.on !== false).length;
       document.getElementById('sOnline').textContent = `${online}/${S.nodes.length}`;
     }
+    
+    // Real-time network statistics update
+    let totalTrafficIn = 0;
+    let totalTrafficOut = 0;
+    let totalErrors = 0;
+    
+    function updateRealtimeStats() {
+      // Simulate traffic based on PDU count
+      const trafficIn = Math.floor(Math.random() * 100) + (S.pduCnt * 10);
+      const trafficOut = Math.floor(Math.random() * 80) + (S.pduCnt * 8);
+      totalTrafficIn += trafficIn;
+      totalTrafficOut += trafficOut;
+      
+      // Update display
+      document.getElementById('sTrafficIn').textContent = formatBytes(totalTrafficIn);
+      document.getElementById('sTrafficOut').textContent = formatBytes(totalTrafficOut);
+      
+      // Calculate simulated CPU load
+      const cpuLoad = Math.min(100, Math.floor(S.nodes.length * 5 + Math.random() * 10));
+      document.getElementById('sCpuLoad').textContent = cpuLoad + '%';
+      document.getElementById('sCpuLoad').style.color = cpuLoad > 80 ? 'var(--error)' : cpuLoad > 50 ? 'var(--warn)' : 'var(--ok)';
+      
+      // Simulate errors
+      const errors = Math.floor(Math.random() * 5);
+      totalErrors += errors;
+      document.getElementById('sErrors').textContent = totalErrors;
+      document.getElementById('sErrors').style.color = totalErrors > 100 ? 'var(--error)' : 'var(--ok)';
+    }
+    
+    // Update stats every second when simulation is running
+    setInterval(() => {
+      if (S.sim) {
+        updateRealtimeStats();
+      }
+    }, 1000);
 
     function log(layer, type, msg) {
       const t = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit', second: '2-digit' });

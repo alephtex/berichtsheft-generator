@@ -205,6 +205,7 @@
 - [x] **IP Address Planning Panel** - Subnet overview, host list, IP range display
 - [x] **Enhanced Wireless AP** - SSID, Security (WPA2/WPA3/WEP), Channel, Bandwidth settings
 - [x] **Enhanced Cable Panel** - Bandwidth specs, connection recommendations, visual improvements
+- [x] **Real-time Statistics** - Traffic in/out, CPU load, error counter in status bar
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
