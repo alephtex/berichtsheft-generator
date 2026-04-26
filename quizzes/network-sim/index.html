@@ -363,6 +363,24 @@
     .conn-bw.gigabit { fill: var(--ok); }
     .conn-bw.fast { fill: var(--layer3); }
     .conn-bw.slow { fill: var(--warn); }
+    
+    /* Traffic Mini Graph */
+    .traffic-graph { display: flex; align-items: flex-end; gap: 1px; height: 20px; width: 50px; background: var(--bg-deep); border-radius: 3px; padding: 2px; }
+    .traffic-bar { flex: 1; background: var(--layer3); border-radius: 1px; min-width: 3px; transition: height 0.3s ease; }
+    .traffic-bar.in { background: var(--ok); }
+    .traffic-bar.out { background: var(--accent); }
+    
+    /* Interface Detail View */
+    .if-detail { background: var(--bg-deep); border-radius: 8px; padding: 10px; margin: 4px 0; border-left: 3px solid var(--accent); }
+    .if-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .if-detail-name { font-weight: 600; font-size: 0.65rem; color: var(--accent); }
+    .if-detail-status { font-size: 0.5rem; padding: 2px 6px; border-radius: 4px; }
+    .if-detail-status.up { background: var(--ok); color: white; }
+    .if-detail-status.down { background: var(--error); color: white; }
+    .if-detail-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .if-stat-item { display: flex; justify-content: space-between; font-size: 0.5rem; }
+    .if-stat-label { color: var(--text-muted); }
+    .if-stat-value { color: var(--text); font-weight: 600; }
 
     /* Device Power Button */
     .device-power { position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-deep); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 8px; }
@@ -968,7 +986,10 @@
       <div class="if-stats-panel" id="ifStatsPanel">
         <div class="if-stats-header" onclick="toggleIfStatsContent()">
           <span><i class="ph ph-chart-line"></i> Interface Statistics</span>
-          <i class="ph ph-caret-down if-stats-toggle" id="ifStatsToggle"></i>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="event.stopPropagation();toggleIfStatsView()" style="background:var(--bg-deep);border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--accent);font-size:0.5rem;cursor:pointer;">Graph</button>
+            <i class="ph ph-caret-down if-stats-toggle" id="ifStatsToggle"></i>
+          </div>
         </div>
         <div class="if-stats-content" id="ifStatsContent" style="display:none;"></div>
       </div>
@@ -4232,19 +4253,32 @@ exit                - exit current mode
     // ==================== INTERFACE STATISTICS ====================
     let showIfStats = false;
     let ifStatsExpanded = false;
+    let ifStatsView = 'detail';
     const interfaceStats = {}; // { nodeId_portIdx: { in: 0, out: 0, errors: 0, drop: 0 } }
 
     function toggleIfStats() {
       showIfStats = !showIfStats;
       document.getElementById('ifStatsPanel').style.display = showIfStats ? 'block' : 'none';
       document.getElementById('btnIfStats').classList.toggle('active', showIfStats);
-      if (showIfStats) renderIfStats();
+      if (showIfStats) {
+        ifStatsExpanded = true;
+        if (ifStatsView === 'detail') renderIfStatsDetailed();
+        else renderIfStats();
+      }
     }
 
     function toggleIfStatsContent() {
       ifStatsExpanded = !ifStatsExpanded;
       document.getElementById('ifStatsContent').style.display = ifStatsExpanded ? 'block' : 'none';
       document.getElementById('ifStatsToggle').classList.toggle('open', ifStatsExpanded);
+    }
+    
+    function toggleIfStatsView() {
+      ifStatsView = ifStatsView === 'detail' ? 'summary' : 'detail';
+      if (showIfStats) {
+        if (ifStatsView === 'detail') renderIfStatsDetailed();
+        else renderIfStats();
+      }
     }
 
     function updateIfStat(nodeId, portIdx, direction, bytes) {
@@ -4254,6 +4288,10 @@ exit                - exit current mode
       else interfaceStats[key].out += bytes;
     }
 
+    // Traffic history for graphs
+    const trafficHistory = {}; // { nodeId_portIdx: [in_bytes, out_bytes, ...] }
+    const MAX_HISTORY = 20;
+    
     function renderIfStats() {
       const content = document.getElementById('ifStatsContent');
       let html = '<div class="if-stats-row header"><span>Interface</span><span>In</span><span>Out</span><span>Status</span></div>';
@@ -4265,7 +4303,7 @@ exit                - exit current mode
           const conn = S.conns.find(c => (c.n1 === n.id && c.p1 === i) || (c.n2 === n.id && c.p2 === i));
           const status = conn ? 'up' : 'down';
           const statusClass = conn ? 'ok' : 'error';
-          const portName = i >= n.ports ? `U${i - n.ports + 1}` : `F0/${i}`;
+          const portName = i >= (n.ports || 4) ? `U${i - (n.ports || 4) + 1}` : `F0/${i}`;
           html += `<div class="if-stats-row">
             <span class="name">${n.name.substring(0, 8)}/${portName}</span>
             <span class="stat">${formatBytes(stats.in)}</span>
@@ -4276,6 +4314,71 @@ exit                - exit current mode
       });
 
       content.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No interfaces</div>';
+    }
+    
+    function renderIfStatsDetailed() {
+      const content = document.getElementById('ifStatsContent');
+      if (!content) return;
+      
+      let html = '<div style="max-height:400px;overflow-y:auto;">';
+      
+      S.nodes.forEach(n => {
+        const nodeConns = S.conns.filter(c => c.n1 === n.id || c.n2 === n.id);
+        if (nodeConns.length === 0 && n.usedPorts === 0) return;
+        
+        html += `<div style="margin-bottom:12px;">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--accent);padding:6px 8px;background:var(--bg-deep);border-radius:6px;margin-bottom:6px;">
+            <i class="ph ${n.r ? 'ph-router' : n.sw ? 'ph-swap' : n.srv ? 'ph-hard-drives' : 'ph-desktop'}"></i> ${n.name}
+          </div>`;
+        
+        for (let i = 0; i < n.totalPorts; i++) {
+          const key = `${n.id}_${i}`;
+          const stats = interfaceStats[key] || { in: 0, out: 0, errors: 0, drop: 0 };
+          const conn = S.conns.find(c => (c.n1 === n.id && c.p1 === i) || (c.n2 === n.id && c.p2 === i));
+          const status = conn ? 'up' : 'down';
+          const portName = i >= (n.ports || 4) ? `GigabitEthernet0/${i - (n.ports || 4) + 1}` : `FastEthernet0/${i}`;
+          const bw = conn ? (conn.type === 'fiber' ? '1 Gbps' : conn.type === 'serial' ? '2 Mbps' : '100 Mbps') : '-';
+          
+          // Traffic graph data
+          const history = trafficHistory[key] || [];
+          const maxTraffic = Math.max(...history, 1024);
+          const inBars = history.filter((_, idx) => idx % 2 === 0).map(v => Math.min(20, Math.round((v / maxTraffic) * 20)));
+          const outBars = history.filter((_, idx) => idx % 2 === 1).map(v => Math.min(20, Math.round((v / maxTraffic) * 20)));
+          
+          html += `<div class="if-detail">
+            <div class="if-detail-header">
+              <span class="if-detail-name">${portName}</span>
+              <span class="if-detail-status ${status}">${status.toUpperCase()}</span>
+            </div>
+            <div style="font-size:0.5rem;color:var(--text-muted);margin-bottom:6px;">Bandwidth: ${bw}</div>
+            <div class="if-detail-stats">
+              <div class="if-stat-item"><span class="if-stat-label">In Bytes:</span><span class="if-stat-value">${formatBytes(stats.in)}</span></div>
+              <div class="if-stat-item"><span class="if-stat-label">Out Bytes:</span><span class="if-stat-value">${formatBytes(stats.out)}</span></div>
+              <div class="if-stat-item"><span class="if-stat-label">Errors:</span><span class="if-stat-value">${stats.errors}</span></div>
+              <div class="if-stat-item"><span class="if-stat-label">Drops:</span><span class="if-stat-value">${stats.drop}</span></div>
+            </div>
+            ${history.length > 0 ? `<div style="margin-top:8px;">
+              <div style="font-size:0.45rem;color:var(--ok);margin-bottom:2px;">↗ In: ${formatBytes(history[history.length-2] || 0)}</div>
+              <div class="traffic-graph">${inBars.map(h => `<div class="traffic-bar in" style="height:${h}px;"></div>`).join('')}</div>
+              <div style="font-size:0.45rem;color:var(--accent);margin:4px 0 2px;">↘ Out: ${formatBytes(history[history.length-1] || 0)}</div>
+              <div class="traffic-graph">${outBars.map(h => `<div class="traffic-bar out" style="height:${h}px;"></div>`).join('')}</div>
+            </div>` : ''}
+          </div>`;
+        }
+        html += '</div>';
+      });
+      
+      html += '</div>';
+      content.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No interfaces</div>';
+    }
+    
+    function updateTrafficHistory(nodeId, portIdx, inBytes, outBytes) {
+      const key = `${nodeId}_${portIdx}`;
+      if (!trafficHistory[key]) trafficHistory[key] = [];
+      trafficHistory[key].push(inBytes, outBytes);
+      if (trafficHistory[key].length > MAX_HISTORY * 2) {
+        trafficHistory[key] = trafficHistory[key].slice(-MAX_HISTORY * 2);
+      }
     }
 
     function formatBytes(b) {
