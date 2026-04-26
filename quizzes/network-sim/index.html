@@ -1093,6 +1093,15 @@
     .dscp-class.assured { border-left: 2px solid var(--layer3); }
     .dscp-class.expedited { border-left: 2px solid var(--ok); }
 
+    /* Interface Status Grid */
+    .int-status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .int-status-item { background: var(--bg-deep); padding: 8px; border-radius: 6px; }
+    .int-status-label { font-size: 0.45rem; color: var(--text-muted); margin-bottom: 2px; }
+    .int-status-value { font-size: 0.6rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .int-status-value.success { color: var(--ok); }
+    .int-status-value.error { color: var(--error); }
+    .int-status-value i { font-size: 12px; }
+
     @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
   </style>
 </head>
@@ -2410,6 +2419,48 @@
             <option value="up">up</option>
             <option value="down">down</option>
           </select>
+        </div>
+        <!-- Interface Status & Auto-Negotiation -->
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+          <div style="font-size:0.6rem;font-weight:600;color:var(--accent);margin-bottom:8px;">Interface Status</div>
+          <div class="int-status-grid">
+            <div class="int-status-item">
+              <div class="int-status-label">Link Status</div>
+              <div class="int-status-value success"><i class="ph ph-check-circle"></i> Up</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Protocol</div>
+              <div class="int-status-value">Up</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Auto-Neg</div>
+              <div class="int-status-value success">Enabled</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Speed</div>
+              <div class="int-status-value">1000Mb/s</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Duplex</div>
+              <div class="int-status-value">Full</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">CRC</div>
+              <div class="int-status-value">0</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Collisions</div>
+              <div class="int-status-value">0</div>
+            </div>
+            <div class="int-status-item">
+              <div class="int-status-label">Late Coll.</div>
+              <div class="int-status-value">0</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:0.5rem;color:var(--text-muted);">
+            <div>Last input: never, output: never</div>
+            <div>5 minute input rate: 0 bits/sec</div>
+          </div>
         </div>
       </div>
       <div class="modal-actions">

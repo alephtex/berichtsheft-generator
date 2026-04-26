@@ -174,6 +174,7 @@
 - [x] **ACL Panel** - Access Control List viewer
 - [x] **Path Trace Panel** - Route visualization with hops, latency, bandwidth
 - [x] **QoS Queue Visualization** - Priority/High/Normal/Low queue status
+- [x] **Interface Status Grid** - Auto-negotiation, speed, duplex, CRC stats
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
