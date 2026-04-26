@@ -1,0 +1,19 @@
+{
+  "name": "network-sim",
+  "version": "1.0.0",
+  "description": "> Browserbasierter Netzwerk-Simulator für ITSE IHK AP2",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
