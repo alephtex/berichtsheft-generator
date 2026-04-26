@@ -187,6 +187,7 @@
 - [x] **Keyboard Shortcuts Panel** - Categorized shortcuts, better UI
 - [x] **Connection Quality Indicators** - Bandwidth display, quality dots, packet flow animation
 - [x] **Enhanced Port Status Panel** - Summary stats, port status LEDs, bandwidth display
+- [x] **Improved Drag UX** - Scale/shadow during drag, enhanced landing animation, guide pulse
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

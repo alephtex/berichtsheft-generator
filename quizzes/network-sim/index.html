@@ -710,15 +710,35 @@
       z-index: 1000 !important;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    .sim-node.dragging .node-front-panel { border-color: var(--accent); }
+    .sim-node.dragging { 
+      cursor: grabbing !important; 
+      transform: scale(1.05);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px rgba(201, 162, 39, 0.3);
+      z-index: 1000;
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+    }
+    .sim-node.dragging .node-front-panel { border-color: var(--accent); box-shadow: 0 0 15px rgba(201, 162, 39, 0.5); }
     .sim-node.snapping { animation: snapPulse 0.3s ease-out; }
     @keyframes snapPulse { 0% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    .sim-node.landing { animation: landDrop 0.2s ease-out; }
-    @keyframes landDrop { 0% { transform: scale(1.05); } 50% { transform: scale(0.98); } 100% { transform: scale(1); } }
+    .sim-node.landing { 
+      animation: landDrop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+    }
+    @keyframes landDrop { 
+      0% { transform: scale(1.08); opacity: 0.8; } 
+      50% { transform: scale(0.97); } 
+      75% { transform: scale(1.02); }
+      100% { transform: scale(1); opacity: 1; } 
+    }
     .sim-node.selected:not(.dragging) { cursor: grab; }
     .sim-node:hover:not(.dragging) { cursor: grab; }
     .sim-node.drag-ghost { opacity: 0.3; }
     .sim-node.drag-target { outline: 2px dashed var(--accent); outline-offset: 4px; }
+    .snap-guide { position: absolute; pointer-events: none; z-index: 999; }
+    .snap-guide.h { height: 1px; background: var(--accent); opacity: 0.5; }
+    .snap-guide.v { width: 1px; background: var(--accent); opacity: 0.5; }
+    .snap-guide.h { animation: guidePulse 0.5s ease-in-out infinite; }
+    .snap-guide.v { animation: guidePulse 0.5s ease-in-out infinite; }
+    @keyframes guidePulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
     
     /* Port Activity Flash */
     .port-active { animation: portFlash 0.3s ease-out; }
