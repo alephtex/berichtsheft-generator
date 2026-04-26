@@ -118,6 +118,9 @@
 - [x] **Export as PNG** image
 - [x] **Center selected** (C key)
 - [x] **Extended shortcuts**: F, C, R, G, N, L keys
+- [x] **Auto-Forward simulation** - automatic packet generation
+- [x] **Simulation controls** - Play/Pause/Step/Speed
+- [x] **Enhanced status bar** - Geräte/Links/PKTs counters
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

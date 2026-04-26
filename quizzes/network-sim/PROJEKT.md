@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+42e0a31 feat: Auto-forward simulation, simulation controls, enhanced status bar
 72a2e86 feat: Add auto-save, export image, center view, keyboard shortcuts
 e89c122 feat: Realistic device front panels, port LEDs, system LEDs
 be36294 feat: Enhanced packet animation, NAT table, trail effects
@@ -161,6 +162,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv
