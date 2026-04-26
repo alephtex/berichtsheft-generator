@@ -28,6 +28,7 @@
       --copper-cross: #c05010;
       --fiber: #4080c0;
       --serial: #606060;
+      --coaxial: #888888;
       --poe: #5a8a6a;
       --device: #8060c0;
       --error: #c04040;
@@ -833,6 +834,8 @@
     .conn-type.copper-cross { border-left: 4px solid var(--copper-cross); }
     .conn-type.fiber { border-left: 4px solid var(--fiber); }
     .conn-type.serial { border-left: 4px solid var(--serial); }
+    .conn-type.console { border-left: 4px solid var(--device); }
+    .conn-type.coaxial { border-left: 4px solid #888; }
     .conn-type-icon { font-size: 18px; margin-bottom: 4px; }
     .conn-type-name { font-size: 0.55rem; font-weight: 600; }
     .conn-type-desc { font-size: 0.5rem; color: var(--text-muted); margin-top: 2px; }
@@ -2096,12 +2099,24 @@
           <div class="conn-type-name">Seriell</div>
           <div class="conn-type-desc">WAN DTE/DCE</div>
         </div>
+        <div class="conn-type console" onclick="selectCable('console', this)">
+          <div class="conn-type-icon"><i class="ph ph-terminal"></i></div>
+          <div class="conn-type-name">Console</div>
+          <div class="conn-type-desc">RJ45 Console</div>
+        </div>
+        <div class="conn-type coaxial" onclick="selectCable('coaxial', this)">
+          <div class="conn-type-icon"><i class="ph ph-circle"></i></div>
+          <div class="conn-type-name">Coaxial</div>
+          <div class="conn-type-desc">Cable/BNC</div>
+        </div>
       </div>
       <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;margin-bottom:12px;">
         <p><strong>Kupfer Straight:</strong> PC→Switch, PC→Router, Switch→Router</p>
         <p><strong>Crossover:</strong> PC→PC, Switch→Switch, Router→Router</p>
         <p><strong>Glasfaser:</strong> Fast/Gigabit Ethernet über lange Distanzen</p>
         <p><strong>Seriell:</strong> WAN Verbindungen (PPP, HDLC)</p>
+        <p><strong>Console:</strong> PC→Router/Switch CLI</p>
+        <p><strong>Coaxial:</strong> Cable Modem, TV</p>
       </div>
       <div class="modal-actions">
         <button class="modal-btn secondary" onclick="closeM('cableModal')">Schließen</button>
@@ -3880,7 +3895,7 @@
         const targetNodeEl = targetPort.closest('.sim-node');
         const targetNodeData = S.nodes.find(x => x.id === targetNodeEl.id);
         const targetPortIdx = parseInt(targetPort.dataset.p);
-        const cableLabels = { 'copper-str': 'UTP', 'copper-cross': 'Cross', 'fiber': 'Fiber', 'serial': 'Serial' };
+        const cableLabels = { 'copper-str': 'UTP', 'copper-cross': 'Cross', 'fiber': 'Fiber', 'serial': 'Serial', 'console': 'Console', 'coaxial': 'Coax' };
         const cableLabel = cableLabels[S.cableType] || S.cableType;
         if (targetNodeData && targetNodeData.id !== connState.sourceNode.id) {
           quickConnect.innerHTML = `${connState.sourceNode.name}:F0/${connState.sourcePort} → ${targetNodeData.name}:F0/${targetPortIdx}<div class="conn-type">${cableLabel} Kabel</div>`;

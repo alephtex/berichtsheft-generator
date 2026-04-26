@@ -176,6 +176,7 @@
 - [x] **QoS Queue Visualization** - Priority/High/Normal/Low queue status
 - [x] **Interface Status Grid** - Auto-negotiation, speed, duplex, CRC stats
 - [x] **Running Config View** - CLI show running-config command with full config
+- [x] **Extended Cable Types** - Console (RJ45), Coaxial (BNC) cable options
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
