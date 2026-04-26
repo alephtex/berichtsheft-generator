@@ -758,6 +758,7 @@
       <button class="tool-btn" onclick="toggleSTP()" id="btnSTP"><i class="ph ph-tree-structure"></i> STP</button>
       <button class="tool-btn" onclick="toggleDNS()" id="btnDNS"><i class="ph ph-globe-hemisphere-west"></i> DNS</button>
       <button class="tool-btn" onclick="toggleClock()" id="btnClock"><i class="ph ph-clock"></i> Clock</button>
+      <button class="tool-btn" onclick="toggleNotes()" id="btnNotes"><i class="ph ph-note"></i> Notes</button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -778,7 +779,8 @@
       <button class="tool-btn" onclick="openDHCPHelper()" title="DHCP Relay"><i class="ph ph-arrows-left-right"></i> Helper</button>
       <button class="tool-btn" onclick="autoSave()" id="btnAutoSave" title="Auto-Save"><i class="ph ph-cloud-check"></i> AutoSave</button>
       <button class="tool-btn" onclick="exportImage()" title="Als Bild"><i class="ph ph-image"></i></button>
-
+      <button class="tool-btn" onclick="openM('helpModal')" title="Help"><i class="ph ph-question"></i></button>
+      
       <div class="toolbar-spacer"></div>
 
       <button class="tool-btn" onclick="saveTopo()"><i class="ph ph-download-simple"></i></button>
@@ -1063,7 +1065,7 @@
           <div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:20px;">Select a connection</div>
         </div>
       </div>
-      
+
       <!-- STP Panel -->
       <div class="route-panel" id="stpPanel" style="width:300px;top:110px;">
         <div class="route-header">
@@ -1081,6 +1083,21 @@
             Priority: 32768 | Hello: 2s | Max Age: 20s
           </div>
           <div id="stpTable"></div>
+        </div>
+      </div>
+
+      <!-- Topology Notes Panel -->
+      <div class="route-panel" id="notesPanel" style="width:260px;top:110px;">
+        <div class="route-header">
+          <span><i class="ph ph-note"></i> Topology Notes</span>
+          <button onclick="toggleNotes()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+        </div>
+        <div style="padding:8px;">
+          <textarea id="topoNotes" placeholder="Add notes about this topology..." style="width:100%;height:120px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text-primary);font-size:0.6rem;resize:none;font-family:inherit;" oninput="saveNotes()"></textarea>
+          <div style="margin-top:8px;display:flex;gap:4px;">
+            <button class="modal-btn secondary" style="flex:1;font-size:0.55rem;" onclick="clearNotes()">Clear</button>
+            <button class="modal-btn secondary" style="flex:1;font-size:0.55rem;" onclick="exportNotes()">Export</button>
+          </div>
         </div>
       </div>
 
@@ -1302,6 +1319,43 @@
         <div class="node-info-row"><span>Verbindungen:</span><span id="sC">0</span></div>
         <div class="node-info-row"><span>Root Switch:</span><span id="sSTP">-</span></div>
         <div class="node-info-row"><span>PDUs:</span><span id="sPDUs">0</span></div>
+      </div>
+    </div>
+
+    <!-- Help Tutorial Modal -->
+    <div class="modal-overlay" id="helpModal">
+      <div class="modal" style="max-width:500px;">
+        <div class="modal-title"><i class="ph ph-book-open"></i> Quick Start Guide</div>
+        <div style="font-size:0.65rem;line-height:1.6;">
+          <div style="margin-bottom:12px;">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:4px;">1. Add Devices</div>
+            <div style="color:var(--text-muted);">Drag devices from the left panel onto the canvas. Devices stay draggable after placement.</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:4px;">2. Connect Devices</div>
+            <div style="color:var(--text-muted);">Click on a port, then drag to another device's port. Select cable type from toolbar.</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:4px;">3. Configure Devices</div>
+            <div style="color:var(--text-muted);">Right-click a device → Config, or use the CLI for advanced commands.</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:4px;">4. Test Connectivity</div>
+            <div style="color:var(--text-muted);">Click "PDU" to send test packets. Watch the animation and logs.</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px;">
+            <div style="font-weight:600;color:var(--accent);margin-bottom:8px;">Keyboard Shortcuts:</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--text-muted);">
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">Del</kbd> Delete</div>
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">F</kbd> Fit All</div>
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">C</kbd> Center</div>
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">Esc</kbd> Deselect</div>
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">Ctrl+Z</kbd> Undo</div>
+              <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:4px;">Ctrl+S</kbd> Save</div>
+            </div>
+          </div>
+        </div>
+        <button class="modal-btn" style="margin-top:16px;width:100%;" onclick="closeM('helpModal')">Got it!</button>
       </div>
     </div>
 
@@ -4266,7 +4320,7 @@ exit                - exit current mode
       const routers = S.nodes.filter(n => n.r);
       select.innerHTML = routers.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
     }
-    
+
     // ==================== QoS PANEL ====================
     let showQoSPanel = false;
     const qosRules = [
@@ -4275,14 +4329,14 @@ exit                - exit current mode
       { name: 'Data', priority: 2, bandwidth: '20%', type: 'data' },
       { name: 'Background', priority: 1, bandwidth: '10%', type: 'bg' }
     ];
-    
+
     function toggleQoSPanel() {
       showQoSPanel = !showQoSPanel;
       document.getElementById('qosPanel').style.display = showQoSPanel ? 'block' : 'none';
       document.getElementById('btnQoS').classList.toggle('active', showQoSPanel);
       if (showQoSPanel) renderQosRules();
     }
-    
+
     function renderQosRules() {
       const list = document.getElementById('qosRulesList');
       list.innerHTML = qosRules.map((r, i) => `
@@ -4300,49 +4354,49 @@ exit                - exit current mode
         </div>
       `).join('');
     }
-    
+
     function addQosRule() {
       qosRules.push({ name: 'Custom', priority: 3, bandwidth: '15%', type: 'data' });
       renderQosRules();
     }
-    
+
     // ==================== WIRELESS PANEL ====================
     let showWirelessPanel = false;
     let wirelessNetwork = { ssid: 'NetSim_WiFi', channel: 6, security: 'wpa2', clients: [] };
-    
+
     function toggleWirelessPanel() {
       showWirelessPanel = !showWirelessPanel;
       document.getElementById('wirelessPanel').style.display = showWirelessPanel ? 'block' : 'none';
       document.getElementById('btnWireless').classList.toggle('active', showWirelessPanel);
       if (showWirelessPanel) renderWirelessClients();
     }
-    
+
     function updateWireless() {
       wirelessNetwork.ssid = document.getElementById('wlanSSID').value;
       wirelessNetwork.channel = parseInt(document.getElementById('wlanChannel').value);
       renderWirelessClients();
     }
-    
+
     // ==================== CONNECTION DETAILS ====================
     let showConnDetails = false;
     let selectedConn = null;
-    
+
     function toggleConnDetails() {
       showConnDetails = !showConnDetails;
       document.getElementById('connDetailsPanel').style.display = showConnDetails ? 'block' : 'none';
       document.getElementById('btnConnDetails').classList.toggle('active', showConnDetails);
     }
-    
+
     function selectConn(c) {
       selectedConn = c;
       const n1 = S.nodes.find(n => n.id === c.n1);
       const n2 = S.nodes.find(n => n.id === c.n2);
       if (!n1 || !n2) return;
-      
+
       const content = document.getElementById('connDetailsContent');
       const cableType = c.type === 'copper-str' ? 'Copper Straight' : c.type === 'copper-cross' ? 'Copper Cross' : c.type === 'fiber' ? 'Fiber Optic' : 'Serial DTE';
       const cableColor = c.type === 'fiber' ? 'var(--fiber)' : c.type === 'serial' ? 'var(--serial)' : 'var(--copper)';
-      
+
       content.innerHTML = `
         <div style="font-size:0.65rem;font-weight:600;margin-bottom:10px;color:var(--accent);">${n1.name} ↔ ${n2.name}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px;background:var(--bg-deep);border-radius:6px;">
@@ -4364,7 +4418,7 @@ exit                - exit current mode
         </div>
       `;
     }
-    
+
     function deleteSelectedConn() {
       if (selectedConn) {
         const idx = S.conns.indexOf(selectedConn);
@@ -4382,39 +4436,39 @@ exit                - exit current mode
         }
       }
     }
-    
+
     // ==================== STP PANEL ====================
     let showSTPPanel = false;
     let stpRootBridge = null;
-    
+
     function toggleSTP() {
       showSTPPanel = !showSTPPanel;
       document.getElementById('stpPanel').style.display = showSTPPanel ? 'block' : 'none';
       document.getElementById('btnSTP').classList.toggle('active', showSTPPanel);
       if (showSTPPanel) initSTPPanel();
     }
-    
+
     function initSTPPanel() {
       // Populate root bridge selector
       const switches = S.nodes.filter(n => n.sw);
       const select = document.getElementById('stpRoot');
-      select.innerHTML = '<option value="">Auto Select</option>' + 
+      select.innerHTML = '<option value="">Auto Select</option>' +
         switches.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       runSTP();
     }
-    
+
     function runSTP() {
       const rootId = document.getElementById('stpRoot').value;
       const switches = S.nodes.filter(n => n.sw);
-      
+
       if (switches.length === 0) {
         document.getElementById('stpTable').innerHTML = '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:10px;">No switches found</div>';
         return;
       }
-      
+
       // Auto-select root if not specified
       stpRootBridge = rootId ? S.nodes.find(n => n.id === rootId) : switches[0];
-      
+
       // Calculate STP roles
       const stpData = switches.map(sw => {
         const isRoot = sw.id === stpRootBridge?.id;
@@ -4429,7 +4483,7 @@ exit                - exit current mode
           isRoot
         };
       });
-      
+
       // Render STP table
       document.getElementById('stpTable').innerHTML = `
         <table style="width:100%;font-size:0.5rem;border-collapse:collapse;">
@@ -4458,7 +4512,7 @@ exit                - exit current mode
           </tbody>
         </table>
       `;
-      
+
       // Highlight blocked connections
       S.conns.forEach(c => {
         const n1 = S.nodes.find(n => n.id === c.n1);
@@ -4475,12 +4529,52 @@ exit                - exit current mode
       });
       drawConns();
     }
-    
+
+    // ==================== TOPOLOGY NOTES ====================
+    let showNotesPanel = false;
+
+    function toggleNotes() {
+      showNotesPanel = !showNotesPanel;
+      document.getElementById('notesPanel').style.display = showNotesPanel ? 'block' : 'none';
+      document.getElementById('btnNotes').classList.toggle('active', showNotesPanel);
+      if (showNotesPanel) loadNotes();
+    }
+
+    function saveNotes() {
+      const notes = document.getElementById('topoNotes').value;
+      localStorage.setItem('netsim_notes', notes);
+    }
+
+    function loadNotes() {
+      const notes = localStorage.getItem('netsim_notes') || '';
+      document.getElementById('topoNotes').value = notes;
+    }
+
+    function clearNotes() {
+      document.getElementById('topoNotes').value = '';
+      localStorage.removeItem('netsim_notes');
+      log('System', 'info', 'Notes cleared');
+    }
+
+    function exportNotes() {
+      const notes = document.getElementById('topoNotes').value;
+      if (!notes) {
+        alert('No notes to export');
+        return;
+      }
+      const blob = new Blob([notes], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'topology-notes-' + Date.now() + '.txt';
+      a.click();
+      log('System', 'success', 'Notes exported');
+    }
+
     // ==================== NETWORK CLOCK ====================
     let showClockPanel = false;
     let networkTime = new Date('2026-01-01T00:00:00');
     let clockInterval = null;
-    
+
     function toggleClock() {
       showClockPanel = !showClockPanel;
       document.getElementById('clockPanel').style.display = showClockPanel ? 'block' : 'none';
@@ -4488,7 +4582,7 @@ exit                - exit current mode
       if (showClockPanel) startClock();
       else stopClock();
     }
-    
+
     function startClock() {
       if (clockInterval) clearInterval(clockInterval);
       updateClock();
@@ -4497,21 +4591,21 @@ exit                - exit current mode
         updateClock();
       }, 1000);
     }
-    
+
     function stopClock() {
       if (clockInterval) {
         clearInterval(clockInterval);
         clockInterval = null;
       }
     }
-    
+
     function updateClock() {
       const time = networkTime.toLocaleTimeString('de-DE');
       const date = networkTime.toISOString().split('T')[0];
       document.getElementById('netClock').textContent = time;
       document.getElementById('netDate').textContent = date;
     }
-    
+
     function syncClock() {
       // Sync time across all devices
       S.nodes.forEach(n => {
@@ -4521,7 +4615,7 @@ exit                - exit current mode
       });
       log('System', 'success', 'Network time synchronized');
     }
-    
+
     // ==================== DNS PANEL ====================
     let showDNSPanel = false;
     const dnsRecords = [
@@ -4532,23 +4626,23 @@ exit                - exit current mode
       { domain: 'gateway.local', ip: '192.168.1.1', type: 'A' },
       { domain: 'switch.local', ip: '192.168.1.2', type: 'A' }
     ];
-    
+
     function toggleDNS() {
       showDNSPanel = !showDNSPanel;
       document.getElementById('dnsPanel').style.display = showDNSPanel ? 'block' : 'none';
       document.getElementById('btnDNS').classList.toggle('active', showDNSPanel);
       if (showDNSPanel) renderDNSRecords();
     }
-    
+
     function resolveDNS() {
       const query = document.getElementById('dnsQuery').value.trim().toLowerCase();
       const result = document.getElementById('dnsResult');
-      
+
       if (!query) {
         result.innerHTML = '<div style="color:var(--warn);">Enter a domain name</div>';
         return;
       }
-      
+
       const record = dnsRecords.find(r => r.domain.toLowerCase() === query);
       if (record) {
         result.innerHTML = `
@@ -4569,7 +4663,7 @@ exit                - exit current mode
         log('DNS', 'fail', `DNS lookup failed: ${query}`);
       }
     }
-    
+
     function renderDNSRecords() {
       const table = document.getElementById('dnsTable');
       table.innerHTML = dnsRecords.map(r => `
@@ -4580,27 +4674,27 @@ exit                - exit current mode
         </div>
       `).join('');
     }
-    
+
     // ==================== LABELS TOGGLE ====================
     let showLabels = true;
-    
+
     function toggleLabels() {
       showLabels = !showLabels;
       document.getElementById('btnLabels').classList.toggle('active', showLabels);
       updateDeviceLabels();
       log('System', 'info', showLabels ? 'Labels shown' : 'Labels hidden');
     }
-    
+
     function updateDeviceLabels() {
       // Remove existing labels
       document.querySelectorAll('.device-label').forEach(l => l.remove());
-      
+
       if (!showLabels) return;
-      
+
       S.nodes.forEach(n => {
         const el = document.getElementById(n.id);
         if (!el) return;
-        
+
         // IP label
         if (n.ip) {
           const ipLabel = document.createElement('div');
@@ -4609,7 +4703,7 @@ exit                - exit current mode
           ipLabel.textContent = n.ip;
           el.appendChild(ipLabel);
         }
-        
+
         // Name label (below IP)
         const nameLabel = document.createElement('div');
         nameLabel.className = 'device-label';
@@ -4618,7 +4712,7 @@ exit                - exit current mode
         el.appendChild(nameLabel);
       });
     }
-    
+
     function renderWirelessClients() {
       // Find wireless devices
       const wirelessDevices = S.nodes.filter(n => n.wireless || n.type?.includes('ap') || n.type?.includes('tablet') || n.type?.includes('phone'));
@@ -4631,7 +4725,7 @@ exit                - exit current mode
         </div>
       `).join('') || '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:10px;">No wireless devices</div>';
     }
-    
+
     function renderRouteTable() {
       const body = document.getElementById('routeTableBody');
       const deviceId = document.getElementById('routeDeviceSelect').value;
