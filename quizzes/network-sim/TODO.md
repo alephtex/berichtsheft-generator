@@ -170,6 +170,7 @@
 - [x] **Playwright tests** - 6 tests for basic functionality
 - [x] **Enhanced Simulation Panel** - filterable by type/layer, PDU info, hex dump
 - [x] **Activity Mode** - Guided exercises with checklist
+- [x] **CDP Neighbors Panel** - Show neighbor devices
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

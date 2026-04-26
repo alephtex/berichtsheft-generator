@@ -964,6 +964,56 @@
     .packet-detail { margin-top: 10px; padding: 8px; background: var(--bg-deep); border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.5rem; }
     .packet-detail pre { white-space: pre-wrap; word-break: break-all; }
 
+    /* CDP Neighbors Panel */
+    .cdp-panel { position: absolute; top: 60px; right: 380px; width: 360px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; max-height: 450px; }
+    .cdp-panel.show { display: flex; flex-direction: column; }
+    .cdp-header { padding: 10px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .cdp-header span { display: flex; align-items: center; gap: 6px; }
+    .cdp-content { flex: 1; overflow-y: auto; padding: 8px; }
+    .cdp-device { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+    .cdp-device-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .cdp-device-icon { font-size: 18px; color: var(--accent); }
+    .cdp-device-name { font-weight: 600; font-size: 0.65rem; }
+    .cdp-device-platform { font-size: 0.5rem; color: var(--text-muted); }
+    .cdp-neighbor { display: flex; justify-content: space-between; padding: 4px 8px; font-size: 0.55rem; border-top: 1px solid var(--border); }
+    .cdp-neighbor:first-of-type { border-top: none; }
+    .cdp-neighbor-label { color: var(--text-muted); }
+    .cdp-neighbor-value { color: var(--text-primary); font-family: 'Fira Code', monospace; }
+    .cdp-ports { display: flex; gap: 8px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+    .cdp-port { background: var(--bg-surface); padding: 4px 8px; border-radius: 4px; font-size: 0.5rem; display: flex; align-items: center; gap: 4px; }
+    .cdp-port-loc { color: var(--ok); }
+    .cdp-port-rem { color: var(--layer3); }
+    .cdp-refresh { margin-top: 8px; }
+    .cdp-refresh-btn { width: 100%; padding: 8px; background: var(--accent); color: var(--bg-deep); border: none; border-radius: 6px; cursor: pointer; font-size: 0.6rem; font-weight: 600; }
+    .cdp-refresh-btn:hover { opacity: 0.9; }
+
+    /* Interface Description Panel */
+    .iface-desc { display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: var(--bg-deep); border-radius: 4px; margin-top: 4px; }
+    .iface-desc input { flex: 1; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; color: var(--text-primary); font-size: 0.55rem; }
+    .iface-desc input:focus { border-color: var(--accent); outline: none; }
+
+    /* Port Security Panel */
+    .port-security-panel { margin-top: 8px; }
+    .security-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.55rem; border-bottom: 1px solid var(--border); }
+    .security-row:last-child { border-bottom: none; }
+    .security-status { padding: 2px 6px; border-radius: 4px; font-size: 0.45rem; }
+    .security-status.up { background: var(--ok); color: var(--bg-deep); }
+    .security-status.down { background: var(--error); color: white; }
+    .security-status.secure { background: var(--layer3); color: var(--bg-deep); }
+
+    /* VTP Panel */
+    .vtp-panel { position: absolute; top: 60px; right: 380px; width: 340px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; }
+    .vtp-panel.show { display: block; }
+    .vtp-header { padding: 10px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 600; }
+    .vtp-content { padding: 12px; }
+    .vtp-mode { display: flex; gap: 6px; margin-bottom: 12px; }
+    .vtp-mode-btn { flex: 1; padding: 6px; background: var(--glass); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); cursor: pointer; font-size: 0.55rem; transition: all 0.15s; }
+    .vtp-mode-btn:hover { border-color: var(--accent); }
+    .vtp-mode-btn.active { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+    .vtp-info { background: var(--bg-deep); border-radius: 6px; padding: 8px; font-size: 0.55rem; }
+    .vtp-info-row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .vtp-info-row span:first-child { color: var(--text-muted); }
+
     /* Delete Zone */
     .delete-zone { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: var(--error); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
     .delete-zone.show { opacity: 1; }
@@ -1451,6 +1501,45 @@
           <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px;">
             <div style="font-size:0.6rem;color:var(--text-muted);margin-bottom:6px;">Static DNS Entries:</div>
             <div id="dnsTable" style="font-size:0.5rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CDP Neighbors Panel -->
+      <div class="cdp-panel" id="cdpPanel">
+        <div class="cdp-header">
+          <span><i class="ph ph-broadcast"></i> CDP Neighbors</span>
+          <button onclick="toggleCDP()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;">×</button>
+        </div>
+        <div class="cdp-content" id="cdpContent"></div>
+        <div class="cdp-refresh">
+          <button class="cdp-refresh-btn" onclick="refreshCDP()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+        </div>
+      </div>
+
+      <!-- VTP Panel -->
+      <div class="vtp-panel" id="vtpPanel">
+        <div class="vtp-header">
+          <span><i class="ph ph-swap"></i> VTP Configuration</span>
+          <button onclick="openVTP()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;">×</button>
+        </div>
+        <div class="vtp-content">
+          <div class="form-group">
+            <label class="form-label">Domain</label>
+            <input type="text" class="form-input" id="vtpDomain" placeholder="example.com" onchange="updateVTP()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mode</label>
+            <div class="vtp-mode">
+              <button class="vtp-mode-btn active" onclick="setVTPMode('server')">Server</button>
+              <button class="vtp-mode-btn" onclick="setVTPMode('client')">Client</button>
+              <button class="vtp-mode-btn" onclick="setVTPMode('transparent')">Transparent</button>
+            </div>
+          </div>
+          <div class="vtp-info">
+            <div class="vtp-info-row"><span>Revision</span><span id="vtpRevision">0</span></div>
+            <div class="vtp-info-row"><span>VLANs</span><span>5</span></div>
+            <div class="vtp-info-row"><span>Pruning</span><span>Enabled</span></div>
           </div>
         </div>
       </div>
@@ -5781,6 +5870,111 @@ exit                - exit current mode
       log('System', 'success', 'Network time synchronized');
     }
 
+    // ==================== CDP NEIGHBORS ====================
+    let showCDP = false;
+    const cdpDevices = [];
+
+    function toggleCDP() {
+      showCDP = !showCDP;
+      const panel = document.getElementById('cdpPanel');
+      panel.classList.toggle('show', showCDP);
+      if (showCDP) {
+        refreshCDP();
+        log('CDP', 'info', 'CDP Neighbors aktualisiert');
+      }
+    }
+
+    function refreshCDP() {
+      const content = document.getElementById('cdpContent');
+      const switches = S.nodes.filter(n => n.sw);
+      const routers = S.nodes.filter(n => n.r);
+      const devices = [...switches, ...routers];
+      
+      if (devices.length === 0) {
+        content.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:0.6rem;">Keine Cisco-Geräte gefunden</div>';
+        return;
+      }
+      
+      content.innerHTML = devices.map(n => {
+        // Find connected neighbors
+        const neighbors = findCDPNeighbors(n);
+        const icon = n.r ? 'ph-router' : 'ph-swap-horizontal';
+        const platform = n.r ? 'Cisco Router' : 'Cisco Switch';
+        const ports = S.conns.filter(c => c.s === n.id || c.d === n.id);
+        
+        return `
+          <div class="cdp-device">
+            <div class="cdp-device-header">
+              <i class="ph ${icon} cdp-device-icon"></i>
+              <div>
+                <div class="cdp-device-name">${n.name}</div>
+                <div class="cdp-device-platform">${platform} - ${n.devName || 'Generic'}</div>
+              </div>
+            </div>
+            ${neighbors.map(neigh => `
+              <div class="cdp-neighbor">
+                <span class="cdp-neighbor-label">Local: ${neigh.localPort}</span>
+                <span class="cdp-neighbor-value">${neigh.name}</span>
+              </div>
+              <div class="cdp-neighbor">
+                <span class="cdp-neighbor-label">Remote:</span>
+                <span class="cdp-neighbor-value">${neigh.remotePort}</span>
+              </div>
+            `).join('')}
+            <div class="cdp-ports">
+              ${ports.map((p, i) => {
+                const portName = n.r ? `GigabitEthernet0/${i}` : `FastEthernet0/${i}`;
+                const connected = p.s === n.id ? S.nodes.find(x => x.id === p.d) : S.nodes.find(x => x.id === p.s);
+                return `<div class="cdp-port"><span class="cdp-port-loc">${portName}</span><span style="color:var(--text-muted)">→</span><span class="cdp-port-rem">${connected?.name || '-'}</span></div>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function findCDPNeighbors(device) {
+      const neighbors = [];
+      S.conns.forEach(c => {
+        if (c.s === device.id) {
+          const other = S.nodes.find(n => n.id === c.d);
+          if (other) neighbors.push({ name: other.name, localPort: 'Gi0/' + c.sp, remotePort: 'Gi0/' + c.dp });
+        } else if (c.d === device.id) {
+          const other = S.nodes.find(n => n.id === c.s);
+          if (other) neighbors.push({ name: other.name, localPort: 'Gi0/' + c.dp, remotePort: 'Gi0/' + c.sp });
+        }
+      });
+      return neighbors;
+    }
+
+    // ==================== VTP CONFIGURATION ====================
+    let vtpMode = 'server';
+    let vtpDomain = '';
+    let vtpRevision = 0;
+
+    function openVTP() {
+      const panel = document.getElementById('vtpPanel');
+      panel.classList.toggle('show');
+      if (panel.classList.contains('show')) {
+        log('VTP', 'info', 'VTP Configuration geöffnet');
+      }
+    }
+
+    function setVTPMode(mode) {
+      vtpMode = mode;
+      document.querySelectorAll('.vtp-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
+      });
+      log('VTP', 'info', `VTP Mode: ${mode}`);
+    }
+
+    function updateVTP() {
+      vtpDomain = document.getElementById('vtpDomain').value;
+      vtpRevision++;
+      document.getElementById('vtpRevision').textContent = vtpRevision;
+      log('VTP', 'success', `Domain: ${vtpDomain}`);
+    }
+
     // ==================== ACTIVITY MODE ====================
     let activityMode = false;
     let currentActivity = 0;
@@ -7079,8 +7273,19 @@ ${target.name}# `;
     let cdpMessages = [];
 
     function openCDP() {
-      document.getElementById('cdpModal').classList.add('show');
-      updateCDPMessages();
+      // Toggle both modal and panel
+      const modal = document.getElementById('cdpModal');
+      const panel = document.getElementById('cdpPanel');
+      if (modal.classList.contains('show')) {
+        modal.classList.remove('show');
+      } else {
+        modal.classList.add('show');
+        updateCDPMessages();
+      }
+      // Also update panel
+      if (panel.classList.contains('show')) {
+        panel.classList.remove('show');
+      }
     }
 
     function runCDP() {
