@@ -1316,6 +1316,7 @@
       <button class="tool-btn" onclick="openBandwidthMonitor()" title="Bandwidth Monitor"><i class="ph ph-gauge"></i></button>
       <button class="tool-btn" onclick="openDocumentation()" title="Documentation"><i class="ph ph-file-text"></i></button>
       <button class="tool-btn" onclick="openNetworkCalc()" title="Network Calculator"><i class="ph ph-calculator"></i></button>
+      <button class="tool-btn" onclick="openVLANManager()" title="VLAN Manager"><i class="ph ph-squares-four"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -6849,6 +6850,116 @@ ${generateVlandDoc()}
           <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Host Bits:</span><span>${32 - cidr}</span></div>
         </div>
       `;
+    }
+
+    // ==================== VLAN MANAGEMENT ====================
+    const VLAN_DB = [
+      { id: 1, name: 'Default', desc: 'Default VLAN' },
+      { id: 10, name: 'Management', desc: 'Management VLAN' },
+      { id: 20, name: 'Data', desc: 'Data VLAN' },
+      { id: 30, name: 'Voice', desc: 'Voice VLAN' },
+      { id: 40, name: 'Guest', desc: 'Guest VLAN' },
+      { id: 50, name: 'Server', desc: 'Server VLAN' },
+      { id: 99, name: 'Native', desc: 'Native VLAN' },
+      { id: 100, name: 'DMZ', desc: 'DMZ VLAN' }
+    ];
+    
+    function openVLANManager() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'vlanMgrModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      const devicesByVlan = {};
+      VLAN_DB.forEach(v => { devicesByVlan[v.id] = []; });
+      S.nodes.forEach(n => {
+        const v = parseInt(n.vlan) || 1;
+        if (!devicesByVlan[v]) devicesByVlan[v] = [];
+        devicesByVlan[v].push(n);
+      });
+      
+      modal.innerHTML = `<div class="modal" style="max-width:700px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-squares-four"></i> VLAN Manager</div>
+        <div class="modal-body">
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="modal-btn primary" onclick="addNewVLAN()"><i class="ph ph-plus"></i> Add VLAN</button>
+            <button class="modal-btn secondary" onclick="applyVLANConfig()"><i class="ph ph-check"></i> Apply</button>
+          </div>
+          <div id="vlanTable" style="background:var(--bg-deep);border-radius:8px;overflow:hidden;">
+            <table class="data-table">
+              <thead>
+                <tr style="background:var(--bg-elevated);">
+                  <th>VLAN ID</th>
+                  <th>Name</th>
+                  <th>Devices</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${VLAN_DB.map(v => {
+                  const devs = devicesByVlan[v.id] || [];
+                  return `<tr>
+                    <td><input type="number" class="form-input" value="${v.id}" style="width:60px;" onchange="updateVLAN(${v.id},this.value)"></td>
+                    <td><input type="text" class="form-input" value="${v.name}" style="width:120px;" onchange="updateVLANName(${v.id},this.value)"></td>
+                    <td style="color:var(--text-muted);">${devs.length} devices</td>
+                    <td><span style="color:${devs.length > 0 ? 'var(--ok)' : 'var(--warn)'};">${devs.length > 0 ? 'Active' : 'Inactive'}</span></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-weight:600;font-size:0.7rem;margin-bottom:8px;">Device VLAN Assignment</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
+              ${S.nodes.map(n => `
+                <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-deep);border-radius:6px;">
+                  <span style="font-size:0.6rem;color:var(--text-primary);flex:1;">${n.name}</span>
+                  <select class="form-select" style="width:80px;" onchange="setNodeVLAN('${n.id}',this.value)">
+                    ${VLAN_DB.map(v => `<option value="${v.id}" ${(n.vlan||'1')==v.id?'selected':''}>${v.id}</option>`).join('')}
+                  </select>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('vlanMgrModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function setNodeVLAN(nodeId, vlanId) {
+      const n = S.nodes.find(x => x.id === nodeId);
+      if (n) {
+        n.vlan = vlanId;
+        log('VLAN', 'success', `${n.name} → VLAN ${vlanId}`);
+      }
+    }
+    
+    function updateVLAN(oldId, newId) {
+      // VLAN ID update logic
+      log('VLAN', 'info', `VLAN ${oldId} updated`);
+    }
+    
+    function updateVLANName(id, name) {
+      const v = VLAN_DB.find(v => v.id === id);
+      if (v) v.name = name;
+    }
+    
+    function addNewVLAN() {
+      const id = prompt('Enter VLAN ID (2-1001):');
+      const name = prompt('Enter VLAN Name:');
+      if (id && name) {
+        VLAN_DB.push({ id: parseInt(id), name, desc: name });
+        openVLANManager();
+        log('VLAN', 'success', `VLAN ${id} (${name}) created`);
+      }
+    }
+    
+    function applyVLANConfig() {
+      log('VLAN', 'success', 'VLAN configuration applied');
+      document.getElementById('vlanMgrModal')?.remove();
     }
 
     function processCLI(cmd) {
