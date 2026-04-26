@@ -199,6 +199,7 @@
 - [x] **JSON Export/Import** - Full topology save/load, settings preservation
 - [x] **Device Grouping** - Group selected devices, visual grouping, toolbar buttons
 - [x] **Auto-Layout** - Layer-based layout, tree layout algorithms, toolbar buttons
+- [x] **Zoom to Selection** - Zoom controls, breadcrumb navigation, device zoom
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

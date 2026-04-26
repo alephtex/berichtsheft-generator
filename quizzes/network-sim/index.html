@@ -406,18 +406,18 @@
     .conn-bw.slow { fill: var(--warn); }
     .conn-dist { font-size: 0.4rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
     .port-end-label { font-size: 0.35rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
-    
+
     /* Port Connection Quality Indicator */
     .conn-quality { font-size: 0.45rem; fill: var(--ok); }
     .conn-quality.warn { fill: var(--warn); }
     .conn-quality.error { fill: var(--error); }
-    
+
     /* Traffic Mini Graph */
     .traffic-graph { display: flex; align-items: flex-end; gap: 1px; height: 20px; width: 50px; background: var(--bg-deep); border-radius: 3px; padding: 2px; }
     .traffic-bar { flex: 1; background: var(--layer3); border-radius: 1px; min-width: 3px; transition: height 0.3s ease; }
     .traffic-bar.in { background: var(--ok); }
     .traffic-bar.out { background: var(--accent); }
-    
+
     /* Interface Detail View */
     .if-detail { background: var(--bg-deep); border-radius: 8px; padding: 10px; margin: 4px 0; border-left: 3px solid var(--accent); }
     .if-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -521,7 +521,7 @@
     }
     .sim-node:hover { box-shadow: 0 0 25px var(--glow); }
     .sim-node:hover .node-tooltip { display: block; }
-    
+
     /* Device Hover Tooltip */
     .node-tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--bg-surface); border: 1px solid var(--accent); border-radius: 8px; padding: 10px; min-width: 150px; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-bottom: 8px; }
     .node-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--accent); }
@@ -631,7 +631,7 @@
       transform: scale(1.5);
     }
     @keyframes targetPulse { 0%, 100% { box-shadow: 0 0 10px var(--ok); } 50% { box-shadow: 0 0 25px var(--ok); } }
-    
+
     .port-label {
       position: absolute;
       bottom: 100%;
@@ -701,17 +701,17 @@
     /* Selection Glow Effect */
     .sim-node.selected { animation: selectedGlow 2s ease-in-out infinite; }
     @keyframes selectedGlow { 0%, 100% { box-shadow: 0 0 15px var(--accent), 0 0 30px rgba(201, 162, 39, 0.3); } 50% { box-shadow: 0 0 25px var(--accent), 0 0 50px rgba(201, 162, 39, 0.5); } }
-    
+
     /* Dragging States */
-    .sim-node.dragging { 
-      cursor: grabbing !important; 
+    .sim-node.dragging {
+      cursor: grabbing !important;
       transform: scale(1.05) !important;
       box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px var(--accent) !important;
       z-index: 1000 !important;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    .sim-node.dragging { 
-      cursor: grabbing !important; 
+    .sim-node.dragging {
+      cursor: grabbing !important;
       transform: scale(1.05);
       box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px rgba(201, 162, 39, 0.3);
       z-index: 1000;
@@ -720,14 +720,14 @@
     .sim-node.dragging .node-front-panel { border-color: var(--accent); box-shadow: 0 0 15px rgba(201, 162, 39, 0.5); }
     .sim-node.snapping { animation: snapPulse 0.3s ease-out; }
     @keyframes snapPulse { 0% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    .sim-node.landing { 
-      animation: landDrop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+    .sim-node.landing {
+      animation: landDrop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    @keyframes landDrop { 
-      0% { transform: scale(1.08); opacity: 0.8; } 
-      50% { transform: scale(0.97); } 
+    @keyframes landDrop {
+      0% { transform: scale(1.08); opacity: 0.8; }
+      50% { transform: scale(0.97); }
       75% { transform: scale(1.02); }
-      100% { transform: scale(1); opacity: 1; } 
+      100% { transform: scale(1); opacity: 1; }
     }
     .sim-node.selected:not(.dragging) { cursor: grab; }
     .sim-node:hover:not(.dragging) { cursor: grab; }
@@ -739,21 +739,21 @@
     .snap-guide.h { animation: guidePulse 0.5s ease-in-out infinite; }
     .snap-guide.v { animation: guidePulse 0.5s ease-in-out infinite; }
     @keyframes guidePulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
-    .selection-box { 
-      position: absolute; 
-      border: 1px dashed var(--accent); 
-      background: rgba(201, 162, 39, 0.1); 
-      pointer-events: none; 
+    .selection-box {
+      position: absolute;
+      border: 1px dashed var(--accent);
+      background: rgba(201, 162, 39, 0.1);
+      pointer-events: none;
       z-index: 998;
       border-radius: 2px;
     }
-    .sim-node.in-selection { 
-      outline: 2px solid var(--ok); 
+    .sim-node.in-selection {
+      outline: 2px solid var(--ok);
       outline-offset: 2px;
       animation: selectPulse 0.3s ease-out;
     }
     @keyframes selectPulse { 0% { transform: scale(1.05); } 100% { transform: scale(1); } }
-    
+
     /* Port Activity Flash */
     .port-active { animation: portFlash 0.3s ease-out; }
     @keyframes portFlash { 0% { transform: scale(1.8); background: var(--accent); } 100% { transform: scale(1); } }
@@ -764,10 +764,10 @@
     .snap-guide.v { width: 2px; }
     .snap-guide-label { position: absolute; background: var(--accent); color: var(--bg-deep); font-size: 0.5rem; padding: 2px 4px; border-radius: 3px; }
     .snap-guide.strong { opacity: 1; background: var(--ok); }
-    
+
     /* Alignment Helpers */
     .align-helper { position: absolute; pointer-events: none; z-index: 998; border: 2px dashed var(--ok); opacity: 0.8; border-radius: 4px; background: rgba(90, 138, 106, 0.1); }
-    
+
     /* Device Groups */
     .device-group {
       transition: all 0.3s ease;
@@ -800,16 +800,16 @@
       justify-content: center;
     }
     .align-helper-label { position: absolute; top: -16px; left: 0; background: var(--ok); color: var(--bg-deep); font-size: 0.45rem; padding: 2px 4px; border-radius: 3px; }
-    
+
     /* Drop Zone Indicator */
     .drop-zone { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
     .drop-zone.dragover { background: radial-gradient(ellipse at center, rgba(201, 162, 39, 0.1) 0%, transparent 70%); }
     .drop-indicator { position: absolute; border: 2px dashed var(--accent); border-radius: 8px; pointer-events: none; z-index: 997; opacity: 0; transition: opacity 0.2s; }
     .drop-indicator.visible { opacity: 0.5; }
-    
+
     /* Drag Ghost */
     .sim-node.drag-ghost { opacity: 0.5; }
-    
+
     /* Connection Preview Line */
     .conn-preview { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
     .conn-preview line { stroke-width: 3; stroke-linecap: round; animation: dashMove 0.3s linear infinite; }
@@ -819,7 +819,7 @@
     @keyframes dashMove { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -20; } }
     .conn-preview line { stroke-dasharray: 10, 5; }
     @keyframes trafficFlow { 0% { transform: translateX(0); } 100% { transform: translateX(20px); } }
-    
+
     .conn-label {
       font-size: 9px;
       fill: var(--text-muted);
@@ -852,25 +852,25 @@
     .conn-preview.serial line { stroke: var(--serial); filter: drop-shadow(0 0 10px var(--serial)); }
 
     /* Quick Connect Label */
-    .quick-connect { 
-      position: fixed; 
-      background: linear-gradient(135deg, var(--accent), #b8942a); 
-      color: var(--bg-deep); 
-      padding: 6px 12px; 
-      border-radius: 16px; 
-      font-size: 0.6rem; 
-      font-weight: 600; 
-      pointer-events: none; 
-      z-index: 5001; 
-      white-space: nowrap; 
-      transform: translate(-50%, -120%); 
+    .quick-connect {
+      position: fixed;
+      background: linear-gradient(135deg, var(--accent), #b8942a);
+      color: var(--bg-deep);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 5001;
+      white-space: nowrap;
+      transform: translate(-50%, -120%);
       box-shadow: 0 4px 15px rgba(201, 162, 39, 0.5);
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .quick-connect.valid { 
-      background: linear-gradient(135deg, var(--ok), #3a7a4a); 
+    .quick-connect.valid {
+      background: linear-gradient(135deg, var(--ok), #3a7a4a);
       box-shadow: 0 4px 15px rgba(90, 138, 106, 0.5);
     }
     .quick-connect .conn-type { font-size: 0.5rem; opacity: 0.8; }
@@ -921,7 +921,7 @@
     .status-label { color: var(--text-muted); }
     .status-value { font-weight: 600; }
     .status-sep { width: 1px; height: 16px; background: var(--border); }
-    
+
     /* Zoom Controls */
     .zoom-controls { display: flex; align-items: center; gap: 4px; background: var(--bg-elevated); padding: 4px 8px; border-radius: 16px; }
     .zoom-btn { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 4px; width: 22px; height: 22px; color: var(--accent); cursor: pointer; font-size: 0.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
@@ -1306,7 +1306,7 @@
 
       <!-- Zoom Controls -->
       <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+        <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">-</button>
         <input type="range" id="zoomSlider" min="30" max="300" value="100" onchange="setZoom(this.value)">
         <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
         <span id="zoomLabel" style="font-size:0.5rem;min-width:35px;text-align:center;">100%</span>
@@ -1664,7 +1664,7 @@
         <div class="context-item" onclick="ctxPower()"><i class="ph ph-power"></i> Power Toggle</div>
         <div class="context-item danger" onclick="ctxDelete()"><i class="ph ph-trash"></i> Löschen</div>
       </div>
-      
+
       <!-- Quick VLAN Popup -->
       <div id="quickVLANPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:20px;z-index:10001;box-shadow:0 8px 40px rgba(0,0,0,0.6);min-width:250px;">
         <div style="font-weight:600;font-size:0.7rem;margin-bottom:12px;color:var(--accent);"><i class="ph ph-stack"></i> Quick VLAN Assignment</div>
@@ -1864,7 +1864,7 @@
           <span><i class="ph ph-eye"></i> Simulation</span>
           <button onclick="closeSimPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;">×</button>
         </div>
-        
+
         <!-- Filters -->
         <div class="sim-filters">
           <button class="sim-filter all active" onclick="setSimFilter('all', this)">Alle</button>
@@ -1881,13 +1881,13 @@
           <button class="layer-filter" onclick="setLayerFilter('L4', this)">L4</button>
           <button class="layer-filter" onclick="setLayerFilter('L7', this)">L7</button>
         </div>
-        
+
         <!-- Packet List -->
         <div id="captureList" class="capture-list"></div>
-        
+
         <!-- Packet Detail -->
         <div id="packetDetail" class="packet-detail"></div>
-        
+
         <!-- Simulation Controls -->
         <div class="sim-controls">
           <button class="sim-btn" onclick="simReset()" title="Reset Simulation"><i class="ph ph-arrow-counter-clockwise"></i></button>
@@ -1896,14 +1896,14 @@
           <button class="sim-btn" id="simPlayBtn" onclick="simPlayPause()" title="Play/Pause"><i class="ph ph-play"></i></button>
           <button class="sim-btn" onclick="simBurst()" title="Burst (5x)"><i class="ph ph-lightning"></i></button>
         </div>
-        
+
         <!-- Speed Control -->
         <div class="sim-speed-control">
           <span class="sim-speed-label">Speed:</span>
           <input type="range" class="sim-speed-slider" id="simSpeedSlider" min="10" max="1000" value="500" onchange="updateSimSpeed()">
           <span class="sim-speed-value" id="simSpeedValue">500ms</span>
         </div>
-        
+
         <!-- Status -->
         <div class="sim-status">
           <div class="sim-status-dot" id="simStatusDot"></div>
@@ -2199,9 +2199,23 @@
     <div class="status-bar">
       <div class="status-item"><span class="status-label">⏱</span><span class="status-value" id="sClock" style="font-family:'Fira Code',monospace;">00:00:00</span></div>
       <div class="status-sep"></div>
+      <!-- Breadcrumb Navigation -->
+      <div class="breadcrumb" id="breadcrumb">
+        <span class="breadcrumb-item active" onclick="resetView()">
+          <i class="ph ph-house"></i> Home
+        </span>
+      </div>
+      <div class="status-sep"></div>
       <div class="status-item"><span class="status-label">Modus:</span><span class="status-value" id="sMode">Echtzeit</span></div>
       <div class="status-item"><span class="status-label">WS:</span><span class="status-value" id="sWS">Logical</span></div>
-      <div class="status-item"><span class="status-label">Zoom:</span><span class="status-value" id="sZoom">100%</span></div>
+      <div class="status-item">
+        <button onclick="zoomOut()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0 2px;">-</button>
+        <span class="status-value" id="sZoom">100%</span>
+        <button onclick="zoomIn()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0 2px;">+</button>
+      </div>
+      <div class="status-item">
+        <button onclick="zoomToSelection()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.55rem;" title="Zoom to Selection">Sel</button>
+      </div>
       <div class="status-item"><span class="status-label">Sel:</span><span class="status-value" id="sSel">-</span></div>
       <div class="status-sep"></div>
       <div class="status-item"><span class="status-label">📦</span><span class="status-value" id="sDevs">0</span></div>
@@ -2212,6 +2226,13 @@
       <div class="status-item"><span class="status-label">Links:</span><span class="status-value" id="sLinks">0</span></div>
       <div class="status-item"><span class="status-label">PKTs:</span><span class="status-value" id="sPkts">0</span></div>
     </div>
+    <style>
+      .breadcrumb { display: flex; align-items: center; gap: 4px; }
+      .breadcrumb-item { color: var(--text-muted); cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 0.55rem; display: flex; align-items: center; gap: 4px; }
+      .breadcrumb-item:hover { background: var(--glass-light); color: var(--text-primary); }
+      .breadcrumb-item.active { color: var(--accent); }
+      .breadcrumb-sep { color: var(--text-muted); font-size: 0.5rem; }
+    </style>
 
     <!-- Activity Mode Panel -->
     <div class="activity-panel" id="activityPanel">
@@ -3261,23 +3282,23 @@
       initPZ();
       initCanvas();
       initLasso();
-      
+
       // Check for network issues periodically
       setInterval(checkNetworkHealth, 10000);
       log('System', 'success', 'NetSim Pro v4.6 geladen');
     }
-    
+
     // ==================== QUICK CONFIG WIZARD ====================
     function openQuickConfigWizard() {
       if (S.nodes.length === 0) {
         log('System', 'warn', 'Keine Geräte vorhanden');
         return;
       }
-      
+
       const routers = S.nodes.filter(n => n.r);
       const switches = S.nodes.filter(n => n.sw);
       const endDevices = S.nodes.filter(n => n.end || n.srv);
-      
+
       document.getElementById('configWizardContent').innerHTML = `
         <div class="config-step active" id="step1">
           <div style="font-size:0.7rem;font-weight:600;color:var(--accent);margin-bottom:12px;">
@@ -3302,7 +3323,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="config-step" id="step2">
           <div style="font-size:0.7rem;font-weight:600;color:var(--accent);margin-bottom:12px;">
             <i class="ph ph-globe"></i> Schritt 2: Router-Konfiguration
@@ -3321,7 +3342,7 @@
             <input type="text" class="form-input" id="cfgGateway" placeholder="z.B. 192.168.1.1">
           </div>
         </div>
-        
+
         <div class="config-step" id="step3">
           <div style="font-size:0.7rem;font-weight:600;color:var(--accent);margin-bottom:12px;">
             <i class="ph ph-desktop"></i> Schritt 3: Endgeräte-Konfiguration
@@ -3337,7 +3358,7 @@
             ${endDevices.length} Endgeräte werden konfiguriert
           </div>
         </div>
-        
+
         <div class="config-summary" id="configSummary">
           <div style="font-size:0.7rem;font-weight:600;color:var(--ok);margin-bottom:8px;">Zusammenfassung</div>
           <div style="font-size:0.6rem;color:var(--text-muted);">
@@ -3346,7 +3367,7 @@
             <div>💻 Endgeräte: <span id="sumDevices">${endDevices.length}</span></div>
           </div>
         </div>
-        
+
         <div style="display:flex;gap:8px;margin-top:16px;">
           <button class="modal-btn secondary" style="flex:1;" onclick="closeM('quickConfigModal')">Abbrechen</button>
           <button class="modal-btn primary" style="flex:1;" onclick="runQuickConfig()">
@@ -3354,21 +3375,21 @@
           </button>
         </div>
       `;
-      
+
       openM('quickConfigModal');
     }
-    
+
     function runQuickConfig() {
       saveState();
-      
+
       const subnet = document.getElementById('cfgSubnet').value;
       const mask = document.getElementById('cfgMask').value;
       const method = document.getElementById('cfgMethod').value;
       const gateway = document.getElementById('cfgGateway').value;
-      
+
       let ipSuffix = 2;
       let configured = 0;
-      
+
       // Configure routers first
       S.nodes.filter(n => n.r).forEach(r => {
         const inputVal = document.getElementById(`cfg_router_${r.id}`)?.value;
@@ -3381,7 +3402,7 @@
         r.subnet = mask === '24' ? '255.255.255.0' : mask === '16' ? '255.255.0.0' : '255.255.240.0';
         configured++;
       });
-      
+
       // Configure end devices
       S.nodes.filter(n => n.end || n.srv).forEach(n => {
         if (method === 'static') {
@@ -3392,7 +3413,7 @@
         n.gateway = gateway || `${subnet}.0.1`;
         configured++;
       });
-      
+
       // Update visuals
       S.nodes.forEach(n => {
         const el = document.getElementById(n.id);
@@ -3401,29 +3422,29 @@
           if (info) info.innerHTML = renderInfo(n);
         }
       });
-      
+
       updateSmartLabels();
       closeM('quickConfigModal');
       log('Config', 'success', `${configured} Geräte mit IP ${subnet}.0.x konfiguriert`);
     }
-    
+
     // ==================== AUTO-CONFIGURE NETWORK ====================
     function autoConfigure() {
       if (S.nodes.length === 0) {
         log('System', 'warn', 'Keine Geräte vorhanden');
         return;
       }
-      
+
       saveState();
       let configured = 0;
-      
+
       // Group devices by connection clusters
       const clusters = findClusters();
-      
+
       clusters.forEach((cluster, idx) => {
         const baseIP = `192.168.${idx + 1}.`;
         let ipSuffix = 1;
-        
+
         cluster.forEach(n => {
           if (n.r) {
             n.ip = baseIP + '1';
@@ -3437,7 +3458,7 @@
           configured++;
         });
       });
-      
+
       // Update visuals
       S.nodes.forEach(n => {
         const el = document.getElementById(n.id);
@@ -3446,28 +3467,28 @@
           if (info) info.innerHTML = renderInfo(n);
         }
       });
-      
+
       updateSmartLabels();
       drawConns();
       log('Config', 'success', `${configured} Geräte automatisch konfiguriert`);
     }
-    
+
     function findClusters() {
       const visited = new Set();
       const clusters = [];
-      
+
       S.nodes.forEach(n => {
         if (visited.has(n.id)) return;
-        
+
         const cluster = [];
         const queue = [n];
-        
+
         while (queue.length > 0) {
           const current = queue.shift();
           if (visited.has(current.id)) continue;
           visited.add(current.id);
           cluster.push(current);
-          
+
           // Find connected nodes
           S.conns.forEach(c => {
             const neighborId = c.n1 === current.id ? c.n2 : c.n1 === current.id ? c.n1 : null;
@@ -3479,37 +3500,37 @@
             }
           });
         }
-        
+
         if (cluster.length > 0) {
           clusters.push(cluster);
         }
       });
-      
+
       return clusters;
     }
-    
+
     // Network health check
     function checkNetworkHealth() {
       const issues = [];
-      
+
       S.nodes.forEach(n => {
         // Check for unconfigured devices
         if (!n.ip && (n.r || n.srv)) {
           issues.push({ type: 'warn', msg: `${n.name} hat keine IP-Adresse` });
         }
-        
+
         // Check for unreachable routers
         if (n.r && !n.gateway) {
           issues.push({ type: 'error', msg: `${n.name}: Gateway fehlt` });
         }
       });
-      
+
       // Show issues in log if any
       if (issues.length > 0 && issues.length <= 3) {
         issues.forEach(i => log('Health', i.type, i.msg));
       }
     }
-    
+
     // ==================== INIT ====================
     function init() {
       renderDevs();
@@ -3518,7 +3539,7 @@
       initLasso();
       setInterval(checkNetworkHealth, 10000);
       log('System', 'success', '🌐 NetSim Pro v4.6 geladen');
-      
+
       // Show welcome message for new users
       if (!localStorage.getItem('netsim_welcomed')) {
         setTimeout(() => {
@@ -3526,17 +3547,17 @@
           localStorage.setItem('netsim_welcomed', 'true');
         }, 500);
       }
-      
+
       document.getElementById('cliTerm').innerHTML = `
         <div style="color:var(--ok)">Cisco IOS Simulation v15.x</div>
         <div style="color:var(--text-muted)">Commands: help, show ?, configure terminal, interface, exit</div>
       `;
-      
+
       // Show keyboard shortcuts hint
       setTimeout(() => {
         log('System', 'info', 'Tastenkürzel: Del=Löschen, Esc=Schließen, F=Fit, C=Center');
       }, 1500);
-      
+
       // Load from autosave if available
       loadFromLocalStorage();
     }
@@ -3564,7 +3585,7 @@
       document.querySelectorAll('.device-filter').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.toLowerCase() === filter || (filter === 'all' && btn.textContent === 'Alle'));
       });
-      
+
       // Show/hide sections
       const sections = {
         sectionEnd: ['end'],
@@ -3574,7 +3595,7 @@
         sectionSrv: ['srv'],
         sectionWan: ['wan']
       };
-      
+
       Object.entries(sections).forEach(([id, types]) => {
         const el = document.getElementById(id);
         if (el) {
@@ -3582,7 +3603,7 @@
           el.classList.toggle('hidden', !show);
         }
       });
-      
+
       filterDevices();
     }
 
@@ -3621,11 +3642,50 @@
       updZoom();
     }
 
+    function zoomToSelection() {
+      if (!S.sel || S.sel.length === 0) {
+        log('System', 'warn', 'Keine Geräte ausgewählt');
+        return;
+      }
+
+      const selNodes = S.nodes.filter(n => S.sel.includes(n.id));
+      if (selNodes.length === 0) return;
+
+      const minX = Math.min(...selNodes.map(n => n.x));
+      const maxX = Math.max(...selNodes.map(n => n.x + 100));
+      const minY = Math.min(...selNodes.map(n => n.y));
+      const maxY = Math.max(...selNodes.map(n => n.y + 80));
+
+      const cw = document.getElementById('canvas').clientWidth;
+      const ch = document.getElementById('canvas').clientHeight;
+      const pad = 100;
+      const scaleX = (cw - pad * 2) / (maxX - minX + 100);
+      const scaleY = (ch - pad * 2) / (maxY - minY + 100);
+      const scale = Math.min(scaleX, scaleY, 2, 0.5);
+
+      S.pz.zoom(scale, { animate: true });
+      S.pz.pan(-minX * scale + cw / 2 - (maxX - minX + 100) * scale / 2, -minY * scale + ch / 2 - (maxY - minY + 80) * scale / 2);
+      updZoom();
+      log('System', 'info', `Zoom zu ${selNodes.length} Geräten`);
+    }
+
+    function zoomToDevice(deviceId) {
+      const n = S.nodes.find(x => x.id === deviceId);
+      if (!n) return;
+
+      const cw = document.getElementById('canvas').clientWidth;
+      const ch = document.getElementById('canvas').clientHeight;
+
+      S.pz.zoom(1.5, { animate: true });
+      S.pz.pan(-n.x * 1.5 + cw / 2 - 50, -n.y * 1.5 + ch / 2 - 40);
+      updZoom();
+    }
+
     function updZoom() { document.getElementById('sZoom').textContent = Math.round(S.pz.getScale() * 100) + '%'; updateMiniMap(); }
 
     // ==================== UNDO/REDO ====================
     let stateLabel = 'Initial';
-    
+
     function saveState(label = 'Change') {
       const state = JSON.stringify({ nodes: S.nodes.map(n => ({...n, x: n.x, y: n.y})), conns: S.conns });
       S.undoStack.push({ state, label: stateLabel, time: Date.now() });
@@ -3726,7 +3786,7 @@
       updZoom();
       log('System', 'info', `${selected.length} Geräte fokussiert`);
     }
-    
+
     // ==================== MINI MAP ====================
     function updateMiniMap() {
       if (S.nodes.length === 0) {
@@ -3791,8 +3851,8 @@
     function ctxDelete() { if (S.ctxNode) { S.sel = S.ctxNode; deleteSelected(); } hideContextMenu(); }
     function ctxConfig() { if (S.ctxNode) { sel(S.ctxNode, document.getElementById(S.ctxNode.id)); } hideContextMenu(); }
     function ctxCLI() { if (S.ctxNode) { S.sel = S.ctxNode; openCLI(); } hideContextMenu(); }
-    function ctxDuplicate() { 
-      if (!S.ctxNode) return; 
+    function ctxDuplicate() {
+      if (!S.ctxNode) return;
       const n = S.ctxNode;
       // Find device template
       const type = n.r ? 'r' : n.sw ? 'sw' : n.wireless ? 'wireless' : n.srv ? 'srv' : n.wan ? 'wan' : 'end';
@@ -3814,7 +3874,7 @@
     }
     function ctxCopy() { if (S.ctxNode) { const el = document.getElementById(S.ctxNode.id); const rect = el.getBoundingClientRect(); const dev = DEVS.end.find(d => d.name === S.ctxNode.name) || DEVS.sw.find(d => d.name === S.ctxNode.name) || DEVS.r.find(d => d.name === S.ctxNode.name); if (dev) createNode(dev, S.ctxNode.x + 50, S.ctxNode.y + 50); } hideContextMenu(); }
     function ctxInspect() { hideContextMenu(); openInspectPanel(S.ctxNode); }
-    
+
     let quickVLANNode = null;
     function ctxQuickVLAN() {
       if (!S.ctxNode) return;
@@ -4031,7 +4091,7 @@
             width: parseFloat(selBox.style.width),
             height: parseFloat(selBox.style.height)
           };
-          
+
           // Select nodes within box
           S.nodes.forEach(n => {
             const el = document.getElementById(n.id);
@@ -4044,7 +4104,7 @@
               right: elRect.right - canvasRect.left,
               bottom: elRect.bottom - canvasRect.top
             };
-            
+
             if (elInCanvas.left < selRect.left + selRect.width &&
                 elInCanvas.right > selRect.left &&
                 elInCanvas.top < selRect.top + selRect.height &&
@@ -4055,7 +4115,7 @@
               el.classList.remove('in-selection');
             }
           });
-          
+
           selBox.remove();
           selBox = null;
           selStart = null;
@@ -4146,7 +4206,7 @@
 
         dragSt = { node: n, el, startX: e.clientX, startY: e.clientY, origX: n.x, origY: n.y, moved: false };
         el.classList.add('dragging');
-        
+
         // Remove old guides
         document.querySelectorAll('.snap-guide, .align-helper').forEach(g => g.remove());
 
@@ -4156,12 +4216,12 @@
           const sc = S.pz.getScale();
           dragSt.node.x = dragSt.origX + dx / sc;
           dragSt.node.y = dragSt.origY + dy / sc;
-          
+
           // Snap to grid guides
           document.querySelectorAll('.snap-guide').forEach(g => g.remove());
           const snapped = snapPos(dragSt.node.x, dragSt.node.y);
           const gs = S.gridSize;
-          
+
           // Show horizontal guide if close to grid
           if (Math.abs(dragSt.node.y - snapped.y) < 5) {
             const hGuide = document.createElement('div');
@@ -4180,7 +4240,7 @@
             vGuide.style.height = '100%';
             document.getElementById('canvasInner').appendChild(vGuide);
           }
-          
+
           // Alignment helpers - snap to other devices
           S.nodes.forEach(other => {
             if (other.id === n.id) return;
@@ -4206,7 +4266,7 @@
               document.getElementById('canvasInner').appendChild(hGuide);
             }
           });
-          
+
           dragSt.el.style.left = dragSt.node.x + 'px';
           dragSt.el.style.top = dragSt.node.y + 'px';
           drawConns();
@@ -4368,7 +4428,7 @@
 
       const port = el.querySelectorAll('.node-port')[portIdx];
       port.classList.add('connecting');
-      
+
       // Smart port highlighting - show available ports on all devices
       S.nodes.forEach(node => {
         if (node.id !== n.id) {
@@ -4377,7 +4437,7 @@
             const ports = nodeEl.querySelectorAll('.node-port');
             ports.forEach((p, i) => {
               if (i >= node.totalPorts) return;
-              const isUsed = S.conns.some(c => 
+              const isUsed = S.conns.some(c =>
                 (c.n1 === node.id && c.p1 === i) || (c.n2 === node.id && c.p2 === i)
               );
               if (!isUsed) {
@@ -4515,7 +4575,7 @@
       updPortVisuals();
       updStats();
       log('Verbindung', 'success', `${n1.name} ↔ ${n2.name} [${c.type}]`);
-      
+
       // Connection success animation
       const n1El = document.getElementById(n1.id);
       const n2El = document.getElementById(n2.id);
@@ -4533,7 +4593,7 @@
         createSpark(n2.x + 50, n2.y + 40);
       }
     }
-    
+
     function createSpark(x, y) {
       const spark = document.createElement('div');
       spark.className = 'spark';
@@ -4542,12 +4602,12 @@
       document.getElementById('canvasInner').appendChild(spark);
       setTimeout(() => spark.remove(), 500);
     }
-    
+
     @keyframes connSuccess {
       0% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-    
+
     /* Connection Spark Effect */
     .spark { position: absolute; width: 20px; height: 20px; pointer-events: none; z-index: 1000; }
     .spark::before, .spark::after { content: ''; position: absolute; top: 50%; left: 50%; background: var(--accent); border-radius: 50%; }
@@ -4619,7 +4679,7 @@
         bwLabel.setAttribute('text-anchor', 'middle');
         bwLabel.textContent = bw;
         svg.appendChild(bwLabel);
-        
+
         // Distance indicator
         const dist = Math.round(Math.sqrt((p2x-p1x)**2 + (p2y-p1y)**2));
         const distLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -4629,7 +4689,7 @@
         distLabel.setAttribute('text-anchor', 'middle');
         distLabel.textContent = `${dist}px`;
         svg.appendChild(distLabel);
-        
+
         // Quality indicator based on distance and cable type
         const maxDist = c.type === 'fiber' ? 500 : c.type === 'serial' ? 1000 : 300;
         const quality = Math.max(0, 100 - (dist / maxDist * 100));
@@ -4641,7 +4701,7 @@
         qualityLabel.setAttribute('text-anchor', 'middle');
         qualityLabel.textContent = `⚡${Math.round(quality)}%`;
         svg.appendChild(qualityLabel);
-        
+
         // Port labels on endpoints
         const p1Label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         p1Label.setAttribute('x', p1x + 15);
@@ -4649,7 +4709,7 @@
         p1Label.setAttribute('class', 'port-end-label');
         p1Label.textContent = `F0/${c.p1}`;
         svg.appendChild(p1Label);
-        
+
         const p2Label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         p2Label.setAttribute('x', p2x - 15);
         p2Label.setAttribute('y', p2y - 5);
@@ -4748,7 +4808,8 @@
       document.querySelectorAll('.sim-node').forEach(e => e.classList.remove('selected'));
       el.classList.add('selected');
       updateTopologyTree();
-      
+      updateBreadcrumb(n);
+
       // Show quick actions bar
       const quickBar = document.getElementById('quickActions');
       quickBar.style.display = 'flex';
@@ -4818,7 +4879,7 @@
       document.getElementById('sSel').textContent = '-';
       document.getElementById('quickActions').style.display = 'none';
     }
-    
+
     function quickConnectSel() {
       if (!S.sel) return;
       const el = document.getElementById(S.sel.id);
@@ -4831,12 +4892,12 @@
         }
       }
     }
-    
+
     function quickConfigSel() {
       if (!S.sel) return;
       ctxConfig();
     }
-    
+
     function quickDeleteSel() {
       if (!S.sel) return;
       deleteSelected();
@@ -5056,7 +5117,7 @@
 
     // ==================== NAT & ACL ====================
     function openNAT() { document.getElementById('natModal').classList.add('show'); }
-    function openACL() { 
+    function openACL() {
       // Toggle both modal and panel
       const modal = document.getElementById('aclModal');
       const panel = document.getElementById('aclPanel');
@@ -5091,14 +5152,14 @@
       const rulesEl = document.getElementById('aclRules');
       const totalEl = document.getElementById('aclTotalRules');
       const activeEl = document.getElementById('aclActiveRules');
-      
+
       // Sample ACL rules
       const rules = [
         { num: 10, action: 'permit', src: '192.168.1.0', wild: '0.0.0.255', desc: 'Local Network' },
         { num: 20, action: 'permit', src: '10.0.0.0', wild: '0.255.255.255', desc: 'Internal' },
         { num: 30, action: 'deny', src: 'any', wild: '', desc: 'Deny All' }
       ];
-      
+
       rulesEl.innerHTML = rules.map(r => `
         <div class="acl-rule">
           <div class="acl-rule-header">
@@ -5109,7 +5170,7 @@
           <div class="acl-rule-detail" style="color:var(--accent);">${r.desc}</div>
         </div>
       `).join('');
-      
+
       totalEl.textContent = rules.length;
       activeEl.textContent = rules.filter(r => r.action === 'permit').length;
     }
@@ -5131,11 +5192,11 @@
       const srcSelect = document.getElementById('pathSrc');
       const dstSelect = document.getElementById('pathDst');
       const nodes = S.nodes.filter(n => n.ip);
-      
+
       const options = nodes.map(n => `<option value="${n.id}">${n.name} (${n.ip})</option>`).join('');
       srcSelect.innerHTML = options;
       dstSelect.innerHTML = options;
-      
+
       if (nodes.length > 1) {
         dstSelect.value = nodes[1].id;
       }
@@ -5144,32 +5205,32 @@
     function tracePath() {
       const srcId = document.getElementById('pathSrc').value;
       const dstId = document.getElementById('pathDst').value;
-      
+
       if (!srcId || !dstId || srcId === dstId) {
         log('Path Trace', 'fail', 'Ungültige Auswahl');
         return;
       }
-      
+
       const src = S.nodes.find(n => n.id === srcId);
       const dst = S.nodes.find(n => n.id === dstId);
-      
+
       if (!src || !dst) return;
-      
+
       // Find path using existing pathfinding
       const path = findPath(src, dst);
-      
+
       const resultEl = document.getElementById('pathTraceResult');
-      
+
       if (!path || path.length === 0) {
         resultEl.innerHTML = '<div style="color:var(--error);padding:10px;text-align:center;font-size:0.6rem;">Kein Pfad verfügbar</div>';
         return;
       }
-      
+
       // Calculate stats
       const hops = path.length;
       const latency = hops * 2 + Math.random() * 5;
       const bandwidth = Math.min(...path.map(n => n.bw || 1000));
-      
+
       resultEl.innerHTML = `
         <div class="path-trace-route">
           <div class="path-trace-title">
@@ -5210,7 +5271,7 @@
           </div>
         </div>
       `;
-      
+
       log('Path Trace', 'success', `${hops} Hops, ${latency.toFixed(1)}ms Latenz`);
     }
 
@@ -5246,7 +5307,7 @@
       const sticky = document.getElementById('psSticky').checked;
       const aging = document.getElementById('psAging').value;
       const staticMac = document.getElementById('psStaticMac').value;
-      
+
       if (enabled) {
         log('PortSec', 'success', `switchport mode access`);
         log('PortSec', 'success', `switchport port-security`);
@@ -5260,23 +5321,23 @@
       }
       closeM('portSecurityModal');
     }
-    
+
     // Update Port Security live config preview
     document.getElementById('psMax')?.addEventListener('input', updatePsLiveConfig);
     document.getElementById('psAction')?.addEventListener('change', updatePsLiveConfig);
     document.getElementById('psSticky')?.addEventListener('change', updatePsLiveConfig);
     document.getElementById('psEnabled')?.addEventListener('change', updatePsLiveConfig);
-    
+
     function updatePsLiveConfig() {
       const enabled = document.getElementById('psEnabled')?.value === 'enabled';
       const max = document.getElementById('psMax')?.value || 1;
       const action = document.getElementById('psAction')?.value || 'shutdown';
       const sticky = document.getElementById('psSticky')?.checked;
       const aging = document.getElementById('psAging')?.value || 0;
-      
+
       const configEl = document.getElementById('psLiveConfig');
       if (!configEl) return;
-      
+
       let config = '';
       if (enabled) {
         config += 'switchport mode access<br>';
@@ -5576,7 +5637,34 @@ exit                - exit current mode
 
       tree.innerHTML = html;
     }
-
+    
+    function updateBreadcrumb(n) {
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (!breadcrumb) return;
+      
+      // Get device type label
+      let typeLabel = 'Gerät';
+      let typeIcon = 'ph-desktop';
+      if (n.r) { typeLabel = 'Router'; typeIcon = 'ph-globe'; }
+      else if (n.sw) { typeLabel = 'Switch'; typeIcon = 'ph-git-branch'; }
+      else if (n.srv) { typeLabel = 'Server'; typeIcon = 'ph-hard-drives'; }
+      else if (n.end) { typeLabel = 'PC'; typeIcon = 'ph-desktop'; }
+      
+      breadcrumb.innerHTML = `
+        <span class="breadcrumb-item active" onclick="resetView()">
+          <i class="ph ph-house"></i> Home
+        </span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item">
+          <i class="ph ${typeIcon}"></i> ${typeLabel}
+        </span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-item" onclick="zoomToDevice('${n.id}')" style="color:var(--accent);">
+          ${n.name}
+        </span>
+      `;
+    }
+    
     function selectNodeById(id) {
       const n = S.nodes.find(x => x.id === id);
       const el = document.getElementById(id);
@@ -5885,7 +5973,7 @@ exit                - exit current mode
     function updateCaptureList() {
       const el = document.getElementById('captureList');
       let filtered = S.capturedPackets;
-      
+
       // Apply filters
       if (simFilter !== 'all') {
         filtered = filtered.filter(p => p.type === simFilter);
@@ -5893,16 +5981,16 @@ exit                - exit current mode
       if (layerFilter !== 'all') {
         filtered = filtered.filter(p => p.layer === layerFilter);
       }
-      
+
       // Update filtered count
       document.getElementById('simFilteredCount').textContent = filtered.length;
       document.getElementById('simPacketCount').textContent = S.capturedPackets.length;
-      
+
       if (filtered.length === 0) {
         el.innerHTML = '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:20px;">Keine Pakete<br><span style="font-size:0.5rem;">' + (simFilter !== 'all' || layerFilter !== 'all' ? 'Filter anpassen' : 'PDU senden') + '</span></div>';
         return;
       }
-      
+
       el.innerHTML = filtered.slice().reverse().slice(0, 50).map((p, i) => {
         const origIndex = S.capturedPackets.indexOf(p);
         return `<div class="capture-item ${selectedPacket === p ? 'selected' : ''}" onclick="showPacketDetail(S.capturedPackets[${origIndex}])">
@@ -5917,13 +6005,13 @@ exit                - exit current mode
     function showPacketDetail(p) {
       selectedPacket = p;
       updateCaptureList();
-      
+
       const detail = document.getElementById('packetDetail');
       if (!p) { detail.innerHTML = ''; return; }
-      
+
       // Generate hex dump
       const hex = generateHexDump(p);
-      
+
       // OSI Layer visualization
       const layers = {
         'L7': p.layer === 'L7',
@@ -5932,7 +6020,7 @@ exit                - exit current mode
         'L2': true,
         'L1': true
       };
-      
+
       detail.innerHTML = `
         <div class="packet-detail-title">
           <i class="ph ph-envelope"></i> PDU #${p.id} - ${p.type.toUpperCase()}
@@ -5970,7 +6058,7 @@ exit                - exit current mode
       };
       const pat = patterns[p.type] || [0x00, 0x00];
       for (let i = 0; i < 32; i++) data.push((i < pat.length ? pat[i] : Math.floor(Math.random() * 256)).toString(16).padStart(2, '0'));
-      
+
       let hex = '<span class="hex-header">Offset(h)  00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  Ascii</span>\n';
       for (let i = 0; i < 2; i++) {
         const offset = (i * 16).toString(16).padStart(8, '0');
@@ -6206,7 +6294,7 @@ exit                - exit current mode
       document.getElementById('ifStatsContent').style.display = ifStatsExpanded ? 'block' : 'none';
       document.getElementById('ifStatsToggle').classList.toggle('open', ifStatsExpanded);
     }
-    
+
     function toggleIfStatsView() {
       ifStatsView = ifStatsView === 'detail' ? 'summary' : 'detail';
       if (showIfStats) {
@@ -6225,13 +6313,13 @@ exit                - exit current mode
     // Traffic history for graphs
     const trafficHistory = {}; // { nodeId_portIdx: [in_bytes, out_bytes, ...] }
     const MAX_HISTORY = 20;
-    
+
     function renderIfStats() {
       const content = document.getElementById('ifStatsContent');
-      
+
       // Calculate summary stats
       let totalPorts = 0, upPorts = 0, downPorts = 0, totalIn = 0, totalOut = 0;
-      
+
       S.nodes.forEach(n => {
         for (let i = 0; i < n.totalPorts; i++) {
           totalPorts++;
@@ -6243,7 +6331,7 @@ exit                - exit current mode
           totalOut += stats.out;
         }
       });
-      
+
       let html = `<div class="if-stats-summary">
         <div class="if-stats-summary-item"><div class="if-stats-summary-value">${totalPorts}</div><div class="if-stats-summary-label">Ports</div></div>
         <div class="if-stats-summary-item"><div class="if-stats-summary-value" style="color:var(--ok);">${upPorts}</div><div class="if-stats-summary-label">Up</div></div>
@@ -6273,22 +6361,22 @@ exit                - exit current mode
 
       content.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No interfaces</div>';
     }
-    
+
     function renderIfStatsDetailed() {
       const content = document.getElementById('ifStatsContent');
       if (!content) return;
-      
+
       let html = '<div style="max-height:400px;overflow-y:auto;">';
-      
+
       S.nodes.forEach(n => {
         const nodeConns = S.conns.filter(c => c.n1 === n.id || c.n2 === n.id);
         if (nodeConns.length === 0 && n.usedPorts === 0) return;
-        
+
         html += `<div style="margin-bottom:12px;">
           <div style="font-size:0.65rem;font-weight:600;color:var(--accent);padding:6px 8px;background:var(--bg-deep);border-radius:6px;margin-bottom:6px;">
             <i class="ph ${n.r ? 'ph-router' : n.sw ? 'ph-swap' : n.srv ? 'ph-hard-drives' : 'ph-desktop'}"></i> ${n.name}
           </div>`;
-        
+
         for (let i = 0; i < n.totalPorts; i++) {
           const key = `${n.id}_${i}`;
           const stats = interfaceStats[key] || { in: 0, out: 0, errors: 0, drop: 0 };
@@ -6296,13 +6384,13 @@ exit                - exit current mode
           const status = conn ? 'up' : 'down';
           const portName = i >= (n.ports || 4) ? `GigabitEthernet0/${i - (n.ports || 4) + 1}` : `FastEthernet0/${i}`;
           const bw = conn ? (conn.type === 'fiber' ? '1 Gbps' : conn.type === 'serial' ? '2 Mbps' : '100 Mbps') : '-';
-          
+
           // Traffic graph data
           const history = trafficHistory[key] || [];
           const maxTraffic = Math.max(...history, 1024);
           const inBars = history.filter((_, idx) => idx % 2 === 0).map(v => Math.min(20, Math.round((v / maxTraffic) * 20)));
           const outBars = history.filter((_, idx) => idx % 2 === 1).map(v => Math.min(20, Math.round((v / maxTraffic) * 20)));
-          
+
           html += `<div class="if-detail">
             <div class="if-detail-header">
               <span class="if-detail-name">${portName}</span>
@@ -6325,11 +6413,11 @@ exit                - exit current mode
         }
         html += '</div>';
       });
-      
+
       html += '</div>';
       content.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:0.55rem;">No interfaces</div>';
     }
-    
+
     function updateTrafficHistory(nodeId, portIdx, inBytes, outBytes) {
       const key = `${nodeId}_${portIdx}`;
       if (!trafficHistory[key]) trafficHistory[key] = [];
@@ -6778,7 +6866,7 @@ exit                - exit current mode
     // ==================== NETWORK SUMMARY ====================
     function openNetSummary() {
       const content = document.getElementById('netSummaryContent');
-      
+
       // Count devices by type
       const routers = S.nodes.filter(n => n.r).length;
       const switches = S.nodes.filter(n => n.sw).length;
@@ -6789,31 +6877,31 @@ exit                - exit current mode
       const totalDevices = S.nodes.length;
       const totalConns = S.conns.length;
       const onlineDevices = S.nodes.filter(n => n.on !== false).length;
-      
+
       // Count connections by type
       const copperStr = S.conns.filter(c => c.type === 'copper-str' || c.type === 'copper').length;
       const copperCross = S.conns.filter(c => c.type === 'copper-cross' || c.type === 'cross').length;
       const fiber = S.conns.filter(c => c.type === 'fiber').length;
       const serial = S.conns.filter(c => c.type === 'serial').length;
       const consoleCable = S.conns.filter(c => c.type === 'console').length;
-      
+
       // Calculate total bandwidth
       const totalBw = S.conns.reduce((sum, c) => {
         if (c.type === 'fiber') return sum + 1000;
         if (c.type === 'serial') return sum + 2;
         return sum + 100;
       }, 0);
-      
+
       // IP addressing stats
       const configuredIPs = S.nodes.filter(n => n.ip).length;
       const dhcpServers = S.nodes.filter(n => n.services?.includes('dhcp')).length;
       const dnsServers = S.nodes.filter(n => n.services?.includes('dns')).length;
       const webServers = S.nodes.filter(n => n.services?.includes('http')).length;
-      
+
       // Network health score
       const healthScore = totalDevices > 0 ? Math.round((onlineDevices / totalDevices) * 100) : 100;
       const healthClass = healthScore >= 80 ? 'good' : healthScore >= 50 ? 'warn' : 'bad';
-      
+
       content.innerHTML = `
         <div class="net-stats">
           <div class="net-stat">
@@ -6833,7 +6921,7 @@ exit                - exit current mode
             <div class="net-stat-label">Total BW</div>
           </div>
         </div>
-        
+
         <div class="net-health-bar">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
             <span style="font-size:0.6rem;color:var(--text-muted);">Network Health</span>
@@ -6843,7 +6931,7 @@ exit                - exit current mode
             <div class="health-bar-fill ${healthClass}" style="width:${healthScore}%"></div>
           </div>
         </div>
-        
+
         <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
           <div style="font-size:0.65rem;font-weight:600;color:var(--accent);margin-bottom:8px;">📊 Device Breakdown</div>
           <div class="net-breakdown">
@@ -6879,7 +6967,7 @@ exit                - exit current mode
             </div>
           </div>
         </div>
-        
+
         <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
           <div style="font-size:0.65rem;font-weight:600;color:var(--accent);margin-bottom:8px;">🔌 Cables</div>
           <div style="font-size:0.6rem;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
@@ -6890,7 +6978,7 @@ exit                - exit current mode
             <div><span style="color:var(--poe);">🔌</span> Console: ${consoleCable}</div>
           </div>
         </div>
-        
+
         <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
           <div style="font-size:0.65rem;font-weight:600;color:var(--accent);margin-bottom:8px;">🌐 IP & Services</div>
           <div style="font-size:0.6rem;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
@@ -6900,7 +6988,7 @@ exit                - exit current mode
             <div><span style="color:var(--accent);">🌐</span> HTTP: ${webServers}</div>
           </div>
         </div>
-        
+
         <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
           <div style="font-size:0.6rem;color:var(--text-muted);">
             Packets: <span style="color:var(--accent);">${S.pduCnt}</span> |
@@ -6908,17 +6996,17 @@ exit                - exit current mode
             MAC: <span style="color:var(--device);">${macTable.length}</span>
           </div>
         </div>
-        
+
         <div style="margin-top:12px;">
           <button class="modal-btn" style="width:100%;font-size:0.6rem;" onclick="exportNetworkReport()">
             <i class="ph ph-download"></i> Export Report
           </button>
         </div>
       `;
-      
+
       openM('netSummaryModal');
     }
-    
+
     function exportNetworkReport() {
       const report = `Network Topology Report
 ========================
@@ -6935,7 +7023,7 @@ ${S.conns.map(c => {
   const n2 = S.nodes.find(x => x.id === c.n2)?.name || '?';
   return `- ${n1} ↔ ${n2} (${c.type})`;
 }).join('\n')}`;
-      
+
       const blob = new Blob([report], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -6943,7 +7031,7 @@ ${S.conns.map(c => {
       a.click();
       log('System', 'success', 'Report exported');
     }
-    
+
     // ==================== TOPOLOGY NOTES ====================
     let showNotesPanel = false;
 
@@ -7049,19 +7137,19 @@ ${S.conns.map(c => {
       const switches = S.nodes.filter(n => n.sw);
       const routers = S.nodes.filter(n => n.r);
       const devices = [...switches, ...routers];
-      
+
       if (devices.length === 0) {
         content.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:20px;font-size:0.6rem;">Keine Cisco-Geräte gefunden</div>';
         return;
       }
-      
+
       content.innerHTML = devices.map(n => {
         // Find connected neighbors
         const neighbors = findCDPNeighbors(n);
         const icon = n.r ? 'ph-router' : 'ph-swap-horizontal';
         const platform = n.r ? 'Cisco Router' : 'Cisco Switch';
         const ports = S.conns.filter(c => c.s === n.id || c.d === n.id);
-        
+
         return `
           <div class="cdp-device">
             <div class="cdp-device-header">
@@ -7166,11 +7254,11 @@ ${S.conns.map(c => {
     function updateActivity() {
       const activity = activities[currentActivity];
       document.getElementById('questionText').textContent = activity.desc;
-      
+
       // Update progress
       const progress = document.querySelector('.activity-progress');
       if (!progress) {
-        const progressHTML = '<div class="activity-progress">' + activities.map((_, i) => 
+        const progressHTML = '<div class="activity-progress">' + activities.map((_, i) =>
           `<div class="activity-step ${i < currentActivity ? 'done' : i === currentActivity ? 'current' : ''}"></div>`
         ).join('') + '</div>';
         document.getElementById('activityQuestion').insertAdjacentHTML('beforebegin', progressHTML);
@@ -7179,12 +7267,12 @@ ${S.conns.map(c => {
           el.className = 'activity-step' + (i < currentActivity ? ' done' : i === currentActivity ? ' current' : '');
         });
       }
-      
+
       // Reset checks
       document.querySelectorAll('.check-item').forEach(el => el.classList.remove('completed'));
       document.querySelectorAll('.check-box').forEach(el => el.textContent = '☐');
       document.getElementById('activityResult').style.display = 'none';
-      
+
       // Check current state
       checkActivityState();
     }
@@ -7193,7 +7281,7 @@ ${S.conns.map(c => {
       const activity = activities[currentActivity];
       const nodes = S.nodes;
       const conns = S.conns;
-      
+
       // Check devices placed
       if (activity.checks.includes('devices')) {
         const hasPC = nodes.some(n => n.end);
@@ -7204,12 +7292,12 @@ ${S.conns.map(c => {
           markCheck('checkDevices');
         }
       }
-      
+
       // Check connected
       if (activity.checks.includes('connected') && conns.length > 0) {
         markCheck('checkConnected');
       }
-      
+
       // Check configured
       if (activity.checks.includes('configured')) {
         const configuredNodes = nodes.filter(n => n.ip);
@@ -7536,7 +7624,7 @@ ${S.conns.map(c => {
         log('Gerät', 'info', `Hinzugefügt: ${dev.label}`);
       }
     }
-    
+
     function filterDevices() {
       const query = document.getElementById('deviceSearch').value.toLowerCase();
       document.querySelectorAll('.device-item').forEach(item => {
@@ -7553,7 +7641,7 @@ ${S.conns.map(c => {
         return;
       }
       saveState();
-      
+
       if (direction === 'left') {
         const minX = Math.min(...selected.map(n => n.x));
         selected.forEach(n => { n.x = minX; document.getElementById(n.id).style.left = n.x + 'px'; });
@@ -7572,9 +7660,9 @@ ${S.conns.map(c => {
         const minX = sorted[0].x;
         const maxX = sorted[sorted.length - 1].x;
         const step = (maxX - minX) / (sorted.length - 1);
-        sorted.forEach((n, i) => { 
-          n.x = minX + step * i; 
-          document.getElementById(n.id).style.left = n.x + 'px'; 
+        sorted.forEach((n, i) => {
+          n.x = minX + step * i;
+          document.getElementById(n.id).style.left = n.x + 'px';
         });
       } else if (direction === 'vdist') {
         // Distribute vertically
@@ -7582,42 +7670,42 @@ ${S.conns.map(c => {
         const minY = sorted[0].y;
         const maxY = sorted[sorted.length - 1].y;
         const step = (maxY - minY) / (sorted.length - 1);
-        sorted.forEach((n, i) => { 
-          n.y = minY + step * i; 
-          document.getElementById(n.id).style.top = n.y + 'px'; 
+        sorted.forEach((n, i) => {
+          n.y = minY + step * i;
+          document.getElementById(n.id).style.top = n.y + 'px';
         });
       }
-      
+
       drawConns();
       updateMiniMap();
       log('System', 'success', `Ausgewählte ausgerichtet: ${direction}`);
     }
-    
+
     // ==================== SELECT ALL ====================
     function selectAll() {
       S.sel = S.nodes.map(n => n.id);
       document.querySelectorAll('.sim-node').forEach(el => el.classList.add('selected'));
       log('System', 'info', `Alle ${S.nodes.length} Geräte ausgewählt`);
     }
-    
+
     // ==================== DEVICE GROUPING ====================
     let deviceGroups = [];
-    
+
     function groupSelected() {
       if (!S.sel || S.sel.length < 2) {
         log('System', 'warn', 'Mindestens 2 Geräte auswählen');
         return;
       }
-      
+
       const selectedNodes = S.nodes.filter(n => S.sel.includes(n.id));
       const groupId = 'group_' + Date.now();
-      
+
       // Calculate group bounds
       const minX = Math.min(...selectedNodes.map(n => n.x));
       const minY = Math.min(...selectedNodes.map(n => n.y));
       const maxX = Math.max(...selectedNodes.map(n => n.x + 90));
       const maxY = Math.max(...selectedNodes.map(n => n.y + 80));
-      
+
       const group = {
         id: groupId,
         name: 'Group ' + (deviceGroups.length + 1),
@@ -7626,36 +7714,36 @@ ${S.conns.map(c => {
         color: 'var(--accent)',
         collapsed: false
       };
-      
+
       deviceGroups.push(group);
       renderGroups();
       log('System', 'success', `${selectedNodes.length} Geräte gruppiert`);
     }
-    
+
     function ungroupSelected() {
       if (!S.sel || S.sel.length === 0) return;
-      
+
       // Find groups that contain selected nodes
-      const groupsToRemove = deviceGroups.filter(g => 
+      const groupsToRemove = deviceGroups.filter(g =>
         g.nodes.some(nId => S.sel.includes(nId))
       );
-      
+
       groupsToRemove.forEach(g => {
         const idx = deviceGroups.findIndex(dg => dg.id === g.id);
         if (idx !== -1) deviceGroups.splice(idx, 1);
       });
-      
+
       renderGroups();
       log('System', 'info', 'Gruppierung aufgelöst');
     }
-    
+
     function renderGroups() {
       // Remove old group visuals
       document.querySelectorAll('.device-group').forEach(el => el.remove());
-      
+
       const container = document.getElementById('nodesContainer');
       if (!container) return;
-      
+
       deviceGroups.forEach(group => {
         const div = document.createElement('div');
         div.className = 'device-group';
@@ -7688,42 +7776,42 @@ ${S.conns.map(c => {
         container.insertBefore(div, container.firstChild);
       });
     }
-    
+
     function updateGroupBounds() {
       deviceGroups.forEach(group => {
         const nodes = S.nodes.filter(n => group.nodes.includes(n.id));
         if (nodes.length === 0) return;
-        
+
         const minX = Math.min(...nodes.map(n => n.x));
         const minY = Math.min(...nodes.map(n => n.y));
         const maxX = Math.max(...nodes.map(n => n.x + 90));
         const maxY = Math.max(...nodes.map(n => n.y + 80));
-        
+
         group.bounds = { x: minX - 20, y: minY - 20, width: maxX - minX + 40, height: maxY - minY + 40 };
       });
       renderGroups();
     }
-    
+
     // ==================== AUTO-LAYOUT ====================
     function autoLayout() {
       if (S.nodes.length === 0) {
         log('System', 'warn', 'Keine Geräte zum Anordnen');
         return;
       }
-      
+
       saveState('Auto-Layout');
-      
+
       // Separate nodes by type
       const routers = S.nodes.filter(n => n.r);
       const switches = S.nodes.filter(n => n.sw);
       const servers = S.nodes.filter(n => n.srv);
       const others = S.nodes.filter(n => !n.r && !n.sw && !n.srv);
-      
+
       const spacingX = 150;
       const spacingY = 120;
       const startX = 200;
       const startY = 200;
-      
+
       // Layout routers at top (core layer)
       routers.forEach((n, i) => {
         n.x = startX + i * spacingX * 2;
@@ -7731,7 +7819,7 @@ ${S.conns.map(c => {
         document.getElementById(n.id).style.left = n.x + 'px';
         document.getElementById(n.id).style.top = n.y + 'px';
       });
-      
+
       // Layout switches below routers (distribution layer)
       const swStartY = startY + spacingY * 2;
       switches.forEach((n, i) => {
@@ -7740,7 +7828,7 @@ ${S.conns.map(c => {
         document.getElementById(n.id).style.left = n.x + 'px';
         document.getElementById(n.id).style.top = n.y + 'px';
       });
-      
+
       // Layout servers on the right (services)
       const srvStartX = startX + spacingX * 4;
       const srvStartY = startY + spacingY;
@@ -7750,7 +7838,7 @@ ${S.conns.map(c => {
         document.getElementById(n.id).style.left = n.x + 'px';
         document.getElementById(n.id).style.top = n.y + 'px';
       });
-      
+
       // Layout other devices below switches (access layer)
       const otherStartY = swStartY + spacingY * 2;
       others.forEach((n, i) => {
@@ -7759,7 +7847,7 @@ ${S.conns.map(c => {
         document.getElementById(n.id).style.left = n.x + 'px';
         document.getElementById(n.id).style.top = n.y + 'px';
       });
-      
+
       updConnParams();
       updateMiniMap();
       updateGroupBounds();
@@ -7767,15 +7855,15 @@ ${S.conns.map(c => {
       fitAll();
       log('System', 'success', 'Auto-Layout angewendet');
     }
-    
+
     function autoLayoutTree() {
       if (S.nodes.length === 0) {
         log('System', 'warn', 'Keine Geräte zum Anordnen');
         return;
       }
-      
+
       saveState('Tree-Layout');
-      
+
       // Build adjacency list
       const adj = {};
       S.nodes.forEach(n => adj[n.id] = []);
@@ -7783,22 +7871,22 @@ ${S.conns.map(c => {
         if (adj[c.n1]) adj[c.n1].push(c.n2);
         if (adj[c.n2]) adj[c.n2].push(c.n1);
       });
-      
+
       // Find root (router with most connections or first router)
       let root = S.nodes.find(n => n.r) || S.nodes[0];
       S.nodes.forEach(n => {
         if (n.r && adj[n.id].length > adj[root.id].length) root = n;
       });
-      
+
       // BFS to assign levels
       const levels = {};
       const queue = [{ id: root.id, level: 0 }];
       const visited = new Set([root.id]);
-      
+
       while (queue.length > 0) {
         const { id, level } = queue.shift();
         levels[id] = level;
-        
+
         adj[id].forEach(neighbor => {
           if (!visited.has(neighbor)) {
             visited.add(neighbor);
@@ -7806,30 +7894,30 @@ ${S.conns.map(c => {
           }
         });
       }
-      
+
       // Assign unvisited nodes
       S.nodes.forEach(n => {
         if (levels[n.id] === undefined) levels[n.id] = 2;
       });
-      
+
       // Group by level
       const byLevel = {};
       Object.entries(levels).forEach(([id, level]) => {
         if (!byLevel[level]) byLevel[level] = [];
         byLevel[level].push(id);
       });
-      
+
       // Position nodes
       const spacingX = 150;
       const spacingY = 120;
       const startX = 200;
       const startY = 100;
-      
+
       Object.entries(byLevel).forEach(([level, nodeIds]) => {
         const y = startY + parseInt(level) * spacingY;
         const totalWidth = nodeIds.length * spacingX;
         const startOffset = startX + (S.nodes.length * spacingX - totalWidth) / 2;
-        
+
         nodeIds.forEach((id, i) => {
           const n = S.nodes.find(x => x.id === id);
           if (n) {
@@ -7843,7 +7931,7 @@ ${S.conns.map(c => {
           }
         });
       });
-      
+
       updConnParams();
       updateMiniMap();
       updateGroupBounds();
@@ -8373,7 +8461,7 @@ ${S.conns.map(c => {
           'straight': '#e07020'
         };
         ctx.strokeStyle = connColors[c.type] || '#e07020';
-        
+
         // Connection quality indicator (based on packet loss, latency, etc.)
         const quality = c.quality || 100;
         const qualityColors = {
@@ -8381,13 +8469,13 @@ ${S.conns.map(c => {
           medium: 'rgba(255, 193, 7, 0.3)',
           poor: 'rgba(244, 67, 54, 0.3)'
         };
-        
+
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.stroke();
-        
+
         // Draw quality indicator in the middle
         const midX = (x1 + x2) / 2;
         const midY = (y1 + y2) / 2;
@@ -8396,7 +8484,7 @@ ${S.conns.map(c => {
         ctx.beginPath();
         ctx.arc(midX, midY, 4, 0, Math.PI * 2);
         ctx.fill();
-        
+
         // Draw bandwidth indicator for high bandwidth connections
         if (c.bandwidth && c.bandwidth > 1000) {
           ctx.fillStyle = 'rgba(76, 175, 80, 0.8)';
@@ -8404,7 +8492,7 @@ ${S.conns.map(c => {
           ctx.textAlign = 'center';
           ctx.fillText(`${(c.bandwidth/1000).toFixed(0)}G`, midX, midY - 8);
         }
-        
+
         // Draw animated packet flow for active connections
         if (c.active && S.sim) {
           const progress = (Date.now() % 1000) / 1000;
@@ -8460,14 +8548,14 @@ ${S.conns.map(c => {
       link.click();
       log('System', 'success', 'Bild exportiert');
     }
-    
+
     // ==================== JSON EXPORT/IMPORT ====================
     function exportTopologyJSON() {
       if (S.nodes.length === 0) {
         alert('Keine Geräte zum Exportieren');
         return;
       }
-      
+
       const topology = {
         version: '1.0',
         timestamp: new Date().toISOString(),
@@ -8512,7 +8600,7 @@ ${S.conns.map(c => {
           snapToGrid: S.snapToGrid
         }
       };
-      
+
       const blob = new Blob([JSON.stringify(topology, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -8520,7 +8608,7 @@ ${S.conns.map(c => {
       a.click();
       log('System', 'success', 'Topologie exportiert (JSON)');
     }
-    
+
     function importTopologyJSON() {
       const input = document.createElement('input');
       input.type = 'file';
@@ -8528,18 +8616,18 @@ ${S.conns.map(c => {
       input.onchange = e => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = event => {
           try {
             const topology = JSON.parse(event.target.result);
-            
+
             if (!topology.nodes || !topology.connections) {
               throw new Error('Invalid topology format');
             }
-            
+
             clearAll(true);
-            
+
             // Restore nodes
             topology.nodes.forEach(n => {
               const dev = {
@@ -8551,7 +8639,7 @@ ${S.conns.map(c => {
                 services: n.services
               };
               createNode(dev, n.x, n.y, false);
-              
+
               // Update with saved data
               const node = S.nodes[S.nodes.length - 1];
               if (node) {
@@ -8568,7 +8656,7 @@ ${S.conns.map(c => {
                 node.routing = n.routing;
               }
             });
-            
+
             // Restore connections (after a small delay to ensure nodes are rendered)
             setTimeout(() => {
               topology.connections.forEach(c => {
@@ -8578,11 +8666,11 @@ ${S.conns.map(c => {
                   makeConn(n1, c.p1, n2, c.p2, c.type);
                 }
               });
-              
+
               updateAll();
               log('System', 'success', `Topologie importiert (${topology.nodes.length} Geräte)`);
             }, 100);
-            
+
           } catch (err) {
             log('System', 'error', 'Fehler beim Importieren: ' + err.message);
             alert('Fehler beim Importieren der Topologie: ' + err.message);
@@ -9054,7 +9142,7 @@ ${target.name}# `;
       document.getElementById('zoomLabel').textContent = val + '%';
       document.getElementById('sZoom').textContent = val + '%';
     }
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
