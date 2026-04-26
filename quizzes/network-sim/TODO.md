@@ -158,6 +158,9 @@
 - [x] **Animated connection preview** - dashed moving line
 - [x] **Align selected devices** - left, distribute horizontally/vertically
 - [x] **Improved connection tooltip** - shows cable type, valid indicator
+- [x] **Connection distance indicator** - shows pixel distance on cables
+- [x] **Connection quality indicator** - shows signal quality %
+- [x] **Port labels on cables** - shows F0/0 etc on endpoints
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

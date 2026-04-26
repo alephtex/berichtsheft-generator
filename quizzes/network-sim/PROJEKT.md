@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+cc78094 feat: Add connection distance/quality indicators, alignment shortcuts
 4602ae1 feat: Add align selected devices, improved connection tooltip
 908328b feat: Add snap guides, alignment helpers, improved connection preview
 62aa9ca feat: Improve drag UX, target port highlighting, better animations
@@ -182,6 +183,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 4.3  
+**Version:** 4.4  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv
