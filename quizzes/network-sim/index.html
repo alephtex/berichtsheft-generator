@@ -383,9 +383,10 @@
     .if-stat-value { color: var(--text); font-weight: 600; }
 
     /* Device Power Button */
-    .device-power { position: absolute; bottom: 4px; right: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-deep); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 8px; }
-    .device-power.on { background: var(--ok); border-color: var(--ok); color: white; }
+    .device-power { position: absolute; bottom: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--bg-deep); border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 9px; transition: all 0.2s; }
+    .device-power.on { background: var(--ok); border-color: var(--ok); color: white; box-shadow: 0 0 8px var(--ok); }
     .device-power:hover { transform: scale(1.2); }
+    .device-power:active { transform: scale(0.9); }
 
     /* VLAN Tag on Connection */
     .conn-vlan { position: absolute; background: var(--device); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.45rem; font-weight: bold; }
@@ -1114,12 +1115,33 @@
 
       <!-- Context Menu -->
       <div class="context-menu" id="contextMenu">
-        <div class="context-item" onclick="ctxDelete()"><i class="ph ph-trash" style="color:var(--error)"></i> Löschen</div>
+        <div class="context-item" onclick="ctxDuplicate()"><i class="ph ph-copy"></i> Duplicate</div>
         <div class="context-item" onclick="ctxConfig()"><i class="ph ph-sliders"></i> Konfigurieren</div>
         <div class="context-item" onclick="ctxCLI()"><i class="ph ph-terminal"></i> CLI öffnen</div>
         <div class="context-sep"></div>
-        <div class="context-item" onclick="ctxCopy()"><i class="ph ph-copy"></i> Duplizieren</div>
-        <div class="context-item" onclick="ctxInspect()"><i class="ph ph-magnifying-glass"></i> Inspizieren</div>
+        <div class="context-item" onclick="ctxQuickVLAN()"><i class="ph ph-stack"></i> Quick VLAN</div>
+        <div class="context-item" onclick="ctxInspect()"><i class="ph ph-magnifying-glass-plus"></i> Inspector</div>
+        <div class="context-sep"></div>
+        <div class="context-item" onclick="ctxDelete()"><i class="ph ph-trash" style="color:var(--error)"></i> Löschen</div>
+      </div>
+      
+      <!-- Quick VLAN Popup -->
+      <div id="quickVLANPopup" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:20px;z-index:10001;box-shadow:0 8px 40px rgba(0,0,0,0.6);min-width:250px;">
+        <div style="font-weight:600;font-size:0.7rem;margin-bottom:12px;color:var(--accent);"><i class="ph ph-stack"></i> Quick VLAN Assignment</div>
+        <div id="quickVLANDevice" style="font-size:0.6rem;color:var(--text-muted);margin-bottom:10px;"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:15px;" id="vlanButtons">
+          <button class="modal-btn" style="font-size:0.55rem;padding:4px 10px;" onclick="assignVLAN(1)">VLAN 1</button>
+          <button class="modal-btn" style="font-size:0.55rem;padding:4px 10px;" onclick="assignVLAN(10)">VLAN 10</button>
+          <button class="modal-btn" style="font-size:0.55rem;padding:4px 10px;" onclick="assignVLAN(20)">VLAN 20</button>
+          <button class="modal-btn" style="font-size:0.55rem;padding:4px 10px;" onclick="assignVLAN(30)">VLAN 30</button>
+          <button class="modal-btn" style="font-size:0.55rem;padding:4px 10px;" onclick="assignVLAN(99)">VLAN 99</button>
+        </div>
+        <div style="font-size:0.5rem;color:var(--text-muted);margin-bottom:10px;">Or enter custom:</div>
+        <div style="display:flex;gap:8px;">
+          <input type="number" id="customVLANInput" min="1" max="4094" placeholder="1-4094" style="flex:1;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);font-size:0.6rem;">
+          <button class="modal-btn" onclick="assignCustomVLAN()">Apply</button>
+        </div>
+        <button onclick="closeQuickVLAN()" style="margin-top:12px;width:100%;" class="modal-btn secondary">Cancel</button>
       </div>
 
       <!-- Lasso Selection -->
@@ -2528,8 +2550,61 @@
     function ctxDelete() { if (S.ctxNode) { S.sel = S.ctxNode; deleteSelected(); } hideContextMenu(); }
     function ctxConfig() { if (S.ctxNode) { sel(S.ctxNode, document.getElementById(S.ctxNode.id)); } hideContextMenu(); }
     function ctxCLI() { if (S.ctxNode) { S.sel = S.ctxNode; openCLI(); } hideContextMenu(); }
+    function ctxDuplicate() { 
+      if (!S.ctxNode) return; 
+      const n = S.ctxNode;
+      // Find device template
+      const type = n.r ? 'r' : n.sw ? 'sw' : n.wireless ? 'wireless' : n.srv ? 'srv' : n.wan ? 'wan' : 'end';
+      const templates = DEVS[type] || [];
+      const dev = templates.find(d => d.name === (n.devName || n.name.split(/\d/)[0]));
+      if (dev) {
+        saveState();
+        const newNode = createNode(dev, n.x + 60, n.y + 60);
+        // Copy IP config
+        if (n.ip) {
+          newNode.ip = n.ip;
+          newNode.subnet = n.subnet;
+          newNode.gateway = n.gateway;
+          newNode.mac = genMAC();
+        }
+        log('Gerät', 'info', `Dupliziert: ${n.name} → ${newNode.name}`);
+      }
+      hideContextMenu();
+    }
     function ctxCopy() { if (S.ctxNode) { const el = document.getElementById(S.ctxNode.id); const rect = el.getBoundingClientRect(); const dev = DEVS.end.find(d => d.name === S.ctxNode.name) || DEVS.sw.find(d => d.name === S.ctxNode.name) || DEVS.r.find(d => d.name === S.ctxNode.name); if (dev) createNode(dev, S.ctxNode.x + 50, S.ctxNode.y + 50); } hideContextMenu(); }
     function ctxInspect() { hideContextMenu(); openInspectPanel(S.ctxNode); }
+    
+    let quickVLANNode = null;
+    function ctxQuickVLAN() {
+      if (!S.ctxNode) return;
+      quickVLANNode = S.ctxNode;
+      document.getElementById('quickVLANDevice').textContent = `Device: ${S.ctxNode.name} (Current: VLAN ${S.ctxNode.vlan || 1})`;
+      document.getElementById('quickVLANPopup').style.display = 'block';
+      hideContextMenu();
+    }
+    function assignVLAN(vlan) {
+      if (!quickVLANNode) return;
+      saveState();
+      quickVLANNode.vlan = vlan;
+      // Update display
+      const el = document.getElementById(quickVLANNode.id);
+      if (el) {
+        const vlanTag = el.querySelector('.vlan-tag');
+        if (vlanTag) vlanTag.textContent = `V${vlan}`;
+      }
+      log('VLAN', 'success', `${quickVLANNode.name} → VLAN ${vlan}`);
+      closeQuickVLAN();
+    }
+    function assignCustomVLAN() {
+      const vlan = parseInt(document.getElementById('customVLANInput').value);
+      if (vlan >= 1 && vlan <= 4094) {
+        assignVLAN(vlan);
+      }
+    }
+    function closeQuickVLAN() {
+      document.getElementById('quickVLANPopup').style.display = 'none';
+      quickVLANNode = null;
+    }
 
     function openInspectPanel(n) {
       if (!n) return;
