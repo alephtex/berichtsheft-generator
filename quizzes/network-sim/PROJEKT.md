@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+29b2a19 docs: Update version to 4.8, add test info
 c2d114b test: Add Playwright tests for NetSim Pro
 906c3ae feat: Add auto-configure network, health check
 be8145c feat: Add keyboard shortcuts modal, fit to selection, more shortcuts
@@ -187,6 +188,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 4.8  
+**Version:** 4.9  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv

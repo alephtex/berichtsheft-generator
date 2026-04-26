@@ -217,6 +217,19 @@ VLAN 99 - Management
 
 ## Simulation
 
+### Simulation Panel
+
+**Öffnen:** Toolbar → "Simulation" Button
+
+Das Simulation Panel bietet erweiterte Kontrolle über Paket-Simulationen:
+
+- **Filter nach Typ**: ICMP, ARP, DHCP, DNS, TCP, UDP
+- **Filter nach Layer**: L3, L4, L7
+- **PDU Information**: Detaillierte Paket-Info mit Hex-Dump
+- **OSI Layer Visualisierung**: Zeigt aktive Schichten
+- **Simulation Controls**: Play/Pause, Step, Reset, Burst
+- **Speed Control**: Geschwindigkeit der Animation anpassen
+
 ### PDU senden
 
 1. **Toolbar** → "PDU" Button
@@ -228,14 +241,26 @@ VLAN 99 - Management
 
 ### PDU-Typen
 
-| Typ | Layer | Beschreibung |
-|-----|-------|-------------|
-| ICMP | L3 | Ping-Anfrage |
-| ARP | L2 | MAC-Auflösung |
-| DHCP | L7 | IP-Adressanfrage |
-| DNS | L7 | Namensauflösung |
-| HTTP | L7 | Web-Anfrage |
-| TCP | L4 | Verbindungsaufbau |
+| Typ | Layer | Farbe | Beschreibung |
+|-----|-------|-------|-------------|
+| ICMP | L3 | 🟢 | Ping-Anfrage |
+| ARP | L2 | 🟠 | MAC-Auflösung |
+| DHCP | L7 | 🟡 | IP-Adressanfrage |
+| DNS | L7 | 🟣 | Namensauflösung |
+| HTTP | L7 | 🟠 | Web-Anfrage |
+| TCP | L4 | 🔵 | Verbindungsaufbau |
+| UDP | L4 | 🟡 | Datagramme |
+
+### Packet Detail View
+
+Klicke auf ein Paket in der Liste für detaillierte Informationen:
+
+- **Source/Dest MAC**: Hardware-Adressen
+- **Source/Dest IP**: Netzwerk-Adressen
+- **Protocol**: PDU-Typ
+- **Size**: Paketgröße in Bytes
+- **Hex Dump**: Hexadezimale Darstellung
+- **OSI Layers**: Visualisierung der aktiven Schichten
 
 ### Paketfluss beobachten
 

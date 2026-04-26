@@ -838,15 +838,107 @@
     .conn-type-desc { font-size: 0.5rem; color: var(--text-muted); margin-top: 2px; }
 
     /* PDU Simulation Panel */
-    .sim-panel { position: absolute; bottom: 60px; right: 12px; background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: 10px; padding: 12px; width: 280px; z-index: 100; display: none; }
-    .sim-panel.show { display: block; }
-    .sim-panel-title { font-size: 0.7rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .sim-panel { position: absolute; bottom: 60px; right: 12px; background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: 10px; padding: 12px; width: 320px; z-index: 100; display: none; max-height: 480px; }
+    .sim-panel.show { display: flex; flex-direction: column; }
+    .sim-panel-title { font-size: 0.7rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .sim-panel-title span { display: flex; align-items: center; gap: 6px; }
+
+    /* Simulation Filters */
+    .sim-filters { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; flex-shrink: 0; }
+    .sim-filter { background: var(--glass); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; font-size: 0.5rem; color: var(--text-primary); cursor: pointer; transition: all 0.15s; }
+    .sim-filter:hover { border-color: var(--accent); }
+    .sim-filter.active { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+    .sim-filter.icmp { border-left: 2px solid var(--ok); }
+    .sim-filter.arp { border-left: 2px solid var(--warn); }
+    .sim-filter.dhcp { border-left: 2px solid var(--layer3); }
+    .sim-filter.dns { border-left: 2px solid var(--device); }
+    .sim-filter.tcp { border-left: 2px solid var(--layer7); }
+    .sim-filter.udp { border-left: 2px solid var(--accent); }
+    .sim-filter.all { border-left: 2px solid var(--text-muted); }
+
+    /* Layer Filter */
+    .layer-filters { display: flex; gap: 4px; }
+    .layer-filter { background: var(--glass); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-size: 0.45rem; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+    .layer-filter:hover { border-color: var(--accent); color: var(--text-primary); }
+    .layer-filter.active { background: var(--bg-elevated); border-color: var(--accent); color: var(--accent); }
 
     /* Capture List */
-    .capture-list { max-height: 200px; overflow-y: auto; }
-    .capture-item { padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.55rem; cursor: pointer; transition: background 0.1s; }
+    .capture-list { max-height: 180px; overflow-y: auto; flex-shrink: 0; }
+    .capture-list::-webkit-scrollbar { width: 4px; }
+    .capture-list::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 2px; }
+    .capture-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .capture-item { padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.55rem; cursor: pointer; transition: background 0.1s; display: flex; align-items: center; gap: 6px; }
     .capture-item:hover { background: var(--glass); }
     .capture-item.selected { background: rgba(201, 162, 39, 0.2); }
+    .capture-item .pkt-num { color: var(--accent); font-weight: 600; min-width: 24px; }
+    .capture-item .pkt-type { padding: 1px 4px; border-radius: 3px; font-size: 0.45rem; font-weight: 600; }
+    .capture-item .pkt-type.icmp { background: var(--ok); color: var(--bg-deep); }
+    .capture-item .pkt-type.arp { background: var(--warn); color: var(--bg-deep); }
+    .capture-item .pkt-type.dhcp { background: var(--layer3); color: var(--bg-deep); }
+    .capture-item .pkt-type.dns { background: var(--device); color: var(--bg-deep); }
+    .capture-item .pkt-type.tcp { background: var(--layer7); color: var(--bg-deep); }
+    .capture-item .pkt-type.udp { background: var(--accent); color: var(--bg-deep); }
+    .capture-item .pkt-type.http { background: var(--copper); color: var(--bg-deep); }
+    .capture-item .pkt-path { color: var(--text-muted); font-size: 0.5rem; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .capture-item .pkt-time { color: var(--text-muted); font-size: 0.45rem; }
+
+    /* Packet Detail Panel */
+    .packet-detail { flex: 1; min-height: 0; background: var(--bg-deep); border-radius: 6px; padding: 8px; overflow-y: auto; max-height: 200px; }
+    .packet-detail-title { font-size: 0.6rem; font-weight: 600; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .pdu-info-section { margin-bottom: 8px; }
+    .pdu-info-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 0.5rem; border-bottom: 1px solid var(--border); }
+    .pdu-info-row span:first-child { color: var(--text-muted); }
+    .pdu-info-row span:last-child { color: var(--text-primary); font-family: 'Fira Code', monospace; }
+    .osi-layers { display: flex; gap: 2px; margin: 6px 0; }
+    .osi-layer { flex: 1; padding: 4px 2px; text-align: center; font-size: 0.4rem; border-radius: 3px; }
+    .osi-layer.l7 { background: var(--layer7); color: white; }
+    .osi-layer.l4 { background: var(--layer4); color: var(--bg-deep); }
+    .osi-layer.l3 { background: var(--layer3); color: var(--bg-deep); }
+    .osi-layer.l2 { background: var(--device); color: white; }
+    .osi-layer.l1 { background: var(--serial); color: white; }
+    .osi-layer.active { box-shadow: 0 0 8px currentColor; }
+    .hex-dump { background: var(--bg-surface); padding: 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.45rem; line-height: 1.4; overflow-x: auto; white-space: pre; color: var(--text-muted); }
+    .hex-dump .hex-header { color: var(--accent); }
+    .hex-dump .hex-offset { color: var(--layer3); }
+    .hex-dump .hex-ascii { color: var(--ok); }
+
+    /* Simulation Controls */
+    .sim-controls { display: flex; gap: 4px; margin-top: 8px; flex-shrink: 0; }
+    .sim-btn { flex: 1; padding: 6px; background: var(--glass); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.55rem; transition: all 0.15s; }
+    .sim-btn:hover { background: var(--glass-light); border-color: var(--accent); }
+    .sim-btn.active { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+    .sim-btn i { font-size: 14px; }
+    .sim-btn.reset { border-color: var(--error); color: var(--error); }
+    .sim-btn.reset:hover { background: var(--error); color: white; }
+
+    /* Simulation Speed */
+    .sim-speed-control { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .sim-speed-label { font-size: 0.5rem; color: var(--text-muted); }
+    .sim-speed-slider { flex: 1; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; }
+    .sim-speed-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+    .sim-speed-value { font-size: 0.5rem; color: var(--accent); min-width: 30px; text-align: right; }
+
+    /* Event History Panel */
+    .event-history { position: absolute; top: 60px; left: 260px; width: 380px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; z-index: 200; overflow: hidden; display: none; max-height: 500px; }
+    .event-history.show { display: flex; flex-direction: column; }
+    .event-history-header { padding: 8px 12px; background: var(--bg-elevated); display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem; font-weight: 600; }
+    .event-history-header .filters { display: flex; gap: 4px; }
+    .event-history-content { flex: 1; overflow-y: auto; padding: 8px; max-height: 400px; }
+    .event-history-item { display: flex; gap: 8px; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 0.55rem; }
+    .event-history-item .time { color: var(--text-muted); min-width: 50px; }
+    .event-history-item .type { font-weight: 600; min-width: 60px; }
+    .event-history-item .msg { flex: 1; }
+    .event-history-item.success .type { color: var(--ok); }
+    .event-history-item.fail .type { color: var(--error); }
+    .event-history-item.info .type { color: var(--layer3); }
+
+    /* Simulation Status Bar */
+    .sim-status { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: var(--bg-deep); border-radius: 4px; margin-top: 6px; font-size: 0.5rem; flex-shrink: 0; }
+    .sim-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); animation: simPulse 1s infinite; }
+    .sim-status-dot.paused { background: var(--warn); animation: none; }
+    @keyframes simPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .sim-status-text { color: var(--text-muted); }
+    .sim-status-count { color: var(--accent); font-weight: 600; }
 
     /* Packet Detail */
     .packet-detail { margin-top: 10px; padding: 8px; background: var(--bg-deep); border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.5rem; }
@@ -877,7 +969,7 @@
       <div class="toolbar-spacer"></div>
 
       <button class="tool-btn" onclick="openPDU()" id="btnPDU"><i class="ph ph-paper-plane-tilt"></i> PDU</button>
-      <button class="tool-btn" onclick="openCapture()" id="btnCapture"><i class="ph ph-eye"></i> Capture</button>
+      <button class="tool-btn" onclick="openCapture()" id="btnCapture"><i class="ph ph-eye"></i> Simulation</button>
       <button class="tool-btn" onclick="runSTP()"><i class="ph ph-git-branch"></i> STP</button>
       <button class="tool-btn" onclick="openNAT()"><i class="ph ph-arrows-split"></i> NAT</button>
       <button class="tool-btn" onclick="openRouting()"><i class="ph ph-path"></i> Routing</button>
@@ -1345,15 +1437,56 @@
       <!-- Simulation Panel -->
       <div class="sim-panel" id="simPanel">
         <div class="sim-panel-title">
-          <span><i class="ph ph-eye"></i> Capture / Forward</span>
-          <button onclick="closeSimPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+          <span><i class="ph ph-eye"></i> Simulation</span>
+          <button onclick="closeSimPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;">×</button>
         </div>
+        
+        <!-- Filters -->
+        <div class="sim-filters">
+          <button class="sim-filter all active" onclick="setSimFilter('all', this)">Alle</button>
+          <button class="sim-filter icmp" onclick="setSimFilter('icmp', this)">ICMP</button>
+          <button class="sim-filter arp" onclick="setSimFilter('arp', this)">ARP</button>
+          <button class="sim-filter dhcp" onclick="setSimFilter('dhcp', this)">DHCP</button>
+          <button class="sim-filter dns" onclick="setSimFilter('dns', this)">DNS</button>
+          <button class="sim-filter tcp" onclick="setSimFilter('tcp', this)">TCP</button>
+          <button class="sim-filter udp" onclick="setSimFilter('udp', this)">UDP</button>
+        </div>
+        <div class="layer-filters">
+          <button class="layer-filter active" onclick="setLayerFilter('all', this)">Alle Layer</button>
+          <button class="layer-filter" onclick="setLayerFilter('L3', this)">L3</button>
+          <button class="layer-filter" onclick="setLayerFilter('L4', this)">L4</button>
+          <button class="layer-filter" onclick="setLayerFilter('L7', this)">L7</button>
+        </div>
+        
+        <!-- Packet List -->
         <div id="captureList" class="capture-list"></div>
-        <div id="packetDetail" class="packet-detail" style="display:none;"></div>
-        <div style="margin-top:8px;display:flex;gap:4px;">
-          <button class="modal-btn secondary" style="flex:1;font-size:0.6rem;" onclick="captureBack()"><i class="ph ph-arrow-left"></i> Back</button>
-          <button class="modal-btn secondary" style="flex:1;font-size:0.6rem;" onclick="captureForward()"><i class="ph ph-arrow-right"></i> Forward</button>
-          <button class="modal-btn primary" style="flex:1;font-size:0.6rem;" onclick="captureAuto()">Auto</button>
+        
+        <!-- Packet Detail -->
+        <div id="packetDetail" class="packet-detail"></div>
+        
+        <!-- Simulation Controls -->
+        <div class="sim-controls">
+          <button class="sim-btn" onclick="simReset()" title="Reset Simulation"><i class="ph ph-arrow-counter-clockwise"></i></button>
+          <button class="sim-btn" onclick="simStepBack()" title="Step Back"><i class="ph ph-arrow-left"></i></button>
+          <button class="sim-btn" onclick="simStepForward()" title="Step Forward"><i class="ph ph-arrow-right"></i></button>
+          <button class="sim-btn" id="simPlayBtn" onclick="simPlayPause()" title="Play/Pause"><i class="ph ph-play"></i></button>
+          <button class="sim-btn" onclick="simBurst()" title="Burst (5x)"><i class="ph ph-lightning"></i></button>
+        </div>
+        
+        <!-- Speed Control -->
+        <div class="sim-speed-control">
+          <span class="sim-speed-label">Speed:</span>
+          <input type="range" class="sim-speed-slider" id="simSpeedSlider" min="10" max="1000" value="500" onchange="updateSimSpeed()">
+          <span class="sim-speed-value" id="simSpeedValue">500ms</span>
+        </div>
+        
+        <!-- Status -->
+        <div class="sim-status">
+          <div class="sim-status-dot" id="simStatusDot"></div>
+          <span class="sim-status-text">Packets:</span>
+          <span class="sim-status-count" id="simPacketCount">0</span>
+          <span class="sim-status-text"> | Filtered:</span>
+          <span class="sim-status-count" id="simFilteredCount">0</span>
         </div>
       </div>
     </div>
@@ -4512,42 +4645,27 @@ exit                - exit current mode
       const packet = {
         id: S.pduCnt,
         src: src.name,
-        srcIP: src.ip,
+        srcIP: src.ip || 'DHCP',
         srcMAC: src.mac,
         dst: dst.name,
-        dstIP: dst.ip,
+        dstIP: dst.ip || 'DHCP',
         dstMAC: dst.mac,
         type,
         layer,
         timestamp: new Date().toLocaleTimeString(),
-        success: null
+        success: null,
+        size: type === 'icmp' ? 64 : type === 'arp' ? 42 : type === 'dhcp' ? 350 : type === 'dns' ? 128 : type === 'http' ? 512 : 256
       };
       S.capturedPackets.push(packet);
       updateCaptureList();
       addToPacketHistory(packet);
 
       // Update interface statistics
-      const packetSize = type === 'icmp' ? 64 : type === 'arp' ? 42 : type === 'dhcp' ? 350 : 512;
-      updateIfStat(src.id, src.usedPorts - 1, 'out', packetSize);
-      updateIfStat(dst.id, dst.usedPorts - 1, 'in', packetSize);
+      const packetSize = packet.size;
+      if (src.usedPorts > 0) updateIfStat(src.id, src.usedPorts - 1, 'out', packetSize);
+      if (dst.usedPorts > 0) updateIfStat(dst.id, dst.usedPorts - 1, 'in', packetSize);
       if (showIfStats) renderIfStats();
       if (showHealthDashboard) renderHealthDashboard();
-
-      // Store packet for capture
-      const packet = {
-        id: S.pduCnt,
-        src: src.name,
-        dst: dst.name,
-        srcIP: src.ip,
-        dstIP: dst.ip,
-        srcMAC: src.mac,
-        dstMAC: dst.mac,
-        type,
-        layer,
-        timestamp: new Date().toLocaleTimeString()
-      };
-      S.capturedPackets.push(packet);
-      updateCaptureList();
 
       const path = findPath(src, dst);
       if (!path) { log(layer, 'fail', 'Kein Pfad verfügbar!'); updStats(); return; }
@@ -4555,24 +4673,192 @@ exit                - exit current mode
       animatePath(path, type, layer, () => {
         log(layer, 'success', `${dst.name} erreicht!`);
         updateOSIPanel(null);
-
-        // Show packet detail on click
+        packet.success = true;
         showPacketDetail(packet);
         updStats();
       });
     }
 
+    // ==================== ENHANCED SIMULATION CONTROLS ====================
+    let simFilter = 'all';
+    let layerFilter = 'all';
+    let simPaused = false;
+    let selectedPacket = null;
+
+    function setSimFilter(type, btn) {
+      simFilter = type;
+      document.querySelectorAll('.sim-filter').forEach(f => f.classList.remove('active'));
+      btn.classList.add('active');
+      updateCaptureList();
+    }
+
+    function setLayerFilter(layer, btn) {
+      layerFilter = layer;
+      document.querySelectorAll('.layer-filter').forEach(f => f.classList.remove('active'));
+      btn.classList.add('active');
+      updateCaptureList();
+    }
+
     function updateCaptureList() {
       const el = document.getElementById('captureList');
-      if (S.capturedPackets.length === 0) {
-        el.innerHTML = '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;">Keine Pakete</div>';
+      let filtered = S.capturedPackets;
+      
+      // Apply filters
+      if (simFilter !== 'all') {
+        filtered = filtered.filter(p => p.type === simFilter);
+      }
+      if (layerFilter !== 'all') {
+        filtered = filtered.filter(p => p.layer === layerFilter);
+      }
+      
+      // Update filtered count
+      document.getElementById('simFilteredCount').textContent = filtered.length;
+      document.getElementById('simPacketCount').textContent = S.capturedPackets.length;
+      
+      if (filtered.length === 0) {
+        el.innerHTML = '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:20px;">Keine Pakete<br><span style="font-size:0.5rem;">' + (simFilter !== 'all' || layerFilter !== 'all' ? 'Filter anpassen' : 'PDU senden') + '</span></div>';
         return;
       }
-      el.innerHTML = S.capturedPackets.slice().reverse().slice(0, 20).map((p, i) =>
-        `<div class="capture-item" onclick="showPacketDetail(S.capturedPackets[${S.capturedPackets.length - 1 - i}])">
-          <span style="color:var(--layer3)">#${p.id}</span> ${p.src} → ${p.dst} <span style="color:var(--text-muted)">[${p.type.toUpperCase()}]</span>
-        </div>`
-      ).join('');
+      
+      el.innerHTML = filtered.slice().reverse().slice(0, 50).map((p, i) => {
+        const origIndex = S.capturedPackets.indexOf(p);
+        return `<div class="capture-item ${selectedPacket === p ? 'selected' : ''}" onclick="showPacketDetail(S.capturedPackets[${origIndex}])">
+          <span class="pkt-num">#${p.id}</span>
+          <span class="pkt-type ${p.type}">${p.type.toUpperCase()}</span>
+          <span class="pkt-path">${p.src} → ${p.dst}</span>
+          <span class="pkt-time">${p.timestamp}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function showPacketDetail(p) {
+      selectedPacket = p;
+      updateCaptureList();
+      
+      const detail = document.getElementById('packetDetail');
+      if (!p) { detail.innerHTML = ''; return; }
+      
+      // Generate hex dump
+      const hex = generateHexDump(p);
+      
+      // OSI Layer visualization
+      const layers = {
+        'L7': p.layer === 'L7',
+        'L4': p.layer === 'L4' || p.layer === 'L7',
+        'L3': true,
+        'L2': true,
+        'L1': true
+      };
+      
+      detail.innerHTML = `
+        <div class="packet-detail-title">
+          <i class="ph ph-envelope"></i> PDU #${p.id} - ${p.type.toUpperCase()}
+          <span style="margin-left:auto;font-size:0.45rem;color:${p.success ? 'var(--ok)' : 'var(--error)'}">${p.success ? '✓ Success' : '○ Pending'}</span>
+        </div>
+        <div class="osi-layers">
+          <div class="osi-layer l1 ${layers['L1'] && p.layer === 'L7' ? 'active' : ''}">L1</div>
+          <div class="osi-layer l2 ${layers['L2'] ? 'active' : ''}">L2</div>
+          <div class="osi-layer l3 ${layers['L3'] ? 'active' : ''}">L3</div>
+          <div class="osi-layer l4 ${layers['L4'] ? 'active' : ''}">L4</div>
+          <div class="osi-layer l7 ${layers['L7'] ? 'active' : ''}">L7</div>
+        </div>
+        <div class="pdu-info-section">
+          <div class="pdu-info-row"><span>Source MAC</span><span>${p.srcMAC}</span></div>
+          <div class="pdu-info-row"><span>Dest MAC</span><span>${p.dstMAC}</span></div>
+          <div class="pdu-info-row"><span>Source IP</span><span>${p.srcIP}</span></div>
+          <div class="pdu-info-row"><span>Dest IP</span><span>${p.dstIP}</span></div>
+          <div class="pdu-info-row"><span>Protocol</span><span>${p.type.toUpperCase()}</span></div>
+          <div class="pdu-info-row"><span>Size</span><span>${p.size} bytes</span></div>
+        </div>
+        <div style="font-size:0.5rem;color:var(--text-muted);margin:4px 0;">Hex Dump:</div>
+        <div class="hex-dump">${hex}</div>
+      `;
+    }
+
+    function generateHexDump(p) {
+      const data = [];
+      const patterns = {
+        icmp: [0x08, 0x00, 0x00, 0x00, 0x00, 0x01],
+        arp: [0x00, 0x01, 0x08, 0x00, 0x06, 0x04],
+        dhcp: [0x01, 0x01, 0x06, 0x00],
+        dns: [0x00, 0x00, 0x01, 0x00, 0x00],
+        tcp: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        udp: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+      };
+      const pat = patterns[p.type] || [0x00, 0x00];
+      for (let i = 0; i < 32; i++) data.push((i < pat.length ? pat[i] : Math.floor(Math.random() * 256)).toString(16).padStart(2, '0'));
+      
+      let hex = '<span class="hex-header">Offset(h)  00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  Ascii</span>\n';
+      for (let i = 0; i < 2; i++) {
+        const offset = (i * 16).toString(16).padStart(8, '0');
+        const row = data.slice(i * 16, (i + 1) * 16);
+        const padded = [...Array(16)].map((_, j) => row[j] || '00');
+        const ascii = padded.map(b => {
+          const v = parseInt(b, 16);
+          return (v >= 32 && v <= 126) ? String.fromCharCode(v) : '.';
+        }).join('');
+        hex += `<span class="hex-offset">${offset}</span> ${padded.join(' ')} <span class="hex-ascii">${ascii}</span>\n`;
+      }
+      return hex;
+    }
+
+    // Simulation Controls
+    function simReset() {
+      S.capturedPackets = [];
+      S.pduCnt = 0;
+      selectedPacket = null;
+      document.getElementById('packetDetail').innerHTML = '';
+      updateCaptureList();
+      log('Simulation', 'info', 'Simulation zurückgesetzt');
+    }
+
+    function simStepBack() {
+      log('Simulation', 'info', 'Step Back - nicht verfügbar');
+    }
+
+    function simStepForward() {
+      log('Simulation', 'info', 'Step Forward - nicht verfügbar');
+    }
+
+    function simPlayPause() {
+      simPaused = !simPaused;
+      const btn = document.getElementById('simPlayBtn');
+      const dot = document.getElementById('simStatusDot');
+      if (simPaused) {
+        btn.innerHTML = '<i class="ph ph-play"></i>';
+        dot.classList.add('paused');
+        log('Simulation', 'info', 'Simulation pausiert');
+      } else {
+        btn.innerHTML = '<i class="ph ph-pause"></i>';
+        dot.classList.remove('paused');
+        log('Simulation', 'info', 'Simulation fortgesetzt');
+      }
+    }
+
+    function simBurst() {
+      const types = ['icmp', 'arp', 'dhcp', 'dns', 'tcp', 'udp'];
+      const pcs = S.nodes.filter(n => n.end && n.ip);
+      const servers = S.nodes.filter(n => n.srv || n.r);
+      if (pcs.length === 0 || servers.length === 0) {
+        log('Simulation', 'fail', 'Keine Geräte für Burst verfügbar');
+        return;
+      }
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const src = pcs[Math.floor(Math.random() * pcs.length)];
+          const dst = servers[Math.floor(Math.random() * servers.length)];
+          const type = types[Math.floor(Math.random() * types.length)];
+          const layers = { icmp: 'L3', arp: 'L2', dhcp: 'L7', dns: 'L7', tcp: 'L4', udp: 'L4' };
+          simPDU(src, dst, type, layers[type]);
+        }, i * 200);
+      }
+      log('Simulation', 'info', 'Burst gesendet: 5 Pakete');
+    }
+
+    function updateSimSpeed() {
+      const val = parseInt(document.getElementById('simSpeedSlider').value);
+      document.getElementById('simSpeedValue').textContent = val + 'ms';
+      simSpeed = val;
     }
 
     // ==================== PACKET HISTORY ====================

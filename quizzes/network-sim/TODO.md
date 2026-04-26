@@ -168,6 +168,7 @@
 - [x] **Auto-Configure** - automatic IP assignment
 - [x] **Network health check** - periodic diagnostics
 - [x] **Playwright tests** - 6 tests for basic functionality
+- [x] **Enhanced Simulation Panel** - filterable by type/layer, PDU info, hex dump
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
