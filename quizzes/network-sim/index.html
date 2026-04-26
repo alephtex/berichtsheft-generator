@@ -2678,17 +2678,22 @@
 
   <!-- CLI Modal -->
   <div class="modal-overlay" id="cliModal">
-    <div class="modal" style="max-width: 640px;">
-      <div class="modal-title"><i class="ph ph-terminal"></i> <span id="cliTitle">CLI Terminal</span></div>
-      <div id="cliTerm" style="background:#0a0a0a;border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:0.65rem;height:220px;overflow-y:auto;margin-bottom:10px;line-height:1.5;"></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="color:var(--ok);font-family:'Fira Code',monospace;">></span>
-        <input type="text" id="cliInput" style="flex:1;background:#0a0a0a;border:1px solid var(--border);border-radius:4px;padding:8px;color:var(--text-bright);font-family:inherit;font-size:0.7rem;" placeholder="Befehl eingeben..." onkeydown="if(event.key==='Enter')execCLI()">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-title"><i class="ph ph-terminal"></i> <span id="cliTitle">CLI Terminal</span> <span id="cliHostname" style="font-weight:normal;color:var(--text-muted);font-size:0.6rem;"></span></div>
+      <div id="cliTerm" style="background:#0a0a0a;border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:0.65rem;height:280px;overflow-y:auto;margin-bottom:10px;line-height:1.5;"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="color:var(--ok);font-family:'Fira Code',monospace;font-size:0.8rem;">></span>
+        <input type="text" id="cliInput" style="flex:1;background:#0a0a0a;border:1px solid var(--border);border-radius:4px;padding:8px;color:var(--text-bright);font-family:inherit;font-size:0.75rem;" placeholder="Befehl eingeben... (Tab für Auto-complete)" autocomplete="off">
       </div>
-      <div style="margin-top:8px;font-size:0.55rem;color:var(--text-muted);">
-        <strong>Tip:</strong> Tab = Auto-complete | ? = Hilfe | Pfeiltasten = History
+      <div id="cliSuggestions" style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a24;border:1px solid var(--border);border-radius:6px;padding:8px;display:none;min-width:200px;max-width:400px;z-index:10001;"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:0.5rem;color:var(--text-muted);background:var(--bg-deep);padding:8px;border-radius:6px;">
+        <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:3px;">Tab</kbd> Auto-complete</div>
+        <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:3px;">↑↓</kbd> History</div>
+        <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:3px;">?</kbd> Hilfe</div>
+        <div><kbd style="background:var(--bg-elevated);padding:2px 6px;border-radius:3px;">Ctrl+C</kbd> Clear</div>
       </div>
       <div class="modal-actions">
+        <button class="modal-btn secondary" onclick="clearCLI()">Clear</button>
         <button class="modal-btn secondary" onclick="closeM('cliModal')">Schließen</button>
       </div>
     </div>
@@ -5592,28 +5597,99 @@
         </div>
       `;
       document.getElementById('cliModal').classList.add('show');
-      setTimeout(() => document.getElementById('cliInput').focus(), 100);
+      setTimeout(() => {
+        document.getElementById('cliInput').focus();
+        document.getElementById('cliHostname').textContent = S.sel ? S.sel.name : '';
+      }, 100);
     }
+    
+    // CLI Commands for tab completion
+    const CLI_COMMANDS = [
+      'show', 'show ip', 'show ip route', 'show ip interface', 'show ip protocols', 'show version',
+      'show interfaces', 'show interface fastethernet', 'show interface gigabitethernet',
+      'show cdp neighbors', 'show cdp neighbors detail', 'show mac-address-table',
+      'show arp', 'show vlan', 'show vlan brief', 'show spanning-tree',
+      'configure terminal', 'interface', 'interface fastethernet', 'interface gigabitethernet',
+      'ip address', 'ip address dhcp', 'no ip address', 'no shutdown', 'shutdown',
+      'description', 'speed', 'duplex', 'bandwidth',
+      'router rip', 'router ospf', 'router eigrp', 'network',
+      'vlan', 'switchport mode', 'switchport access vlan', 'switchport trunk',
+      'port-security', 'port-security maximum', 'port-security violation',
+      'access-list', 'ip nat inside', 'ip nat outside', 'clear arp',
+      'copy running-config startup-config', 'write memory', 'wr mem',
+      'enable', 'configure', 'interface', 'exit', 'end', 'logout', '?', 'help'
+    ];
+    
+    document.getElementById('cliInput')?.addEventListener('keydown', function(e) {
+      const input = this;
+      
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const val = input.value.toLowerCase();
+        const matches = CLI_COMMANDS.filter(c => c.startsWith(val) && c !== val);
+        if (matches.length === 1) {
+          input.value = matches[0];
+        } else if (matches.length > 1) {
+          // Show suggestions
+          const suggestions = document.getElementById('cliSuggestions');
+          if (suggestions) {
+            suggestions.innerHTML = matches.slice(0, 5).map(m => `<div style="padding:4px 8px;cursor:pointer;" onclick="document.getElementById('cliInput').value='${m}';this.parentElement.style.display='none';">${m}</div>`).join('');
+            suggestions.style.display = 'block';
+            setTimeout(() => suggestions.style.display = 'none', 3000);
+          }
+        }
+      }
+      
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (S.cliHistory.length > 0 && S.cliHistoryIdx > 0) {
+          S.cliHistoryIdx--;
+          input.value = S.cliHistory[S.cliHistoryIdx] || '';
+        }
+      }
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (S.cliHistoryIdx < S.cliHistory.length - 1) {
+          S.cliHistoryIdx++;
+          input.value = S.cliHistory[S.cliHistoryIdx] || '';
+        } else {
+          S.cliHistoryIdx = S.cliHistory.length;
+          input.value = '';
+        }
+      }
+      
+      if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        input.value = '';
+      }
+    });
 
     function execCLI() {
       const cmd = document.getElementById('cliInput').value.trim();
       if (!cmd) return;
 
-      S.cliHistory.push(cmd);
+      if (!S.cliHistory.includes(cmd)) {
+        S.cliHistory.push(cmd);
+      }
       S.cliHistoryIdx = S.cliHistory.length;
 
       const term = document.getElementById('cliTerm');
-      term.innerHTML += `<div><span style="color:var(--ok)">></span> <span style="color:var(--text-bright)">${cmd}</span></div>`;
+      term.innerHTML += `<div style="margin:4px 0;"><span style="color:var(--ok);font-weight:bold;">${S.sel?.name || 'Router'}#</span> <span style="color:var(--text-bright)">${cmd}</span></div>`;
 
       const out = processCLI(cmd);
-      if (out) term.innerHTML += `<div style="color:var(--text-primary)">${out.replace(/\n/g, '<br>')}</div>`;
+      if (out) term.innerHTML += `<div style="color:var(--text-primary);white-space:pre-wrap;margin:4px 0;">${out.replace(/\n/g, '<br>')}</div>`;
 
       document.getElementById('cliInput').value = '';
       term.scrollTop = term.scrollHeight;
     }
+    
+    function clearCLI() {
+      document.getElementById('cliTerm').innerHTML = '';
+    }
 
     function processCLI(cmd) {
-      if (!S.sel) return '';
+      if (!S.sel) return 'No device selected';
       const n = S.sel;
       const c = cmd.toLowerCase();
 

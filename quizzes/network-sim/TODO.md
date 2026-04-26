@@ -209,6 +209,7 @@
 - [x] **Enhanced Device Inspector** - Detailed device info, connections list, quick actions
 - [x] **Auto-Save History** - Version history, load/delete previous saves, toolbar button
 - [x] **Enhanced Templates** - 14 templates with categories (Basic/Enterprise/WAN/Special)
+- [x] **Enhanced CLI** - Tab completion, command history (↑↓), suggestions, hostname display
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
