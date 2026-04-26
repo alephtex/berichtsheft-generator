@@ -197,6 +197,7 @@
 - [x] **Quick Config Wizard** - Step-by-step IP configuration, subnet selection, router config
 - [x] **Enhanced Device Tooltip** - Detailed info (IP, MAC, Gateway, Subnet, Status)
 - [x] **JSON Export/Import** - Full topology save/load, settings preservation
+- [x] **Device Grouping** - Group selected devices, visual grouping, toolbar buttons
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

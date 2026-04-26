@@ -767,6 +767,38 @@
     
     /* Alignment Helpers */
     .align-helper { position: absolute; pointer-events: none; z-index: 998; border: 2px dashed var(--ok); opacity: 0.8; border-radius: 4px; background: rgba(90, 138, 106, 0.1); }
+    
+    /* Device Groups */
+    .device-group {
+      transition: all 0.3s ease;
+    }
+    .device-group:hover {
+      border-color: var(--ok) !important;
+      background: rgba(76, 175, 80, 0.15) !important;
+    }
+    .group-toolbar {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .device-group:hover .group-toolbar {
+      opacity: 1;
+    }
+    .group-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .align-helper-label { position: absolute; top: -16px; left: 0; background: var(--ok); color: var(--bg-deep); font-size: 0.45rem; padding: 2px 4px; border-radius: 3px; }
     
     /* Drop Zone Indicator */
@@ -1244,6 +1276,8 @@
         <button class="tool-btn" onclick="alignSelected('left')" title="Align Left"><i class="ph ph-align-left"></i></button>
         <button class="tool-btn" onclick="alignSelected('hdist')" title="H-Dist"><i class="ph ph-distribute-horizontal"></i></button>
         <button class="tool-btn" onclick="alignSelected('vdist')" title="V-Dist"><i class="ph ph-distribute-vertical"></i></button>
+        <button class="tool-btn" onclick="groupSelected()" title="Group"><i class="ph ph-selection"></i></button>
+        <button class="tool-btn" onclick="ungroupSelected()" title="Ungroup"><i class="ph ph-arrows-out"></i></button>
       </div>
       <button class="tool-btn" onclick="toggleMacTable()" id="btnMac"><i class="ph ph-ethernet"></i> MAC</button>
       <button class="tool-btn" onclick="toggleRouteTable()" id="btnRoute"><i class="ph ph-path"></i> Routes</button>
@@ -7558,8 +7592,112 @@ ${S.conns.map(c => {
     // ==================== SELECT ALL ====================
     function selectAll() {
       S.sel = S.nodes.map(n => n.id);
-      document.querySelectorAll('.node').forEach(el => el.classList.add('selected'));
+      document.querySelectorAll('.sim-node').forEach(el => el.classList.add('selected'));
       log('System', 'info', `Alle ${S.nodes.length} Geräte ausgewählt`);
+    }
+    
+    // ==================== DEVICE GROUPING ====================
+    let deviceGroups = [];
+    
+    function groupSelected() {
+      if (!S.sel || S.sel.length < 2) {
+        log('System', 'warn', 'Mindestens 2 Geräte auswählen');
+        return;
+      }
+      
+      const selectedNodes = S.nodes.filter(n => S.sel.includes(n.id));
+      const groupId = 'group_' + Date.now();
+      
+      // Calculate group bounds
+      const minX = Math.min(...selectedNodes.map(n => n.x));
+      const minY = Math.min(...selectedNodes.map(n => n.y));
+      const maxX = Math.max(...selectedNodes.map(n => n.x + 90));
+      const maxY = Math.max(...selectedNodes.map(n => n.y + 80));
+      
+      const group = {
+        id: groupId,
+        name: 'Group ' + (deviceGroups.length + 1),
+        nodes: selectedNodes.map(n => n.id),
+        bounds: { x: minX - 20, y: minY - 20, width: maxX - minX + 40, height: maxY - minY + 40 },
+        color: 'var(--accent)',
+        collapsed: false
+      };
+      
+      deviceGroups.push(group);
+      renderGroups();
+      log('System', 'success', `${selectedNodes.length} Geräte gruppiert`);
+    }
+    
+    function ungroupSelected() {
+      if (!S.sel || S.sel.length === 0) return;
+      
+      // Find groups that contain selected nodes
+      const groupsToRemove = deviceGroups.filter(g => 
+        g.nodes.some(nId => S.sel.includes(nId))
+      );
+      
+      groupsToRemove.forEach(g => {
+        const idx = deviceGroups.findIndex(dg => dg.id === g.id);
+        if (idx !== -1) deviceGroups.splice(idx, 1);
+      });
+      
+      renderGroups();
+      log('System', 'info', 'Gruppierung aufgelöst');
+    }
+    
+    function renderGroups() {
+      // Remove old group visuals
+      document.querySelectorAll('.device-group').forEach(el => el.remove());
+      
+      const container = document.getElementById('nodesContainer');
+      if (!container) return;
+      
+      deviceGroups.forEach(group => {
+        const div = document.createElement('div');
+        div.className = 'device-group';
+        div.id = group.id;
+        div.style.cssText = `
+          position: absolute;
+          left: ${group.bounds.x}px;
+          top: ${group.bounds.y}px;
+          width: ${group.bounds.width}px;
+          height: ${group.bounds.height}px;
+          border: 2px dashed ${group.color};
+          border-radius: 12px;
+          background: ${group.color}15;
+          pointer-events: none;
+          z-index: 0;
+        `;
+        div.innerHTML = `
+          <div style="
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: ${group.color};
+            color: var(--bg-deep);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.5rem;
+            font-weight: 600;
+          ">${group.name}</div>
+        `;
+        container.insertBefore(div, container.firstChild);
+      });
+    }
+    
+    function updateGroupBounds() {
+      deviceGroups.forEach(group => {
+        const nodes = S.nodes.filter(n => group.nodes.includes(n.id));
+        if (nodes.length === 0) return;
+        
+        const minX = Math.min(...nodes.map(n => n.x));
+        const minY = Math.min(...nodes.map(n => n.y));
+        const maxX = Math.max(...nodes.map(n => n.x + 90));
+        const maxY = Math.max(...nodes.map(n => n.y + 80));
+        
+        group.bounds = { x: minX - 20, y: minY - 20, width: maxX - minX + 40, height: maxY - minY + 40 };
+      });
+      renderGroups();
     }
 
     // ==================== QUICK TEMPLATES ====================
