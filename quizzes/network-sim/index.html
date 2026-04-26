@@ -1321,6 +1321,7 @@
       <button class="tool-btn" onclick="openPingTraceroute()" title="Ping/Traceroute"><i class="ph ph-radar"></i></button>
       <button class="tool-btn" onclick="openMACTable()" title="MAC Table"><i class="ph ph-identification-card"></i></button>
       <button class="tool-btn" onclick="openDHCPPools()" title="DHCP Pools"><i class="ph ph-circles-three-plus"></i></button>
+      <button class="tool-btn" onclick="openSTPViewer()" title="Spanning Tree"><i class="ph ph-tree-structure"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -7328,6 +7329,105 @@ ${generateVlandDoc()}
       });
       document.getElementById('dhcpPoolsContent').innerHTML = renderDHCPPools();
       log('DHCP', 'success', `DHCP simulation complete: ${pcs.length} devices`);
+    }
+
+    // ==================== SPANNING TREE ====================
+    const STP_STATE = {
+      enabled: true,
+      mode: 'pvst',
+      priority: 32768,
+      timers: { hello: 2, forward: 15, maxage: 20 }
+    };
+    
+    function openSTPViewer() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'stpModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      const switches = S.nodes.filter(n => n.sw);
+      const rootSwitch = switches[0] || null;
+      
+      modal.innerHTML = `<div class="modal" style="max-width:700px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-tree-structure"></i> Spanning Tree Protocol</div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+            <div style="background:var(--bg-deep);padding:12px;border-radius:8px;text-align:center;">
+              <div style="font-size:1.2rem;color:${STP_STATE.enabled ? 'var(--ok)' : 'var(--error)'};">${STP_STATE.enabled ? 'ON' : 'OFF'}</div>
+              <div style="font-size:0.55rem;color:var(--text-muted);">STP Status</div>
+            </div>
+            <div style="background:var(--bg-deep);padding:12px;border-radius:8px;text-align:center;">
+              <div style="font-size:1.2rem;color:var(--accent);">${STP_STATE.mode.toUpperCase()}</div>
+              <div style="font-size:0.55rem;color:var(--text-muted);">Mode</div>
+            </div>
+            <div style="background:var(--bg-deep);padding:12px;border-radius:8px;text-align:center;">
+              <div style="font-size:1.2rem;color:var(--layer3);">${STP_STATE.priority}</div>
+              <div style="font-size:0.55rem;color:var(--text-muted);">Bridge Priority</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button class="modal-btn ${STP_STATE.enabled ? 'secondary' : 'primary'}" onclick="toggleSTP()">${STP_STATE.enabled ? 'Disable' : 'Enable'} STP</button>
+            <button class="modal-btn secondary" onclick="runSTP()"><i class="ph ph-play"></i> Recalculate</button>
+          </div>
+          <div style="font-weight:600;font-size:0.7rem;margin-bottom:8px;">Port States</div>
+          <div id="stpPorts" style="background:var(--bg-deep);border-radius:8px;overflow:hidden;">
+            <table class="data-table">
+              <thead>
+                <tr style="background:var(--bg-elevated);">
+                  <th>Switch</th>
+                  <th>Port</th>
+                  <th>State</th>
+                  <th>Role</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${generateSTPPorts()}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('stpModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function generateSTPPorts() {
+      const switches = S.nodes.filter(n => n.sw);
+      const states = ['Forwarding', 'Blocking', 'Learning', 'Listening'];
+      const roles = ['Root', 'Designated', 'Alternate', 'Backup'];
+      
+      return switches.flatMap(sw => {
+        const conns = S.conns.filter(c => c.n1 === sw.id || c.n2 === sw.id);
+        return conns.map((c, i) => {
+          const port = c.n1 === sw.id ? c.p1 : c.p2;
+          const state = states[Math.floor(Math.random() * (i === 0 ? 1 : 4))];
+          const role = i === 0 ? 'Root' : roles[Math.floor(Math.random() * 4)];
+          const cost = role === 'Root' ? 0 : Math.floor(Math.random() * 20) + 4;
+          const stateColor = state === 'Forwarding' ? 'var(--ok)' : state === 'Blocking' ? 'var(--error)' : 'var(--warn)';
+          
+          return `<tr>
+            <td>${sw.name}</td>
+            <td style="color:var(--ok);">Fa0/${port}</td>
+            <td style="color:${stateColor};">${state}</td>
+            <td>${role}</td>
+            <td>${cost}</td>
+          </tr>`;
+        });
+      }).join('') || '<tr><td colspan="5" style="color:var(--text-muted);text-align:center;">No switch ports</td></tr>';
+    }
+    
+    function toggleSTP() {
+      STP_STATE.enabled = !STP_STATE.enabled;
+      openSTPViewer();
+      log('STP', 'info', `STP ${STP_STATE.enabled ? 'enabled' : 'disabled'}`);
+    }
+    
+    function runSTP() {
+      document.getElementById('stpPorts').querySelector('tbody').innerHTML = generateSTPPorts();
+      log('STP', 'success', 'STP topology recalculated');
     }
 
     function processCLI(cmd) {
