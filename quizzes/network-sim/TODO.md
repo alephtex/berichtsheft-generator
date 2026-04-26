@@ -151,6 +151,8 @@
 - [x] **Favorites bar** - quick access to common devices
 - [x] **Zoom slider** with +/- buttons in toolbar
 - [x] **Enhanced status bar** - devices, connections, online count
+- [x] **Improved drag UX** - scale, shadow, landing animations
+- [x] **Target port highlighting** - pulsing green when connecting
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
