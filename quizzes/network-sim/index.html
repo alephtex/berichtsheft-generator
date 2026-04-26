@@ -1319,6 +1319,7 @@
       <button class="tool-btn" onclick="openVLANManager()" title="VLAN Manager"><i class="ph ph-squares-four"></i></button>
       <button class="tool-btn" onclick="openRouteTable()" title="Route Table"><i class="ph ph-path"></i></button>
       <button class="tool-btn" onclick="openPingTraceroute()" title="Ping/Traceroute"><i class="ph ph-radar"></i></button>
+      <button class="tool-btn" onclick="openMACTable()" title="MAC Table"><i class="ph ph-identification-card"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -7147,6 +7148,107 @@ ${generateVlandDoc()}
       });
       
       log('Traceroute', 'info', `${src.name} → ${target}`);
+    }
+
+    // ==================== MAC ADDRESS TABLE ====================
+    function openMACTable() {
+      const switches = S.nodes.filter(n => n.sw);
+      if (switches.length === 0) {
+        alert('No switches found');
+        return;
+      }
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'macModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:700px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-identification-card"></i> MAC Address Table</div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Select Switch</label>
+            <select class="form-select" id="macSwitch" onchange="updateMACTable()">
+              ${switches.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+            </select>
+          </div>
+          <div id="macTableContent">
+            ${renderMACTable(switches[0])}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="clearMACTable()"><i class="ph ph-trash"></i> Clear</button>
+          <button class="modal-btn secondary" onclick="document.getElementById('macModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function generateMACTable(sw) {
+      if (!sw.macTable) {
+        sw.macTable = [];
+        // Generate entries from connected devices
+        S.conns.forEach(c => {
+          if (c.n1 === sw.id || c.n2 === sw.id) {
+            const otherId = c.n1 === sw.id ? c.n2 : c.n1;
+            const other = S.nodes.find(n => n.id === otherId);
+            if (other && other.mac) {
+              const port = c.n1 === sw.id ? c.p1 : c.p2;
+              sw.macTable.push({
+                mac: other.mac,
+                vlan: other.vlan || '1',
+                port: `Fa0/${port}`,
+                type: 'Dynamic'
+              });
+            }
+          }
+        });
+      }
+      return sw.macTable;
+    }
+    
+    function renderMACTable(sw) {
+      const entries = generateMACTable(sw);
+      
+      return `<table class="data-table" style="width:100%;">
+        <thead>
+          <tr style="background:var(--bg-elevated);">
+            <th>VLAN</th>
+            <th>MAC Address</th>
+            <th>Interface</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map(e => `
+            <tr>
+              <td>${e.vlan}</td>
+              <td style="font-family:'Fira Code',monospace;color:var(--layer3);">${e.mac}</td>
+              <td style="color:var(--ok);">${e.port}</td>
+              <td style="color:var(--accent);">${e.type}</td>
+            </tr>
+          `).join('') || '<tr><td colspan="4" style="color:var(--text-muted);text-align:center;">No entries</td></tr>'}
+        </tbody>
+      </table>
+      <div style="margin-top:8px;font-size:0.55rem;color:var(--text-muted);">
+        Total: ${entries.length} entries
+      </div>`;
+    }
+    
+    function updateMACTable() {
+      const sw = S.nodes.find(n => n.id === document.getElementById('macSwitch').value);
+      if (sw) {
+        document.getElementById('macTableContent').innerHTML = renderMACTable(sw);
+      }
+    }
+    
+    function clearMACTable() {
+      const sw = S.nodes.find(n => n.id === document.getElementById('macSwitch').value);
+      if (sw) {
+        sw.macTable = [];
+        updateMACTable();
+        log('Switch', 'info', 'MAC table cleared');
+      }
     }
 
     function processCLI(cmd) {
