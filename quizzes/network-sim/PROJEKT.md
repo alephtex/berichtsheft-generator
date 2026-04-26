@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+c51985a feat: Add Network Summary panel, selection glow animation
 701e67c feat: Add device hover tooltip with quick info
 d19da60 feat: Add more templates, welcome modal for new users
 7972b48 feat: Improved port connection UX, visual guides
@@ -171,6 +172,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 3.2  
+**Version:** 3.3  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv

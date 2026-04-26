@@ -136,6 +136,8 @@
 - [x] **8 Quick Templates** - including Full Network, Data Center
 - [x] **Welcome modal** for first-time users
 - [x] **Device hover tooltip** - quick info on mouseover
+- [x] **Network Summary panel** - device/cable breakdown statistics
+- [x] **Selection glow animation** - pulsing glow on selected devices
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
