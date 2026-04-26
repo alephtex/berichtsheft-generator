@@ -220,6 +220,7 @@
 - [x] **Event Log Panel** - Real-time event logging, filter, export CSV, clear
 - [x] **Security Audit Panel** - Security score, checks (SSH/VLAN/ACL/PortSec), export report
 - [x] **Device Comparison Tool** - Side-by-side device comparison, property highlighting
+- [x] **Bandwidth Monitor** - Real-time bandwidth usage, utilization %, chart, link stats
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
