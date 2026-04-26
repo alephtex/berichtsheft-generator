@@ -225,6 +225,7 @@
 - [x] **Network Calculator** - Subnet mask, CIDR, broadcast, host range calculation
 - [x] **VLAN Manager** - Create/delete VLANs, assign devices, view by VLAN, status
 - [x] **Route Table Viewer** - View/add/delete routes, static/RIP/OSPF/EIGRP types
+- [x] **Ping/Traceroute Tool** - Network diagnostics, hop tracking, latency display
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
