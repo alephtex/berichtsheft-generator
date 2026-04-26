@@ -201,6 +201,7 @@
 - [x] **Auto-Layout** - Layer-based layout, tree layout algorithms, toolbar buttons
 - [x] **Zoom to Selection** - Zoom controls, breadcrumb navigation, device zoom
 - [x] **Layer Visualization** - Core/Distribution/Access layers, layer indicators, toggle button
+- [x] **Packet Tracer Port Interface** - Enhanced port display, status indicators, hover effects
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

@@ -202,12 +202,20 @@
     .panel-label { font-size: 0.35rem; color: var(--accent); font-weight: 700; letter-spacing: 1px; text-align: center; margin-bottom: 2px; }
     .node-icon { font-size: 28px; color: var(--accent); }
     .node-name { font-size: 0.6rem; font-weight: 600; color: var(--text-primary); margin-top: 2px; text-align: center; }
-    .panel-ports { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin-bottom: 4px; }
-    .panel-port { display: flex; flex-direction: column; align-items: center; }
-    .panel-port-led { width: 6px; height: 6px; border-radius: 50%; background: #333; border: 1px solid #444; }
-    .panel-port-led.up { background: var(--ok); box-shadow: 0 0 4px var(--ok); }
+    .panel-ports { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-bottom: 4px; padding: 4px; background: rgba(0,0,0,0.3); border-radius: 4px; }
+    .panel-port { display: flex; flex-direction: column; align-items: center; padding: 4px 6px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer; transition: all 0.2s; min-width: 28px; }
+    .panel-port:hover { background: rgba(201, 162, 39, 0.2); transform: scale(1.1); }
+    .panel-port.up { background: rgba(76, 175, 80, 0.15); border: 1px solid rgba(76, 175, 80, 0.3); }
+    .panel-port.down { background: rgba(244, 67, 54, 0.05); border: 1px solid rgba(244, 67, 54, 0.2); }
+    .panel-port-led { width: 8px; height: 8px; border-radius: 50%; background: #333; border: 1px solid #444; }
+    .panel-port-led.up { background: var(--ok); box-shadow: 0 0 6px var(--ok); animation: portGlow 2s infinite; }
     .panel-port-led.down { background: #333; }
-    .panel-port-led.poe { background: var(--warn); box-shadow: 0 0 4px var(--warn); }
+    .panel-port-led.poe { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+    @keyframes portGlow { 0%, 100% { box-shadow: 0 0 4px var(--ok); } 50% { box-shadow: 0 0 10px var(--ok); } }
+    .port-name { font-size: 0.45rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .port-status-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 2px; }
+    .port-status-dot.up { background: var(--ok); }
+    .port-status-dot.down { background: var(--error); opacity: 0.5; }
     .panel-leds { display: flex; gap: 4px; justify-content: center; padding-top: 4px; border-top: 1px solid #2a2a34; }
     .panel-led { width: 4px; height: 4px; border-radius: 50%; }
     .panel-led.green { background: var(--ok); }
@@ -4357,11 +4365,16 @@
       let html = '<div class="panel-ports-inner">';
       for (let i = 0; i < n.totalPorts; i++) {
         const isU = i >= n.ports;
-        const portNum = isU ? `U${i - n.ports + 1}` : `${i}`;
+        const portNum = isU ? i - n.ports + 1 : i;
+        const portType = isU ? 'G' : 'F';
         const used = i < n.usedPorts;
-        html += `<div class="panel-port" data-p="${i}">
-          <div class="panel-port-led ${used ? 'up' : 'down'}"></div>
-          <div class="interface-desc">${isU ? 'G' : 'F'}${portNum}</div>
+        const conn = S.conns.find(c => (c.n1 === n.id && c.p1 === i) || (c.n2 === n.id && c.p2 === i));
+        const status = conn ? 'up' : 'down';
+        const speed = conn?.type === 'fiber' ? '1G' : '100M';
+        html += `<div class="panel-port ${status}" data-p="${i}" title="${portType}${portNum} - ${status.toUpperCase()}">
+          <div class="panel-port-led ${status}"></div>
+          <div class="port-name">${portType}${portNum}</div>
+          <div class="port-status-dot ${status}"></div>
         </div>`;
       }
       return html + '</div><div class="port-hint">💡 Ziehe Port zum Verbinden</div>';
