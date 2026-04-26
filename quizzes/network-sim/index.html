@@ -645,10 +645,14 @@
 
     /* Connections SVG */
     .conn-svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
-    .conn-line { fill: none; stroke-width: 4; stroke-linecap: round; pointer-events: stroke; transition: stroke-width 0.15s; }
-    .conn-line.copper-str { stroke: var(--copper-str); }
-    .conn-line.copper-cross { stroke: var(--copper-cross); }
-    .conn-line.fiber { stroke: var(--fiber); stroke-dasharray: 8,4; }
+    .conn-line { fill: none; stroke-width: 4; stroke-linecap: round; pointer-events: stroke; transition: stroke-width 0.2s, filter 0.2s, opacity 0.2s; }
+    .conn-line:hover { stroke-width: 7; filter: drop-shadow(0 0 10px currentColor); }
+    .conn-line.copper-str { stroke: var(--copper); filter: drop-shadow(0 0 3px var(--copper)); }
+    .conn-line.copper-cross { stroke: var(--copper-cross); filter: drop-shadow(0 0 3px var(--copper-cross)); }
+    .conn-line.fiber { stroke: var(--fiber); stroke-dasharray: 12,6; filter: drop-shadow(0 0 5px var(--fiber)); }
+    .conn-line.serial { stroke: var(--serial); filter: drop-shadow(0 0 3px var(--serial)); }
+    .conn-line.selected { stroke-width: 6; filter: drop-shadow(0 0 15px var(--accent)); }
+    .conn-line:hover { cursor: pointer; }
     .conn-line.serial { stroke: var(--serial); }
     .conn-line:hover { stroke-width: 6; filter: drop-shadow(0 0 8px currentColor); cursor: pointer; pointer-events: stroke; }
     .conn-line.selected { stroke: var(--accent); stroke-width: 6; filter: drop-shadow(0 0 12px var(--accent)); }
@@ -700,6 +704,7 @@
     .conn-preview.serial line { stroke: var(--serial); }
     @keyframes dashMove { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -20; } }
     .conn-preview line { stroke-dasharray: 10, 5; }
+    @keyframes trafficFlow { 0% { transform: translateX(0); } 100% { transform: translateX(20px); } }
     
     .conn-label {
       font-size: 9px;
@@ -3498,6 +3503,9 @@
     }
 
     // ==================== CABLE TYPE ====================
+    function openCableModal() {
+      document.getElementById('cableModal').classList.add('show');
+    }
     function selectConnType() {
       document.getElementById('cableModal').classList.add('show');
     }
@@ -3507,9 +3515,16 @@
       document.querySelectorAll('.conn-type').forEach(e => e.classList.remove('selected'));
       el.classList.add('selected');
       const labels = { 'copper-str': 'Kupfer', 'copper-cross': 'Crossover', 'fiber': 'Glasfaser', 'serial': 'Seriell' };
+      const cableColors = { 'copper-str': 'var(--copper)', 'copper-cross': 'var(--copper-cross)', 'fiber': 'var(--fiber)', 'serial': 'var(--serial)' };
       document.getElementById('sCable').textContent = labels[type];
+      document.getElementById('btnConnType').style.background = cableColors[type];
+      document.getElementById('btnConnType').style.color = 'var(--bg-deep)';
       closeM('cableModal');
       log('System', 'info', `Kabeltyp: ${labels[type]}`);
+      // Update preview line color immediately
+      if (previewLine) {
+        previewLine.className.baseVal = `conn-preview ${type}`;
+      }
     }
 
     // ==================== AUTO CONNECT ====================
