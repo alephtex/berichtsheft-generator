@@ -233,11 +233,15 @@
     @keyframes blinkLed { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     /* Mini Map */
-    .mini-map { position: absolute; bottom: 60px; right: 12px; width: 150px; height: 100px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 100; }
-    .mini-map-header { padding: 4px 8px; background: var(--bg-elevated); font-size: 0.5rem; color: var(--text-muted); display: flex; justify-content: space-between; }
-    .mini-map-canvas { width: 100%; height: calc(100% - 20px); background: var(--bg-deep); position: relative; }
-    .mini-map-viewport { position: absolute; border: 1px solid var(--accent); background: rgba(201, 162, 39, 0.2); pointer-events: none; }
-    .mini-map-node { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+    .mini-map { position: absolute; bottom: 60px; right: 12px; width: 180px; height: 120px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; z-index: 100; }
+    .mini-map-header { padding: 4px 8px; background: var(--bg-elevated); font-size: 0.5rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+    .mini-map-canvas { width: 100%; height: calc(100% - 20px); background: var(--bg-deep); position: relative; cursor: crosshair; }
+    .mini-map-viewport { position: absolute; border: 1px solid var(--accent); background: rgba(201, 162, 39, 0.15); pointer-events: all; cursor: move; }
+    .mini-map-node { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+    .mini-map-node.router { background: var(--layer3); }
+    .mini-map-node.switch { background: var(--device); }
+    .mini-map-node.server { background: var(--ok); }
+    .mini-map-node:hover { transform: scale(1.5); cursor: pointer; }
 
     /* Context Menu */
     .context-menu { position: fixed; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px 0; min-width: 180px; z-index: 10000; box-shadow: 0 8px 40px rgba(0,0,0,0.6); display: none; }
