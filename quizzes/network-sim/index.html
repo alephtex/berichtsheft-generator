@@ -719,7 +719,28 @@
     .conn-preview.serial line { stroke: var(--serial); filter: drop-shadow(0 0 10px var(--serial)); }
 
     /* Quick Connect Label */
-    .quick-connect { position: fixed; background: var(--accent); color: var(--bg-deep); padding: 5px 10px; border-radius: 12px; font-size: 0.6rem; font-weight: 600; pointer-events: none; z-index: 5001; white-space: nowrap; transform: translate(-50%, -120%); }
+    .quick-connect { 
+      position: fixed; 
+      background: linear-gradient(135deg, var(--accent), #b8942a); 
+      color: var(--bg-deep); 
+      padding: 6px 12px; 
+      border-radius: 16px; 
+      font-size: 0.6rem; 
+      font-weight: 600; 
+      pointer-events: none; 
+      z-index: 5001; 
+      white-space: nowrap; 
+      transform: translate(-50%, -120%); 
+      box-shadow: 0 4px 15px rgba(201, 162, 39, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .quick-connect.valid { 
+      background: linear-gradient(135deg, var(--ok), #3a7a4a); 
+      box-shadow: 0 4px 15px rgba(90, 138, 106, 0.5);
+    }
+    .quick-connect .conn-type { font-size: 0.5rem; opacity: 0.8; }
 
     /* Packets */
     .packet { position: absolute; width: 12px; height: 12px; border-radius: 50%; pointer-events: none; z-index: 2000; }
@@ -872,6 +893,11 @@
       <button class="tool-btn" onclick="openQuickTemplates()"><i class="ph ph-layout"></i> Templates</button>
       <button class="tool-btn" onclick="toggleTrafficAnim()"><i class="ph ph-activity"></i> Traffic</button>
       <button class="tool-btn" onclick="selectAll()"><i class="ph ph-check-square"></i> All</button>
+      <div style="display:flex;gap:2px;">
+        <button class="tool-btn" onclick="alignSelected('left')" title="Align Left"><i class="ph ph-align-left"></i></button>
+        <button class="tool-btn" onclick="alignSelected('hdist')" title="H-Dist"><i class="ph ph-distribute-horizontal"></i></button>
+        <button class="tool-btn" onclick="alignSelected('vdist')" title="V-Dist"><i class="ph ph-distribute-vertical"></i></button>
+      </div>
       <button class="tool-btn" onclick="toggleMacTable()" id="btnMac"><i class="ph ph-ethernet"></i> MAC</button>
       <button class="tool-btn" onclick="toggleRouteTable()" id="btnRoute"><i class="ph ph-path"></i> Routes</button>
       <button class="tool-btn" onclick="toggleNatTable()" id="btnNat"><i class="ph ph-arrows-left-right"></i> NAT</button>
@@ -3206,13 +3232,15 @@
         const targetNodeEl = targetPort.closest('.sim-node');
         const targetNodeData = S.nodes.find(x => x.id === targetNodeEl.id);
         const targetPortIdx = parseInt(targetPort.dataset.p);
+        const cableLabels = { 'copper-str': 'UTP', 'copper-cross': 'Cross', 'fiber': 'Fiber', 'serial': 'Serial' };
+        const cableLabel = cableLabels[S.cableType] || S.cableType;
         if (targetNodeData && targetNodeData.id !== connState.sourceNode.id) {
-          quickConnect.textContent = `→ ${targetNodeData.name}:${targetPortIdx + 1}`;
-          quickConnect.style.background = 'var(--ok)';
+          quickConnect.innerHTML = `${connState.sourceNode.name}:F0/${connState.sourcePort} → ${targetNodeData.name}:F0/${targetPortIdx}<div class="conn-type">${cableLabel} Kabel</div>`;
+          quickConnect.classList.add('valid');
         }
       } else {
-        quickConnect.textContent = `${connState.sourceNode.name}:${connState.sourcePort + 1}`;
-        quickConnect.style.background = 'var(--accent)';
+        quickConnect.innerHTML = `${connState.sourceNode.name}:F0/${connState.sourcePort}<div class="conn-type">${cableLabel} Kabel</div>`;
+        quickConnect.classList.remove('valid');
       }
     }
 
@@ -5497,6 +5525,54 @@ exit                - exit current mode
       });
     }
 
+    // ==================== ALIGN SELECTED ====================
+    function alignSelected(direction) {
+      const selected = S.nodes.filter(n => S.sel && S.sel.includes && S.sel.includes(n.id));
+      if (selected.length < 2) {
+        log('System', 'warn', 'Mindestens 2 Geräte auswählen');
+        return;
+      }
+      saveState();
+      
+      if (direction === 'left') {
+        const minX = Math.min(...selected.map(n => n.x));
+        selected.forEach(n => { n.x = minX; document.getElementById(n.id).style.left = n.x + 'px'; });
+      } else if (direction === 'right') {
+        const maxX = Math.max(...selected.map(n => n.x));
+        selected.forEach(n => { n.x = maxX; document.getElementById(n.id).style.left = n.x + 'px'; });
+      } else if (direction === 'top') {
+        const minY = Math.min(...selected.map(n => n.y));
+        selected.forEach(n => { n.y = minY; document.getElementById(n.id).style.top = n.y + 'px'; });
+      } else if (direction === 'bottom') {
+        const maxY = Math.max(...selected.map(n => n.y));
+        selected.forEach(n => { n.y = maxY; document.getElementById(n.id).style.top = n.y + 'px'; });
+      } else if (direction === 'hdist') {
+        // Distribute horizontally
+        const sorted = [...selected].sort((a, b) => a.x - b.x);
+        const minX = sorted[0].x;
+        const maxX = sorted[sorted.length - 1].x;
+        const step = (maxX - minX) / (sorted.length - 1);
+        sorted.forEach((n, i) => { 
+          n.x = minX + step * i; 
+          document.getElementById(n.id).style.left = n.x + 'px'; 
+        });
+      } else if (direction === 'vdist') {
+        // Distribute vertically
+        const sorted = [...selected].sort((a, b) => a.y - b.y);
+        const minY = sorted[0].y;
+        const maxY = sorted[sorted.length - 1].y;
+        const step = (maxY - minY) / (sorted.length - 1);
+        sorted.forEach((n, i) => { 
+          n.y = minY + step * i; 
+          document.getElementById(n.id).style.top = n.y + 'px'; 
+        });
+      }
+      
+      drawConns();
+      updateMiniMap();
+      log('System', 'success', `Ausgewählte ausgerichtet: ${direction}`);
+    }
+    
     // ==================== SELECT ALL ====================
     function selectAll() {
       S.sel = S.nodes.map(n => n.id);
