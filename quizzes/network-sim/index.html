@@ -366,6 +366,13 @@
     .conn-bw.gigabit { fill: var(--ok); }
     .conn-bw.fast { fill: var(--layer3); }
     .conn-bw.slow { fill: var(--warn); }
+    .conn-dist { font-size: 0.4rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
+    .port-end-label { font-size: 0.35rem; fill: var(--text-muted); font-family: 'Fira Code', monospace; }
+    
+    /* Port Connection Quality Indicator */
+    .conn-quality { font-size: 0.45rem; fill: var(--ok); }
+    .conn-quality.warn { fill: var(--warn); }
+    .conn-quality.error { fill: var(--error); }
     
     /* Traffic Mini Graph */
     .traffic-graph { display: flex; align-items: flex-end; gap: 1px; height: 20px; width: 50px; background: var(--bg-deep); border-radius: 3px; padding: 2px; }
@@ -3417,6 +3424,43 @@
         bwLabel.setAttribute('text-anchor', 'middle');
         bwLabel.textContent = bw;
         svg.appendChild(bwLabel);
+        
+        // Distance indicator
+        const dist = Math.round(Math.sqrt((p2x-p1x)**2 + (p2y-p1y)**2));
+        const distLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        distLabel.setAttribute('x', mx);
+        distLabel.setAttribute('y', my + 20);
+        distLabel.setAttribute('class', 'conn-dist');
+        distLabel.setAttribute('text-anchor', 'middle');
+        distLabel.textContent = `${dist}px`;
+        svg.appendChild(distLabel);
+        
+        // Quality indicator based on distance and cable type
+        const maxDist = c.type === 'fiber' ? 500 : c.type === 'serial' ? 1000 : 300;
+        const quality = Math.max(0, 100 - (dist / maxDist * 100));
+        const qualityClass = quality > 70 ? '' : quality > 40 ? 'warn' : 'error';
+        const qualityLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        qualityLabel.setAttribute('x', mx);
+        qualityLabel.setAttribute('y', my + 32);
+        qualityLabel.setAttribute('class', `conn-quality ${qualityClass}`);
+        qualityLabel.setAttribute('text-anchor', 'middle');
+        qualityLabel.textContent = `⚡${Math.round(quality)}%`;
+        svg.appendChild(qualityLabel);
+        
+        // Port labels on endpoints
+        const p1Label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        p1Label.setAttribute('x', p1x + 15);
+        p1Label.setAttribute('y', p1y - 5);
+        p1Label.setAttribute('class', 'port-end-label');
+        p1Label.textContent = `F0/${c.p1}`;
+        svg.appendChild(p1Label);
+        
+        const p2Label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        p2Label.setAttribute('x', p2x - 15);
+        p2Label.setAttribute('y', p2y - 5);
+        p2Label.setAttribute('class', 'port-end-label');
+        p2Label.textContent = `F0/${c.p2}`;
+        svg.appendChild(p2Label);
 
         // VLAN tag if applicable
         if (c.vlan && c.vlan !== '1') {
@@ -6652,6 +6696,12 @@ ${target.name}# `;
       if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetView(); }
       // G = Toggle grid snap
       if (e.key === 'g' || e.key === 'G') { e.preventDefault(); toggleSnap(); }
+      // [ = Align left
+      if (e.key === '[') { e.preventDefault(); alignSelected('left'); }
+      // H = Distribute horizontally
+      if (e.key === 'h' || e.key === 'H') { e.preventDefault(); alignSelected('hdist'); }
+      // V = Distribute vertically
+      if (e.key === 'v' || e.key === 'V') { e.preventDefault(); alignSelected('vdist'); }
       // N = New/Clear
       if (e.key === 'n' || e.key === 'N') { e.preventDefault(); if(confirm('Topologie leeren?')) clearAll(); }
       // L = Cycle views
