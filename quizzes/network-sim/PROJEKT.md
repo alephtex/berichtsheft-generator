@@ -73,6 +73,7 @@ python3 -m http.server 8080
 
 ### Commit History
 ```
+db34837 feat: Add STP panel with spanning tree visualization
 70b5dbd feat: Connection details panel, enhanced connection visualization
 83c2ecc feat: Add QoS policy panel, wireless network configuration
 42e0a31 feat: Auto-forward simulation, simulation controls, enhanced status bar
@@ -164,6 +165,6 @@ ITSE IHK AP2 Projekt
 
 ---
 
-**Version:** 2.5  
+**Version:** 2.6  
 **Letzte Änderung:** 2026-04-26  
 **Status:** 🟢 Aktiv

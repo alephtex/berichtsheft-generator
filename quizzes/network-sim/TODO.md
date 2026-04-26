@@ -124,6 +124,9 @@
 - [x] **QoS Policy panel** - traffic prioritization queues
 - [x] **Wireless Networks** - SSID, channel, security config
 - [x] **Connection Details panel** - click to view/edit/delete connections
+- [x] **STP Panel** - spanning tree protocol visualization
+- [x] **Root bridge selection** - auto or manual
+- [x] **Port states** - FWD/BLK with role display
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
