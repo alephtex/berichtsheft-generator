@@ -599,9 +599,11 @@
     .conn-line.copper-cross { stroke: var(--copper-cross); }
     .conn-line.fiber { stroke: var(--fiber); stroke-dasharray: 8,4; }
     .conn-line.serial { stroke: var(--serial); }
-    .conn-line:hover { stroke-width: 8; filter: drop-shadow(0 0 10px currentColor); cursor: pointer; pointer-events: stroke; }
-    .conn-line.selected { stroke: var(--accent); stroke-width: 8; filter: drop-shadow(0 0 15px var(--accent)); }
+    .conn-line:hover { stroke-width: 6; filter: drop-shadow(0 0 8px currentColor); cursor: pointer; pointer-events: stroke; }
+    .conn-line.selected { stroke: var(--accent); stroke-width: 6; filter: drop-shadow(0 0 12px var(--accent)); }
     .conn-line.blocked { opacity: 0.3; stroke-dasharray: 12,6; }
+    .conn-line.busy { animation: connPulse 0.5s infinite; }
+    @keyframes connPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
     .conn-label {
       font-size: 9px;
@@ -752,6 +754,7 @@
       <button class="tool-btn" onclick="toggleAutoForward()" id="btnAutoFwd" title="Auto-Forward"><i class="ph ph-play-circle"></i> AutoFwd</button>
       <button class="tool-btn" onclick="toggleQoSPanel()" id="btnQoS"><i class="ph ph-gauge"></i> QoS</button>
       <button class="tool-btn" onclick="toggleWirelessPanel()" id="btnWireless"><i class="ph ph-wifi-high"></i> WLAN</button>
+      <button class="tool-btn" onclick="toggleConnDetails()" id="btnConnDetails"><i class="ph ph-plugs-connected"></i> Conn</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
       <button class="tool-btn" onclick="toggleArpPanel()" id="btnArp"><i class="ph ph-table"></i> ARP</button>
@@ -1046,6 +1049,17 @@
       <!-- Lasso Selection -->
       <div class="lasso" id="lasso"></div>
 
+      <!-- Connection Details Panel -->
+      <div class="route-panel" id="connDetailsPanel" style="width:280px;top:110px;">
+        <div class="route-header">
+          <span><i class="ph ph-plugs-connected"></i> Connection Details</span>
+          <button onclick="toggleConnDetails()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">×</button>
+        </div>
+        <div class="route-content" id="connDetailsContent">
+          <div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:20px;">Select a connection</div>
+        </div>
+      </div>
+      
       <!-- Simulation Panel -->
       <div class="sim-panel" id="simPanel">
         <div class="sim-panel-title">
@@ -4248,6 +4262,66 @@ exit                - exit current mode
       wirelessNetwork.ssid = document.getElementById('wlanSSID').value;
       wirelessNetwork.channel = parseInt(document.getElementById('wlanChannel').value);
       renderWirelessClients();
+    }
+    
+    // ==================== CONNECTION DETAILS ====================
+    let showConnDetails = false;
+    let selectedConn = null;
+    
+    function toggleConnDetails() {
+      showConnDetails = !showConnDetails;
+      document.getElementById('connDetailsPanel').style.display = showConnDetails ? 'block' : 'none';
+      document.getElementById('btnConnDetails').classList.toggle('active', showConnDetails);
+    }
+    
+    function selectConn(c) {
+      selectedConn = c;
+      const n1 = S.nodes.find(n => n.id === c.n1);
+      const n2 = S.nodes.find(n => n.id === c.n2);
+      if (!n1 || !n2) return;
+      
+      const content = document.getElementById('connDetailsContent');
+      const cableType = c.type === 'copper-str' ? 'Copper Straight' : c.type === 'copper-cross' ? 'Copper Cross' : c.type === 'fiber' ? 'Fiber Optic' : 'Serial DTE';
+      const cableColor = c.type === 'fiber' ? 'var(--fiber)' : c.type === 'serial' ? 'var(--serial)' : 'var(--copper)';
+      
+      content.innerHTML = `
+        <div style="font-size:0.65rem;font-weight:600;margin-bottom:10px;color:var(--accent);">${n1.name} ↔ ${n2.name}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px;background:var(--bg-deep);border-radius:6px;">
+          <div style="width:40px;height:6px;background:${cableColor};border-radius:3px;"></div>
+          <span style="font-size:0.6rem;">${cableType}</span>
+        </div>
+        <div class="route-row"><span style="color:var(--text-muted);">Type:</span><span>${cableType}</span></div>
+        <div class="route-row"><span style="color:var(--text-muted);">Length:</span><span>${c.len?.toFixed(1) || '0'} m</span></div>
+        <div class="route-row"><span style="color:var(--text-muted);">Attenuation:</span><span>${c.atten?.toFixed(2) || '0'} dB</span></div>
+        <div class="route-row"><span style="color:var(--text-muted);">Status:</span><span style="color:var(--ok);">Connected</span></div>
+        <div style="margin-top:12px;font-size:0.6rem;color:var(--text-muted);">Endpoints:</div>
+        <div style="margin-top:4px;padding:6px;background:var(--bg-deep);border-radius:4px;font-size:0.55rem;">
+          <div style="margin-bottom:4px;"><span style="color:var(--accent);">${n1.name}:</span> Port ${c.p1}</div>
+          <div><span style="color:var(--accent);">${n2.name}:</span> Port ${c.p2}</div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="modal-btn secondary" style="flex:1;font-size:0.55rem;" onclick="editConnection()"><i class="ph ph-pencil"></i> Edit</button>
+          <button class="modal-btn" style="flex:1;font-size:0.55rem;background:var(--error);" onclick="deleteSelectedConn()"><i class="ph ph-trash"></i> Delete</button>
+        </div>
+      `;
+    }
+    
+    function deleteSelectedConn() {
+      if (selectedConn) {
+        const idx = S.conns.indexOf(selectedConn);
+        if (idx >= 0) {
+          const n1 = S.nodes.find(n => n.id === selectedConn.n1);
+          const n2 = S.nodes.find(n => n.id === selectedConn.n2);
+          if (n1) n1.usedPorts = Math.max(0, n1.usedPorts - 1);
+          if (n2) n2.usedPorts = Math.max(0, n2.usedPorts - 1);
+          S.conns.splice(idx, 1);
+          selectedConn = null;
+          document.getElementById('connDetailsContent').innerHTML = '<div style="color:var(--text-muted);font-size:0.55rem;text-align:center;padding:20px;">Connection deleted</div>';
+          drawConns();
+          saveState();
+          log('Verbindung', 'success', 'Verbindung gelöscht');
+        }
+      }
     }
     
     function renderWirelessClients() {
