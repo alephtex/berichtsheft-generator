@@ -216,6 +216,7 @@
 - [x] **Packet Capture Modal** - Wireshark-style capture, filters, export CSV
 - [x] **Interface Status Dashboard** - Per-device port status, speed, latency, refresh
 - [x] **Config Diff Tool** - Compare running configs between devices, side-by-side view
+- [x] **Topology Map View** - Hierarchical topology display, layer visualization, SVG export
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

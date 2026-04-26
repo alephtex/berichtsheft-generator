@@ -1309,6 +1309,7 @@
       <button class="tool-btn" onclick="addAnnotation(500, 300)" title="Add Annotation"><i class="ph ph-note-pencil"></i></button>
       <button class="tool-btn" onclick="openInterfaceDashboard()" title="Interface Dashboard"><i class="ph ph-sidebar-simple"></i></button>
       <button class="tool-btn" onclick="openConfigDiff()" title="Config Diff"><i class="ph ph-git-compare"></i></button>
+      <button class="tool-btn" onclick="openTopologyMap()" title="Topology Map"><i class="ph ph-graph"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -6145,6 +6146,93 @@ hostname ${n.name}
 `;
       cfg += 'end';
       return cfg;
+    }
+
+    // ==================== TOPOLOGY MAP ====================
+    function openTopologyMap() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'topologyMapModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      // Calculate topology layout
+      const layers = { core: [], dist: [], access: [], edge: [] };
+      S.nodes.forEach(n => {
+        const layer = n.layer || (n.r ? 'core' : n.sw ? 'access' : 'edge');
+        if (layers[layer]) layers[layer].push(n);
+      });
+      
+      modal.innerHTML = `<div class="modal" style="max-width:90vw;width:1200px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="modal-title"><i class="ph ph-graph"></i> Network Topology Map</div>
+        <div style="flex:1;overflow:auto;background:var(--bg-deep);padding:20px;position:relative;">
+          <div style="display:flex;flex-direction:column;gap:60px;align-items:center;min-width:fit-content;">
+            ${Object.entries(layers).filter(([k,v]) => v.length > 0).map(([layer, nodes]) => `
+              <div style="display:flex;gap:30px;justify-content:center;">
+                ${nodes.map(n => {
+                  const conns = S.conns.filter(c => c.n1 === n.id || c.n2 === n.id).length;
+                  return `<div style="text-align:center;">
+                    <div style="width:80px;height:80px;background:var(--bg-elevated);border:2px solid var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                      <span style="font-size:24px;">${getDeviceIcon(n.type)}</span>
+                      <span style="font-size:0.6rem;color:var(--text-primary);margin-top:4px;">${n.name}</span>
+                    </div>
+                    <div style="font-size:0.5rem;color:var(--text-muted);margin-top:4px;">${conns} links</div>
+                    <div style="font-size:0.5rem;color:var(--accent);">${layer.toUpperCase()}</div>
+                  </div>`;
+                }).join('')}
+              </div>
+            `).join('')}
+          </div>
+          ${renderTopologyLinks()}
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:0.6rem;color:var(--text-muted);">
+            <span style="color:var(--accent);">●</span> ${S.nodes.length} Devices | 
+            <span style="color:var(--ok);">●</span> ${S.conns.length} Links
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="modal-btn secondary" onclick="exportTopologySVG()"><i class="ph ph-download"></i> Export SVG</button>
+            <button class="modal-btn secondary" onclick="document.getElementById('topologyMapModal').remove()">Close</button>
+          </div>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function renderTopologyLinks() {
+      return S.conns.map(c => {
+        const n1 = S.nodes.find(n => n.id === c.n1);
+        const n2 = S.nodes.find(n => n.id === c.n2);
+        if (!n1 || !n2) return '';
+        return `<div style="position:absolute;background:var(--ok);height:2px;opacity:0.3;"></div>`;
+      }).join('');
+    }
+    
+    function exportTopologySVG() {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+        <rect width="1200" height="800" fill="#0a0a0f"/>
+        <text x="600" y="30" fill="#c9a227" text-anchor="middle" font-size="20">Network Topology</text>
+        ${S.nodes.map((n, i) => {
+          const y = 100 + (i % 3) * 200;
+          const x = 200 + Math.floor(i / 3) * 250;
+          return `<rect x="${x-40}" y="${y-40}" width="80" height="80" fill="#1a1a2e" stroke="#c9a227" stroke-width="2" rx="8"/>
+            <text x="${x}" y="${y+5}" fill="#fff" text-anchor="middle" font-size="10">${n.name}</text>`;
+        }).join('')}
+      </svg>`;
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'topology-' + Date.now() + '.svg';
+      a.click();
+      log('Export', 'success', 'Topology exported as SVG');
+    }
+    
+    function getDeviceIcon(type) {
+      const icons = {
+        'router': '🌐', 'switch': '🔌', 'server': '🖥️', 'pc': '💻', 'laptop': '💻',
+        'printer': '🖨️', 'phone': '📱', 'tablet': '📱', 'accesspoint': '📶',
+        'smarttv': '📺', 'smartlight': '💡', 'thermostat': '🌡️', 'smartphone': '📱'
+      };
+      return icons[type] || '📦';
     }
 
     function processCLI(cmd) {
