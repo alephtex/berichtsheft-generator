@@ -240,6 +240,7 @@
 - [x] **QoS Configuration** - Priority queuing, bandwidth allocation, queue management
 - [x] **Syslog Viewer** - System logs, level filtering, export, clear
 - [x] **Favorite Templates** - Save/load topologies, localStorage persistence
+- [x] **Device Template Editor** - Save/load device configs, apply to devices
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

@@ -1333,6 +1333,7 @@
       <button class="tool-btn" onclick="openQoSConfig()" title="QoS Config"><i class="ph ph-traffic-signal"></i></button>
       <button class="tool-btn" onclick="openSyslog()" title="Syslog"><i class="ph ph-list-bullets"></i></button>
       <button class="tool-btn" onclick="openFavorites()" title="Favorites"><i class="ph ph-star"></i></button>
+      <button class="tool-btn" onclick="openDeviceTemplate()" title="Device Template"><i class="ph ph-cube"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -8446,6 +8447,146 @@ ${generateVlandDoc()}
     try {
       const saved = localStorage.getItem('netSimFavorites');
       if (saved) favoriteTemplates = JSON.parse(saved);
+    } catch (e) {}
+
+    // ==================== DEVICE TEMPLATE EDITOR ====================
+    function openDeviceTemplate() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'devTplModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:600px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-cube"></i> Device Template Editor</div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Template Name</label>
+            <input type="text" class="form-input" id="tplName" placeholder="My Router Config">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Device Type</label>
+            <select class="form-select" id="tplType">
+              <option value="router">Router</option>
+              <option value="switch">Switch</option>
+              <option value="server">Server</option>
+              <option value="pc">PC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default IP</label>
+            <input type="text" class="form-input" id="tplIP" placeholder="192.168.1.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Gateway</label>
+            <input type="text" class="form-input" id="tplGW" placeholder="192.168.1.254">
+          </div>
+          <div class="form-group">
+            <label class="form-label">VLAN</label>
+            <input type="text" class="form-input" id="tplVLAN" value="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Services (comma-separated)</label>
+            <input type="text" class="form-input" id="tplServices" placeholder="SSH,HTTP,DNS">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Routing Protocol</label>
+            <select class="form-select" id="tplRouting">
+              <option value="">None</option>
+              <option value="rip">RIP</option>
+              <option value="ospf">OSPF</option>
+              <option value="eigrp">EIGRP</option>
+            </select>
+          </div>
+          <button class="modal-btn primary" onclick="applyDeviceTemplate()" style="margin-top:12px;"><i class="ph ph-floppy-disk"></i> Apply to Selected Device</button>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div style="font-weight:600;font-size:0.7rem;margin-bottom:8px;">Saved Templates</div>
+            <div id="savedTemplates">${renderSavedTemplates()}</div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('devTplModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    let deviceTemplates = [];
+    
+    function saveDeviceTemplate() {
+      const name = document.getElementById('tplName').value;
+      if (!name) { alert('Enter template name'); return; }
+      
+      const tpl = {
+        id: Date.now(),
+        name,
+        type: document.getElementById('tplType').value,
+        ip: document.getElementById('tplIP').value,
+        gateway: document.getElementById('tplGW').value,
+        vlan: document.getElementById('tplVLAN').value,
+        services: document.getElementById('tplServices').value.split(',').map(s => s.trim()),
+        routing: document.getElementById('tplRouting').value
+      };
+      
+      deviceTemplates.push(tpl);
+      localStorage.setItem('netSimDeviceTemplates', JSON.stringify(deviceTemplates));
+      document.getElementById('savedTemplates').innerHTML = renderSavedTemplates();
+      log('Template', 'success', `Device template "${name}" saved`);
+    }
+    
+    function applyDeviceTemplate() {
+      if (!S.sel) { alert('Select a device first'); return; }
+      
+      S.sel.ip = document.getElementById('tplIP').value;
+      S.sel.gateway = document.getElementById('tplGW').value;
+      S.sel.vlan = document.getElementById('tplVLAN').value;
+      
+      if (document.getElementById('tplRouting').value) {
+        S.sel.routing = S.sel.routing || {};
+        S.sel.routing[document.getElementById('tplRouting').value] = true;
+      }
+      
+      updStats();
+      log('Template', 'success', `Template applied to ${S.sel.name}`);
+      document.getElementById('devTplModal')?.remove();
+    }
+    
+    function loadDeviceTemplate(id) {
+      const tpl = deviceTemplates.find(t => t.id === id);
+      if (!tpl) return;
+      
+      document.getElementById('tplName').value = tpl.name;
+      document.getElementById('tplType').value = tpl.type;
+      document.getElementById('tplIP').value = tpl.ip || '';
+      document.getElementById('tplGW').value = tpl.gateway || '';
+      document.getElementById('tplVLAN').value = tpl.vlan || '1';
+      document.getElementById('tplServices').value = (tpl.services || []).join(',');
+      document.getElementById('tplRouting').value = tpl.routing || '';
+      
+      log('Template', 'info', `Template "${tpl.name}" loaded`);
+    }
+    
+    function deleteDeviceTemplate(id) {
+      deviceTemplates = deviceTemplates.filter(t => t.id !== id);
+      localStorage.setItem('netSimDeviceTemplates', JSON.stringify(deviceTemplates));
+      document.getElementById('savedTemplates').innerHTML = renderSavedTemplates();
+    }
+    
+    function renderSavedTemplates() {
+      if (deviceTemplates.length === 0) return '<div style="color:var(--text-muted);font-size:0.6rem;">No saved templates</div>';
+      
+      return deviceTemplates.map(t => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-deep);border-radius:6px;margin-bottom:6px;font-size:0.6rem;">
+          <span style="flex:1;">${t.name}</span>
+          <button onclick="loadDeviceTemplate(${t.id})" style="background:var(--ok);border:none;color:var(--bg-deep);padding:4px 8px;border-radius:4px;cursor:pointer;">Load</button>
+          <button onclick="deleteDeviceTemplate(${t.id})" style="background:transparent;border:1px solid var(--error);color:var(--error);padding:4px 6px;border-radius:4px;cursor:pointer;">×</button>
+        </div>
+      `).join('') + '<button onclick="saveDeviceTemplate()" style="margin-top:8px;width:100%;background:var(--accent);border:none;color:var(--bg-deep);padding:8px;border-radius:6px;cursor:pointer;">💾 Save Current</button>';
+    }
+    
+    // Load templates on init
+    try {
+      const saved = localStorage.getItem('netSimDeviceTemplates');
+      if (saved) deviceTemplates = JSON.parse(saved);
     } catch (e) {}
 
     function processCLI(cmd) {
