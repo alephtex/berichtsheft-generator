@@ -613,6 +613,14 @@
     .conn-line.busy { animation: connPulse 0.5s infinite; }
     @keyframes connPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
+    /* Selection Glow Effect */
+    .sim-node.selected { animation: selectedGlow 2s ease-in-out infinite; }
+    @keyframes selectedGlow { 0%, 100% { box-shadow: 0 0 15px var(--accent), 0 0 30px rgba(201, 162, 39, 0.3); } 50% { box-shadow: 0 0 25px var(--accent), 0 0 50px rgba(201, 162, 39, 0.5); } }
+
+    /* Port Activity Flash */
+    .port-active { animation: portFlash 0.3s ease-out; }
+    @keyframes portFlash { 0% { transform: scale(1.8); background: var(--accent); } 100% { transform: scale(1); } }
+
     .conn-label {
       font-size: 9px;
       fill: var(--text-muted);
@@ -797,6 +805,7 @@
       <button class="tool-btn" onclick="autoSave()" id="btnAutoSave" title="Auto-Save"><i class="ph ph-cloud-check"></i> AutoSave</button>
       <button class="tool-btn" onclick="exportImage()" title="Als Bild"><i class="ph ph-image"></i></button>
       <button class="tool-btn" onclick="openM('helpModal')" title="Help"><i class="ph ph-question"></i></button>
+      <button class="tool-btn" onclick="openNetSummary()" title="Summary"><i class="ph ph-chart-pie"></i></button>
 
       <div class="toolbar-spacer"></div>
 
@@ -1373,6 +1382,15 @@
           </div>
         </div>
         <button class="modal-btn" style="margin-top:16px;width:100%;" onclick="closeM('helpModal')">Got it!</button>
+      </div>
+    </div>
+
+    <!-- Network Summary Modal -->
+    <div class="modal-overlay" id="netSummaryModal">
+      <div class="modal" style="max-width:450px;">
+        <div class="modal-title"><i class="ph ph-chart-pie"></i> Network Summary</div>
+        <div id="netSummaryContent"></div>
+        <button class="modal-btn" style="margin-top:16px;width:100%;" onclick="closeM('netSummaryModal')">Close</button>
       </div>
     </div>
 
@@ -4584,6 +4602,88 @@ exit                - exit current mode
       drawConns();
     }
 
+    // ==================== NETWORK SUMMARY ====================
+    function openNetSummary() {
+      const content = document.getElementById('netSummaryContent');
+      
+      // Count devices by type
+      const routers = S.nodes.filter(n => n.r).length;
+      const switches = S.nodes.filter(n => n.sw).length;
+      const servers = S.nodes.filter(n => n.srv).length;
+      const pcs = S.nodes.filter(n => n.end).length;
+      const wireless = S.nodes.filter(n => n.wireless).length;
+      const poe = S.nodes.filter(n => n.poeBudget > 0).length;
+      const totalDevices = S.nodes.length;
+      const totalConns = S.conns.length;
+      const onlineDevices = S.nodes.filter(n => n.on !== false).length;
+      
+      // Count connections by type
+      const copperStr = S.conns.filter(c => c.type === 'copper-str').length;
+      const copperCross = S.conns.filter(c => c.type === 'copper-cross').length;
+      const fiber = S.conns.filter(c => c.type === 'fiber').length;
+      const serial = S.conns.filter(c => c.type === 'serial').length;
+      
+      // Calculate total bandwidth
+      const totalBw = S.conns.reduce((sum, c) => {
+        if (c.type === 'fiber') return sum + 1000;
+        if (c.type === 'serial') return sum + 2;
+        return sum + 100;
+      }, 0);
+      
+      content.innerHTML = `
+        <div class="net-stats">
+          <div class="net-stat">
+            <div class="net-stat-value">${totalDevices}</div>
+            <div class="net-stat-label">Total Devices</div>
+          </div>
+          <div class="net-stat">
+            <div class="net-stat-value">${onlineDevices}</div>
+            <div class="net-stat-label">Online</div>
+          </div>
+          <div class="net-stat">
+            <div class="net-stat-value">${totalConns}</div>
+            <div class="net-stat-label">Connections</div>
+          </div>
+          <div class="net-stat">
+            <div class="net-stat-value">${totalBw}M</div>
+            <div class="net-stat-label">Total BW</div>
+          </div>
+        </div>
+        
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--accent);margin-bottom:8px;">Device Breakdown:</div>
+          <div style="font-size:0.6rem;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+            <div><span style="color:var(--layer3);">🌐</span> Routers: ${routers}</div>
+            <div><span style="color:var(--device);">🔀</span> Switches: ${switches}</div>
+            <div><span style="color:var(--ok);">🖥️</span> Servers: ${servers}</div>
+            <div><span style="color:var(--accent);">💻</span> PCs: ${pcs}</div>
+            <div><span style="color:var(--layer7);">📶</span> WLAN: ${wireless}</div>
+            <div><span style="color:var(--poe);">⚡</span> PoE: ${poe}</div>
+          </div>
+        </div>
+        
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+          <div style="font-size:0.65rem;font-weight:600;color:var(--accent);margin-bottom:8px;">Cables:</div>
+          <div style="font-size:0.6rem;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+            <div><span style="color:var(--copper);">━</span> Copper: ${copperStr}</div>
+            <div><span style="color:var(--copper-cross);">╳</span> Cross: ${copperCross}</div>
+            <div><span style="color:var(--fiber);">━</span> Fiber: ${fiber}</div>
+            <div><span style="color:var(--serial);">━</span> Serial: ${serial}</div>
+          </div>
+        </div>
+        
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+          <div style="font-size:0.6rem;color:var(--text-muted);">
+            Packets sent: <span style="color:var(--accent);">${S.pduCnt}</span> |
+            ARP entries: <span style="color:var(--ok);">${arpTable.length}</span> |
+            MAC entries: <span style="color:var(--device);">${macTable.length}</span>
+          </div>
+        </div>
+      `;
+      
+      openM('netSummaryModal');
+    }
+    
     // ==================== TOPOLOGY NOTES ====================
     let showNotesPanel = false;
 
