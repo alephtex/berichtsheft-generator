@@ -142,6 +142,8 @@
 - [x] **Quick actions bar** - Connect/Config/Delete buttons
 - [x] **Improved port LEDs** - larger, better styling, blink animation
 - [x] **Color-coded bandwidth** - gigabit/fast/slow indicators
+- [x] **Spark effect** on successful connections
+- [x] **Tips banner** - quick reference on startup
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)
