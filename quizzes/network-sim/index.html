@@ -1332,6 +1332,7 @@
       <button class="tool-btn" onclick="openDeviceStatus()" title="Network Overview"><i class="ph ph-chart-bar"></i></button>
       <button class="tool-btn" onclick="openQoSConfig()" title="QoS Config"><i class="ph ph-traffic-signal"></i></button>
       <button class="tool-btn" onclick="openSyslog()" title="Syslog"><i class="ph ph-list-bullets"></i></button>
+      <button class="tool-btn" onclick="openFavorites()" title="Favorites"><i class="ph ph-star"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -8325,6 +8326,127 @@ ${generateVlandDoc()}
       a.click();
       log('Export', 'success', 'Syslog exported');
     }
+
+    // ==================== FAVORITE TEMPLATES ====================
+    let favoriteTemplates = [];
+    
+    function openFavorites() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'favModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      // Get current topology as JSON
+      const currentTopology = JSON.stringify({
+        nodes: S.nodes.map(n => ({ type: n.type, x: n.x, y: n.y, name: n.name })),
+        conns: S.conns.map(c => ({ n1: c.n1, n2: c.n2, type: c.type }))
+      }, null, 2);
+      
+      modal.innerHTML = `<div class="modal" style="max-width:500px;max-height:80vh;overflow:auto;">
+        <div class="modal-title"><i class="ph ph-star"></i> Favorite Templates</div>
+        <div class="modal-body">
+          <div style="margin-bottom:16px;">
+            <button class="modal-btn primary" onclick="saveFavorite()"><i class="ph ph-floppy-disk"></i> Save Current as Favorite</button>
+          </div>
+          <div id="favList">
+            ${renderFavorites()}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('favModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function saveFavorite() {
+      const name = prompt('Enter template name:');
+      if (!name) return;
+      
+      const template = {
+        id: Date.now(),
+        name,
+        timestamp: new Date().toLocaleString(),
+        nodes: S.nodes.length,
+        conns: S.conns.length,
+        data: JSON.stringify({
+          nodes: S.nodes.map(n => ({ type: n.type, x: n.x, y: n.y, name: n.name, ip: n.ip, vlan: n.vlan })),
+          conns: S.conns.map(c => ({ n1: c.n1, n2: c.n2, type: c.type }))
+        })
+      };
+      
+      favoriteTemplates.push(template);
+      localStorage.setItem('netSimFavorites', JSON.stringify(favoriteTemplates));
+      document.getElementById('favList').innerHTML = renderFavorites();
+      log('Favorites', 'success', `Template "${name}" saved`);
+    }
+    
+    function loadFavorite(id) {
+      const fav = favoriteTemplates.find(f => f.id === id);
+      if (!fav) return;
+      
+      if (S.nodes.length > 0 && !confirm('Clear current topology?')) return;
+      
+      try {
+        const data = JSON.parse(fav.data);
+        clearCanvas();
+        
+        // Recreate nodes
+        data.nodes.forEach(n => {
+          addNode(n.type, n.x, n.y);
+          const newNode = S.nodes[S.nodes.length - 1];
+          if (n.name) newNode.name = n.name;
+          if (n.ip) newNode.ip = n.ip;
+          if (n.vlan) newNode.vlan = n.vlan;
+        });
+        
+        // Recreate connections
+        data.conns.forEach(c => {
+          const n1 = S.nodes.find(n => n.name === c.n1 || n.id === c.n1);
+          const n2 = S.nodes.find(n => n.name === c.n2 || n.id === c.n2);
+          if (n1 && n2) {
+            const p1 = findFreePort(n1), p2 = findFreePort(n2);
+            if (p1 >= 0 && p2 >= 0) makeConn(n1, p1, n2, p2, c.type);
+          }
+        });
+        
+        document.getElementById('favModal')?.remove();
+        log('Favorites', 'success', `Template "${fav.name}" loaded`);
+      } catch (e) {
+        alert('Error loading template');
+      }
+    }
+    
+    function deleteFavorite(id) {
+      favoriteTemplates = favoriteTemplates.filter(f => f.id !== id);
+      localStorage.setItem('netSimFavorites', JSON.stringify(favoriteTemplates));
+      document.getElementById('favList').innerHTML = renderFavorites();
+      log('Favorites', 'info', 'Template deleted');
+    }
+    
+    function renderFavorites() {
+      if (favoriteTemplates.length === 0) {
+        return '<div style="color:var(--text-muted);text-align:center;padding:20px;">No saved templates</div>';
+      }
+      
+      return favoriteTemplates.map(f => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-deep);border-radius:8px;margin-bottom:8px;">
+          <span style="font-size:1.2rem;">⭐</span>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:0.7rem;">${f.name}</div>
+            <div style="font-size:0.5rem;color:var(--text-muted);">${f.nodes} devices, ${f.conns} links • ${f.timestamp}</div>
+          </div>
+          <button onclick="loadFavorite(${f.id})" style="background:var(--ok);border:none;color:var(--bg-deep);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.55rem;">Load</button>
+          <button onclick="deleteFavorite(${f.id})" style="background:transparent;border:1px solid var(--error);color:var(--error);padding:6px 10px;border-radius:4px;cursor:pointer;font-size:0.55rem;">×</button>
+        </div>
+      `).join('');
+    }
+    
+    // Load favorites from localStorage on init
+    try {
+      const saved = localStorage.getItem('netSimFavorites');
+      if (saved) favoriteTemplates = JSON.parse(saved);
+    } catch (e) {}
 
     function processCLI(cmd) {
       if (!S.sel) return 'No device selected';
