@@ -234,6 +234,7 @@
 - [x] **Interface Configuration** - Port settings, speed/duplex, bandwidth, enable/disable
 - [x] **ACL Manager** - Standard/Extended ACLs, add/delete entries, apply to router
 - [x] **NAT Configuration** - Static/dynamic NAT, translations, enable/disable
+- [x] **Quick Commands** - One-click CLI commands for router/switch/server
 
 ### Templates
 - [x] Basic LAN (2 PCs, 1 Switch)

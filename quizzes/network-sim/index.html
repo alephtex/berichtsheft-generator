@@ -1327,6 +1327,7 @@
       <button class="tool-btn" onclick="openInterfaceConfig()" title="Interface Config"><i class="ph ph-gear"></i></button>
       <button class="tool-btn" onclick="openACLManager()" title="ACL Manager"><i class="ph ph-shield-warning"></i></button>
       <button class="tool-btn" onclick="openNATConfig()" title="NAT Config"><i class="ph ph-arrows-left-right"></i></button>
+      <button class="tool-btn" onclick="openQuickCommands()" title="Quick Commands"><i class="ph ph-terminal"></i></button>
       <button class="tool-btn" onclick="toggleLabels()" id="btnLabels" title="Toggle Labels"><i class="ph ph-tag"></i> Labels</button>
       <button class="tool-btn" onclick="toggleHealthDashboard()" id="btnHealth"><i class="ph ph-heartbeat"></i> Health</button>
       <button class="tool-btn" onclick="toggleVlanPanel()" id="btnVlan"><i class="ph ph-squares-four"></i> VLANs</button>
@@ -7911,6 +7912,83 @@ ${generateVlandDoc()}
     function saveNAT() {
       log('NAT', 'success', 'NAT configuration saved');
       document.getElementById('natModal')?.remove();
+    }
+
+    // ==================== QUICK COMMANDS ====================
+    const QUICK_COMMANDS = {
+      router: [
+        { cmd: 'show ip route', desc: 'Show routing table' },
+        { cmd: 'show ip interface brief', desc: 'Interface summary' },
+        { cmd: 'show version', desc: 'Device info' },
+        { cmd: 'show cdp neighbors', desc: 'CDP neighbors' },
+        { cmd: 'show running-config', desc: 'Running config' },
+        { cmd: 'configure terminal', desc: 'Config mode' },
+        { cmd: 'interface gigabitEthernet 0/0', desc: 'Select interface' },
+        { cmd: 'ip address 192.168.1.1 255.255.255.0', desc: 'Set IP' },
+        { cmd: 'no shutdown', desc: 'Enable interface' },
+        { cmd: 'router rip', desc: 'Enable RIP' },
+        { cmd: 'router ospf 1', desc: 'Enable OSPF' },
+        { cmd: 'router eigrp 1', desc: 'Enable EIGRP' }
+      ],
+      switch: [
+        { cmd: 'show vlan brief', desc: 'VLAN summary' },
+        { cmd: 'show mac address-table', desc: 'MAC table' },
+        { cmd: 'show spanning-tree', desc: 'STP info' },
+        { cmd: 'show interfaces status', desc: 'Port status' },
+        { cmd: 'show running-config', desc: 'Running config' },
+        { cmd: 'configure terminal', desc: 'Config mode' },
+        { cmd: 'vlan 10', desc: 'Create VLAN' },
+        { cmd: 'switchport mode access', desc: 'Access mode' },
+        { cmd: 'switchport mode trunk', desc: 'Trunk mode' }
+      ],
+      server: [
+        { cmd: 'show services', desc: 'Services status' },
+        { cmd: 'ifconfig', desc: 'Network config' },
+        { cmd: 'netstat -an', desc: 'Connections' }
+      ]
+    };
+    
+    function openQuickCommands() {
+      if (!S.sel) {
+        alert('Select a device first');
+        return;
+      }
+      
+      const device = S.sel;
+      const type = device.r ? 'router' : device.sw ? 'switch' : 'server';
+      const cmds = QUICK_COMMANDS[type] || QUICK_COMMANDS.server;
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay show';
+      modal.id = 'quickCmdModal';
+      modal.onclick = e => { if (e.target === modal) modal.remove(); };
+      
+      modal.innerHTML = `<div class="modal" style="max-width:500px;">
+        <div class="modal-title"><i class="ph ph-terminal"></i> Quick Commands - ${device.name}</div>
+        <div class="modal-body">
+          <div style="display:grid;gap:6px;">
+            ${cmds.map(c => `
+              <button onclick="executeQuickCmd('${c.cmd}')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-primary);font-family:'Fira Code',monospace;font-size:0.6rem;text-align:left;">
+                <span style="color:var(--ok);">${c.cmd}</span>
+                <span style="color:var(--text-muted);font-size:0.5rem;">${c.desc}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="document.getElementById('quickCmdModal').remove()">Close</button>
+        </div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    
+    function executeQuickCmd(cmd) {
+      document.getElementById('quickCmdModal')?.remove();
+      openCLI();
+      setTimeout(() => {
+        document.getElementById('cliInput').value = cmd;
+        execCLI();
+      }, 100);
     }
 
     function processCLI(cmd) {
