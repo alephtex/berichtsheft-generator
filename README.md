@@ -53,3 +53,9 @@ python3 fill_docx.py \
 - ✅ Automatische PDF-Konvertierung
 - ✅ Auto-Shrink bei mehreren Seiten
 - ✅ Auto-Open PDF mit xdg-open
+
+---
+
+## Hinweis zur KI-Unterstützung
+
+Bei der Entwicklung dieses Projekts wurden teilweise oder vollständig KI-gestützte Tools und Technologien eingesetzt.
